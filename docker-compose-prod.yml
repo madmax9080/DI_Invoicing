@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:15
+    container_name: fbr_db
+    restart: always
+    environment:
+      POSTGRES_DB: fbr_di_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fbr_network
+  backend:
+    build: ./backend
+    container_name: fbr_backend
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:${postgres}@db:5432/fbr_di_db
+    restart: always
+    expose:
+      - "8000"
+    networks:
+      - fbr_network
+  frontend:
+    build: ./frontend
+    container_name: fbr_frontend
+    depends_on:
+      - backend
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - fbr_network
+volumes:
+  postgres_data:
+networks:
+  fbr_network:
