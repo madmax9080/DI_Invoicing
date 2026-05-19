@@ -1,0 +1,103 @@
+:root{
+    --text-muted: #6b7280; 
+}
+
+body {
+    background: #f5f7f6;
+    font-family: 'Roboto'
+}
+
+.color{
+    color: #009be5;
+}
+
+.left-section {
+    background: #eef2f1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.title{
+    font-size: 2rem;
+    text-align: center;
+    font-weight: bold;
+    line-height: 20px;
+}
+
+.subtitle{
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.logo{
+    height: 70px;
+    margin-bottom: 50px;
+    margin-left: 100px;
+}
+
+.right-section {
+    padding: 0;
+}
+
+.bg-image {
+    width: 100%;
+    height: 100vh;
+    background: url('../images/login-bg.png') no-repeat center center/cover;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+
+}
+
+.bg-image::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.2));
+}
+
+.overlay-content {
+    position: relative;
+    color: white;
+    padding: 40px;
+    z-index: 1;
+}
+
+.overlay-content h3 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.overlay-content p {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.form-box {
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 12px;
+    border: none;
+}
+
+input::placeholder {
+    font-size: 0.8rem;
+}
+
+.btn-dark {
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.brand-footer {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-align: center;
+}

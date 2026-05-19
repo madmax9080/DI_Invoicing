@@ -1,0 +1,200 @@
+.invoice-create-page {
+  font-size: 13px;
+}
+
+.invoice-create-page label {
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 2px;
+  color: #555;
+}
+
+.invoice-create-page .form-control,
+.invoice-create-page .form-select {
+  height: 28px;
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.invoice-create-page .row.g-2 {
+  --bs-gutter-y: 6px;
+  --bs-gutter-x: 6px;
+}
+
+.erp-header-bar {
+  display: flex;
+  flex-direction: column; 
+  gap: 10px;
+}
+
+.erp-header-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  max-width: 100%;
+}
+
+.field-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 150px; 
+  min-width: 140px;
+  max-width: 180px;
+}
+
+.erp-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.erp-party-box,
+.erp-item-panel,
+.erp-grid-section {
+  border: 1px solid #e2e5e9;
+  border-radius: 6px;
+  padding: 10px;
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+.box-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 3px;
+}
+
+.erp-party-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.select2-container--default .select2-selection--single {
+  height: 30px;        
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.select2-selection__rendered {
+  line-height: normal !important;
+  padding-left: 2px !important;
+  font-size: 12px;
+}
+
+.select2-selection__arrow {
+  height: 100% !important;
+  right: 4px;
+}
+
+.select2-dropdown {
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.select2-search--dropdown .select2-search__field {
+  height: 28px;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
+.select2-results__option {
+  padding: 4px 8px;  
+  font-size: 12px;
+}
+
+.select2-results__option--highlighted {
+  background-color: #009be5 !important;
+  color: #000;
+}
+
+.select2-results__option--selected {
+  background-color: #f1f3f5;
+}
+
+.select2-selection--multiple {
+  min-height: 30px !important;
+  padding: 2px 4px !important;
+}
+
+.select2-selection--multiple .select2-selection__choice {
+  font-size: 11px;
+  padding: 2px 6px;
+  margin-top: 2px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #86b7fe;
+  box-shadow: none;
+}
+
+.erp-item-panel input,
+.erp-item-panel select {
+  text-align: left;
+}
+
+input[type="number"] {
+  text-align: right;
+}
+
+.btn-sm {
+  padding: 3px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.erp-table {
+  font-size: 12px;
+}
+
+.erp-table th {
+  background: #f1f3f5;
+  font-weight: 600;
+  padding: 6px;
+  white-space: nowrap;
+}
+
+.erp-table td {
+  padding: 4px 6px;
+  vertical-align: middle;
+}
+
+.erp-table tbody tr:hover {
+  background-color: #f9fbff;
+}
+
+.total-col {
+  font-weight: 600;
+  background: #f8f9fa;
+}
+
+.table-responsive {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+#submitInvoiceBtn {
+  font-weight: 500;
+}
+
+.toast-container {
+  font-size: 12px;
+}
+
+.erp-item-panel:focus-within {
+  border-color: #0d6efd;
+}
+
+input[type=number]::-webkit-inner-spin-button {
+  display: none;
+}

@@ -1,0 +1,387 @@
+<div class="reports-container">
+    <div class="header">
+        <div class="card-body reports-header">
+            <div>
+                <div
+                    style="
+                        font-size:15px;
+                        font-weight:600;
+                        color:#009be5;
+                    "
+                >
+                    MANAGE BUYERS
+                </div>
+                <div
+                    class="text-muted"
+                    style="
+                        font-size:12px;
+                        font-weight:400;
+                    "
+                >
+                    CREATE, UPDATE AND DELETE BUYERS
+                </div>
+            </div>
+            <div class="reports-actions">
+                <button
+                    id="addBuyerBtn"
+                    class="btn btn-donezo-primary btn-sm" style="background-color: #009be5;"
+                >
+                    Add Buyer
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- FILTER CARD -->
+    <div
+        class="
+            card
+            shadow-sm
+            border-0
+            rounded-4
+            mb-3
+        "
+    >
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-4">
+                    <label class="donezo-label">
+                        Search Buyer
+                    </label>
+                    <input
+                        type="text"
+                        id="buyerSearchInput"
+                        class="form-control donezo-input"
+                        placeholder="
+                            Search by NTN or Name
+                        "
+                    >
+                </div>
+                <div class="col-lg-2 d-flex gap-2">
+                    <button
+                        id="searchBuyerBtn"
+                        class="
+                            btn
+                            btn-donezo-primary
+                            btn-sm
+                            flex-fill
+                        "
+                        style="background-color: #009be5;" 
+                    >
+                        Search
+                    </button>
+                    <button
+                        id="resetBuyerBtn"
+                        class="
+                            btn
+                            btn-donezo-secondary
+                            btn-sm
+                            flex-fill
+                        "
+                    >
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- TABLE CARD -->
+    <div
+        class="
+            card
+            shadow-sm
+            border-0
+            rounded-4
+        "
+    >
+        <div class="card-body p-0">
+            <div class="donezo-table-wrapper">
+                <table
+                    class="
+                        donezo-table
+                        table
+                        table-striped
+                    "
+                >
+                    <thead class="table-dark">
+                        <tr>
+                            <th
+                                style="
+                                    font-size:12px;
+                                    font-weight:400
+                                "
+                            >
+                                #
+                            </th>
+                            <th
+                                style="
+                                    font-size:12px;
+                                    font-weight:400
+                                "
+                            >
+                                Actions
+                            </th>
+                            <th
+                                style="
+                                    font-size:12px;
+                                    font-weight:400
+                                "
+                            >
+                                NTN/CNIC
+                            </th>
+                            <th
+                                style="
+                                    font-size:12px;
+                                    font-weight:400
+                                "
+                            >
+                                Name
+                            </th>
+                            <th
+                                style="
+                                    font-size:12px;
+                                    font-weight:400
+                                "
+                            >
+                                Province
+                            </th>
+                            <th
+                                style="
+                                    font-size:12px;
+                                    font-weight:400
+                                "
+                            >
+                                Address
+                            </th>
+                            <th
+                                style="
+                                    font-size:12px;
+                                    font-weight:400
+                                "
+                            >
+                                Registration Type
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="buyersTableBody">
+                        <tr>
+                            <td colspan="7">
+                                Loading buyers...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- PAGINATION -->
+            <div class="donezo-pagination">
+                <div class="pagination-info">
+                    Showing
+                    <span id="paginationStart">
+                        0
+                    </span>
+                    to
+                    <span id="paginationEnd">
+                        0
+                    </span>
+                    of
+                    <span id="paginationTotal">
+                        0
+                    </span>
+                    entries
+                </div>
+                <div class="pagination-buttons">
+                    <button
+                        id="prevPageBtn"
+                        class="
+                            btn
+                            btn-donezo-secondary
+                            btn-sm
+                        "
+                    >
+                        Previous
+                    </button>
+                    <button
+                        id="nextPageBtn"
+                        class="
+                            btn
+                            btn-donezo-secondary
+                            btn-sm
+                        "
+                    >
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- BUYER MODAL -->
+<div
+    class="modal fade"
+    id="buyerModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg">
+        <div
+            class="
+                modal-content
+                border-0
+                rounded-4
+            "
+        >
+            <div class="modal-header border-0">
+                <div>
+                    <div
+                        class="fw-semibold"
+                        style="
+                            color:#009be5;
+                            font-size:16px;
+                        "
+                    >
+                        Buyer Form
+                    </div>
+                    <div class="text-muted small">
+                        Create or update buyer
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form id="buyerForm">
+                    <input
+                        type="hidden"
+                        id="buyerId"
+                    />
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <label class="donezo-label">
+                                NTN / CNIC
+                            </label>
+                            <input
+                                type="text"
+                                id="buyerNTN"
+                                class="
+                                    form-control
+                                    donezo-input
+                                "
+                            >
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="donezo-label">
+                                Buyer Name
+                            </label>
+                            <input
+                                type="text"
+                                id="buyerName"
+                                class="
+                                    form-control
+                                    donezo-input
+                                "
+                            >
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="donezo-label">
+                                Province
+                            </label>
+                            <select
+                                id="buyerProvince"
+                                class="
+                                    form-select
+                                    donezo-input
+                                "
+                            >
+                                <option value="">
+                                    Select Province
+                                </option>
+                                <option value="BALOCHISTAN">
+                                    BALOCHISTAN
+                                </option>
+                                <option value="AZAD JAMMU AND KASHMIR">
+                                    AZAD JAMMU AND KASHMIR
+                                </option>
+                                <option value="CAPITAL TERRITORY">
+                                    CAPITAL TERRITORY
+                                </option>
+                                <option value="KHYBER PAKHTUNKHWA">
+                                    KHYBER PAKHTUNKHWA
+                                </option>
+                                <option value="PUNJAB">
+                                    PUNJAB
+                                </option>
+                                <option value="SINDH">
+                                    SINDH
+                                </option>
+                                <option value="GILGIT BALTISTAN">
+                                    GILGIT BALTISTAN
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="donezo-label">
+                                Registration Type
+                            </label>
+                            <select
+                                id="buyerRegistrationType"
+                                class="
+                                    form-select
+                                    donezo-input
+                                "
+                            >
+                                <option value="">
+                                    Select Registration Type
+                                </option>
+                                <option value="Registered">
+                                    Registered
+                                </option>
+                                <option value="Unregistered">
+                                    Unregistered
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="donezo-label">
+                                Address
+                            </label>
+                            <textarea
+                                id="buyerAddress"
+                                rows="3"
+                                class="
+                                    form-control
+                                    donezo-input
+                                "
+                            ></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button
+                    type="button"
+                    class="
+                        btn-sm
+                        btn-donezo-secondary
+                    "
+                    data-bs-dismiss="modal"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="button"
+                    id="saveBuyerBtn"
+                    class="
+                        btn-sm
+                        btn-donezo-primary
+                    "
+                >
+                    Save Buyer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index:1100;">
+</div>

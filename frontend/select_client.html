@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Select Client</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: 'Roboto';
+  background: #f8f9fa;
+  margin: 0;
+  padding: 20px 30px;
+  color: #111;
+}
+
+.header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.color{
+    color: #009be5;
+}
+
+.title{
+  font-size: 2rem;
+  font-weight: 300;
+  text-align: center;
+}
+
+#logoutBtn {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+h1 {
+  margin: 0 0 20px 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.controls {
+  display: flex;
+  justify-content: center; /* ✅ center horizontally */
+  align-items: center;
+  margin: 40px 0 50px;
+}
+
+.search {
+  position: relative;
+  width: 480px;
+  max-width: 90%; /* responsive */
+}
+
+.controls {
+  margin: 40px 0;
+}
+
+.search input {
+  width: 100%;
+  padding: 12px 42px 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.search input::placeholder {
+  color: #9ca3af;
+}
+
+.search input:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.search input:focus {
+  border-color: #3b82f6;
+  box-shadow:
+    0 0 0 3px rgba(59,130,246,0.15),
+    0 6px 14px rgba(0,0,0,0.1);
+}
+
+.search .icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  color: #9ca3af;
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.search input:focus + .icon {
+  color: #3b82f6;
+}
+
+/* GRID */
+#clientGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px;
+}
+
+/* CARD */
+.client-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px;
+  cursor: pointer;
+  position: relative;
+  border: 1px solid #f1f1f1;
+
+  transition: all 0.22s ease;
+}
+
+/* HOVER */
+.client-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+  border-color: transparent;
+}
+
+/* ACTIVE (SELECTED) */
+.client-card.active {
+  border: 2px solid #3b82f6;
+  box-shadow: 0 10px 25px rgba(59,130,246,0.25);
+}
+
+/* TOP SECTION */
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+/* AVATAR */
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+/* STATUS DOT */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+/* TEXT */
+.card-body h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.client-name {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* .business {
+  color: #6b7280;
+  font-size: 0.9rem;
+} */
+
+/* .open-btn {
+  margin-top: 12px;
+  font-size: 0.85rem;
+} */
+
+.add-card {
+  border: 2px dashed #d1d5db;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #6b7280;
+}
+
+.add-card:hover {
+  background: #f1f5f9;
+}
+
+/* MODAL CONTAINER */
+.custom-modal {
+  border-radius: 16px;
+  padding: 10px 5px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+  border: none;
+}
+
+/* INPUT STYLING */
+.custom-input {
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+/* INPUT FOCUS */
+.custom-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+
+/* LABEL */
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* FOOTER BUTTONS */
+.modal-footer .btn {
+  border-radius: 8px;
+}
+
+/* PRIMARY BUTTON */
+#saveClientBtn {
+  background:#009be5;
+  border: none;
+}
+
+/* HOVER EFFECT */
+#saveClientBtn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.empty-state {
+  grid-column: 1 / -1; /* full width inside grid */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+}
+
+.empty-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 30px;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  border: 1px solid #f1f1f1;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.empty-card p {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.empty-btn {
+  padding: 7px 18px;
+  font-weight: 500;
+  border-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header mt-3">
+  <h3 class="title">Choose <span class="color">Workspace</span> to Continue</h3>
+</div>
+
+<div class="controls">
+  <div class="search">
+    <input type="text" id="searchInput" placeholder="Search clients">
+    <span class="icon">🔍</span>
+  </div>
+</div>
+
+<div class="client-grid" id="clientGrid"></div>
+<div class="modal fade" id="addClientModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content custom-modal">
+      <div class="modal-header border-0 pb-0">
+        <div>
+          <h4 class="modal-title fw-semibold mb-1">Create New Client</h4>
+          <p class="text-muted small mb-0">Add business details to start invoicing</p>
+        </div>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-3">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Full Name *</label>
+            <input id="clientNameInput" class="form-control custom-input"
+              placeholder="e.g. Ali Raza">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">NTN / CNIC *</label>
+            <input id="clientNTNInput" class="form-control custom-input"
+              placeholder="1234567 or 12345-1234567-1">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Business Name *</label>
+            <input id="clientBusinessInput" class="form-control custom-input"
+              placeholder="e.g. ABC Enterprises Pvt Ltd">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Province *</label>
+            <select id="clientProvinceInput" class="form-select custom-input">
+              <option value="">Select province...</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">FBR Token *</label>
+            <input id="clientTokenInput" class="form-control custom-input"
+              placeholder="Enter secure API token">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Business Address *</label>
+            <textarea id="clientAddressInput" class="form-control custom-input"
+              rows="2" placeholder="Full business address"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 d-flex justify-content-between">
+        <button class="btn btn-light px-4" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button class="btn btn-primary px-4 fw-semibold" id="saveClientBtn">
+          Save Client →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index: 1100;"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="/assets/js/pages/select_client.js"></script>
+
+</body>
+</html>

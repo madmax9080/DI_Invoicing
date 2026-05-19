@@ -1,0 +1,138 @@
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div style="font-size:15px;font-weight:600;color:#009be5;">
+                SEND INVOICES USING EXCEL TEMPLATE
+            </div>
+            <div class="text-muted" style="font-size:12px;font-weight:400">IMPORT & VALIDATE INVOICES</div>
+        </div>
+        <button id="downloadTemplateBtn" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-download"></i> Download Template
+        </button>
+    </div>
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <label class="form-label fw-semibold">
+                Upload Excel File
+            </label>
+            <div class="upload-box border rounded p-4 text-center position-relative mb-4">
+                <input
+                    type="file"
+                    id="excelFile"
+                    accept=".xlsx,.xls"
+                    class="position-absolute w-100 h-100 top-0 start-0 opacity-0"
+                    style="cursor:pointer"
+                >
+                <i class="bi bi-file-earmark-excel text-success fs-1"></i>
+                <p class="mb-1 fw-semibold">
+                    Click to upload Excel file
+                </p>
+                <small class="text-muted">
+                    Supported formats: .xlsx / .xls
+                </small>
+                <div id="selectedFileName"
+                    class="mt-2 text-primary small fw-semibold">
+                </div>
+            </div>
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3 justify-content-end">
+                <button id="importExcelBtn"
+                        class="btn btn-primary btn-sm">
+                    <i class="bi bi-upload me-1"></i>
+                    Import Excel
+                </button>
+                <button id="validateExcelBtn"
+                        class="btn btn-outline-secondary btn-sm"
+                        disabled>
+                    <i class="bi bi-check-circle me-1"></i>
+                    Validate
+                </button>
+                <button id="submitInvoicesBtn"
+                        class="btn btn-success btn-sm"
+                        disabled>
+                    <i class="bi bi-cloud-upload me-1"></i>
+                    Submit to FBR
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="invoicePreviewSection" class="card shadow-sm border-0 mt-4" style="display:none;">
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+            <div>
+                <div style="font-size:18px;font-weight:600;color:#009be5;">
+                    Invoice Preview
+                </div>
+                <div class="text-muted" style="font-size:12px;font-weight:400">Review imported invoices before validation</div>
+            </div>
+            <span class="badge bg-success text-light px-3 py-2" style="font-size:12px;font-weight:400">
+                <span id="invoiceCount">0</span> invoices
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive preview-table-wrapper">
+                <table id="invoicePreviewTable"
+                    class="table table-sm table-hover table-bordered align-middle mb-0 modern-invoice-table"
+                    style="min-width:1500px">
+                    <thead class="table-dark sticky-top">
+                        <tr class="text-muted small">
+                            <th style="width:40px"></th>
+                            <th style="font-size:12px;font-weight:400">Excel Inv ID</th>
+                            <th style="font-size:12px;font-weight:400">Internal ID</th>
+                            <th style="font-size:12px;font-weight:400">Status</th>
+                            <th style="font-size:12px;font-weight:400">Submission</th>
+                            <th style="font-size:12px;font-weight:400">Type</th>
+                            <th style="font-size:12px;font-weight:400">Date</th>
+                            <th style="font-size:12px;font-weight:400">Seller NTN/CNIC</th>
+                            <th style="font-size:12px;font-weight:400">Seller Business Name</th>
+                            <th style="font-size:12px;font-weight:400">Seller Province</th>
+                            <th style="font-size:12px;font-weight:400">Seller Address</th>
+                            <th style="font-size:12px;font-weight:400">Buyer NTN/CNIC</th>
+                            <th style="font-size:12px;font-weight:400">Buyer Business Name</th>
+                            <th style="font-size:12px;font-weight:400">Buyer Province</th>
+                            <th style="font-size:12px;font-weight:400">Buyer Address</th>
+                            <th style="font-size:12px;font-weight:400">Buyer Reg Type</th>
+                            <th style="font-size:12px;font-weight:400">Inv. Ref No</th>
+                            <th class="text-center">Items</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicePreviewBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="resultSection" class="card shadow-sm border-0 mt-4" style="display:none">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Submission Result</h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <h4 id="totalCount">0</h4>
+                    <small class="text-muted">Total</small>
+                </div>
+                <div class="col-md-3 text-success">
+                    <h4 id="successCount">0</h4>
+                    <small>Success</small>
+                </div>
+                <div class="col-md-3 text-warning">
+                    <h4 id="invalidCount">0</h4>
+                    <small>Invalid</small>
+                </div>
+                <div class="col-md-3 text-danger">
+                    <h4 id="failedCount">0</h4>
+                    <small>Failed</small>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a id="errorReportLink"
+                    href="#"
+                    target="_blank"
+                    class="btn btn-outline-danger"
+                    style="display:none">
+                    <i class="bi bi-download"></i>
+                    Download Error Report
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
