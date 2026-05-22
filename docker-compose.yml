@@ -34,3 +34,5 @@ services:
     restart: always
 volumes:
   postgres_data:
+    external: true
+    name: pegasus_postgres_data

@@ -38,6 +38,13 @@ class Invoice(Base):
     updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
     printed_count = Column(Integer, default=0)
     last_printed_at = Column(DateTime(timezone=True), nullable=True)
+    __table_args__ = (
+        UniqueConstraint(
+            "client_id",
+            "internal_invoice_no",
+            name="uq_client_invoice_no"
+        ),
+    )
     items = relationship("InvoiceItem", back_populates="invoice", cascade="all, delete-orphan")
     client = relationship("Client", back_populates="invoices")
     buyer = relationship("Buyer", back_populates="invoices")

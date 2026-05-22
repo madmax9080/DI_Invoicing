@@ -19,15 +19,19 @@ from datetime import date, datetime
 from fastapi import UploadFile, File
 from app.services.fbr_service import extract_fbr_invoice_numbers, post_to_fbr
 from app.services.cache import clear_cache
+from app.database import SessionLocal
+from app.config import TEST_MODE
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
-logger = logging.getLogger(__name__)    
+logger = logging.getLogger(__name__)   
+SEM_LIMIT = 2
 
 @router.post("/post", status_code=status.HTTP_201_CREATED)
 async def post_invoice_to_fbr(
     invoice: InvoiceCreate,
     fbr_client: FBRClient = Depends(get_fbr_client_secure),
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     client_id = fbr_client.client_id
     internal_invoice_no = invoice.internalInvoiceNo
@@ -70,6 +74,7 @@ async def post_invoice_to_fbr(
             status="posting",
             client_id=client_id,
             internal_invoice_no=internal_invoice_no,
+            user_id=current_user["id"],
         )
     try:
         fbr_response = await fbr_client.post_invoice(payload)
@@ -239,7 +244,7 @@ async def validate_excel(
                 k: v for k, v in inv.items()
                 if k not in {"excelInvoiceId", "internalInvoiceNo"}
             }
-             # ✅ DEBUG LOG HERE
+            # ✅ DEBUG LOG HERE
             # print("\n========== FBR VALIDATE PAYLOAD ==========")
             # print(json.dumps(payload, indent=2, ensure_ascii=False))
             # print("=========================================\n")
@@ -298,116 +303,413 @@ async def validate_excel(
 async def submit_excel(
     invoices: List[Dict] = Body(...),
     client_id: int = Query(...),
-    db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    client = db.query(models.Client).filter(
-        models.Client.id == client_id,
-        models.Client.user_id == current_user["id"]
-    ).first()
-    if not client:
-        raise HTTPException(status_code=404, detail="Client not found")
-    if not client.token:
-        raise HTTPException(status_code=400, detail="Missing FBR token for client")
-    fbr_client = FBRClient(token=client.token)
-    SEM_LIMIT = 5
+    init_db: Session = SessionLocal()
+    try:
+        client = (
+            init_db.query(models.Client)
+            .filter(
+                models.Client.id == client_id,
+                models.Client.user_id == current_user["id"],
+            )
+            .first()
+        )
+        if not client:
+            raise HTTPException(
+                status_code=404,
+                detail="Client not found",
+            )
+        if not client.token and not TEST_MODE:
+            raise HTTPException(
+                status_code=400,
+                detail="Missing FBR token for client",
+            )
+        token = client.token
+    finally:
+        init_db.close()
     semaphore = asyncio.Semaphore(SEM_LIMIT)
     async def submit_invoice(inv: Dict):
         async with semaphore:
-            excel_id = inv.get("excelInvoiceId")
-            internal_invoice_no = inv.get("internalInvoiceNo")
-            if not internal_invoice_no:
-                return {
-                    "excelInvoiceId": excel_id,
-                    "status": "failed",
-                    "message": "Missing internal invoice number"
-                }
-            payload = {
-                k: v for k, v in inv.items()
-                if k not in ["excelInvoiceId", "internalInvoiceNo"]
-            }
-            existing = db.query(models.Invoice).filter(
-                models.Invoice.client_id == client.id,
-                models.Invoice.internal_invoice_no == internal_invoice_no
-            ).first()
-            if existing:
-                if existing.status == "posted":
-                    return {
-                        "excelInvoiceId": excel_id,
-                        "status": "already_posted",
-                        "irn": existing.fbrInvoiceNo,
-                    }
-                if existing.status == "posting":
-                    return {
-                        "excelInvoiceId": excel_id,
-                        "status": "processing",
-                        "error": "Invoice already being processed"
-                    }
-                if existing.status == "failed":
-                    db_invoice = existing
-                    db_invoice.status = "posting"
-                    db.commit()
-                else:
-                    return {
-                        "excelInvoiceId": excel_id,
-                        "status": "error",
-                        "error": f"Cannot process invoice with status {existing.status}"
-                    }
-            else:
-                db_invoice = None
+            db: Session = SessionLocal()
             try:
-                response = await asyncio.wait_for(
-                    post_to_fbr(
-                        url=f"{fbr_client.base_url}{fbr_client.post_url}",
-                        headers=fbr_client.headers,
-                        payload=payload,
-                    ),
-                    timeout=20,
+                excel_id = inv.get(
+                    "excelInvoiceId"
                 )
-                validation = response.get("validationResponse", {})
-                business_status = validation.get("status")
-                if business_status == "Invalid":
+                internal_invoice_no = inv.get(
+                    "internalInvoiceNo"
+                )
+                if not internal_invoice_no:
                     return {
                         "excelInvoiceId": excel_id,
-                        "status": "invalid",
-                        "error": validation.get("error"),
-                        "response": response,
+                        "status": "failed",
+                        "message": (
+                            "Missing internal invoice number"
+                        ),
                     }
-                extracted = extract_fbr_invoice_numbers(response)
-                if not db_invoice:
+                payload = {
+                    k: v
+                    for k, v in inv.items()
+                    if k not in [
+                        "excelInvoiceId",
+                        "internalInvoiceNo",
+                    ]
+                }
+                existing = (
+                    db.query(models.Invoice)
+                    .filter(
+                        models.Invoice.client_id
+                        == client_id,
+                        models.Invoice.internal_invoice_no
+                        == internal_invoice_no,
+                    )
+                    .first()
+                )
+                if existing:
+                    if existing.status == "posted":
+                        return {
+                            "excelInvoiceId": excel_id,
+                            "status": "already_posted",
+                            "irn": existing.fbrInvoiceNo,
+                        }
+                    if existing.status == "posting":
+                        return {
+                            "excelInvoiceId": excel_id,
+                            "status": "processing",
+                            "error": (
+                                "Invoice already being processed"
+                            ),
+                        }
+                    if existing.status == "failed":
+                        existing.status = "posting"
+                        existing.error_message = None
+                        db.commit()
+                        db.refresh(existing)
+                        db_invoice = existing
+                    else:
+                        return {
+                            "excelInvoiceId": excel_id,
+                            "status": "error",
+                            "error": (
+                                f"Cannot process invoice "
+                                f"with status "
+                                f"{existing.status}"
+                            ),
+                        }
+                else:
                     db_invoice = crud.create_invoice(
                         db=db,
                         payload=payload,
-                        response_data=response,
-                        status="posted",
-                        fbr_invoice_no=extracted["invoiceNumber"],
-                        client_id=client.id,
+                        response_data=None,
+                        status="posting",
+                        error_message=None,
+                        client_id=client_id,
                         internal_invoice_no=internal_invoice_no,
+                        user_id=current_user["id"],
                     )
+                    db.commit()
+                    db.refresh(db_invoice)
+                print("TEST_MODE =", TEST_MODE)
+                if TEST_MODE:
+                    await asyncio.sleep(1)
+                    response = {
+                        "validationResponse": {
+                            "status": "Valid"
+                        },
+                        "invoiceNumber": (
+                            f"TEST-{internal_invoice_no}"
+                        ),
+                    }
                 else:
-                    db_invoice.status = "posted"
-                    db_invoice.response_data = response
-                    db_invoice.fbrInvoiceNo = extracted["invoiceNumber"]
+                    fbr_client = FBRClient(
+                        token=token
+                    )
+                    response = await asyncio.wait_for(
+                        post_to_fbr(
+                            url=(
+                                f"{fbr_client.base_url}"
+                                f"{fbr_client.post_url}"
+                            ),
+                            headers=fbr_client.headers,
+                            payload=payload,
+                        ),
+                        timeout=20,
+                    )
+                validation = response.get(
+                    "validationResponse",
+                    {},
+                )
+                business_status = validation.get(
+                    "status"
+                )
+                if business_status == "Invalid":
+                    db_invoice.status = "failed"
+                    db_invoice.response_data = (
+                        response
+                    )
+                    db_invoice.error_message = (
+                        validation.get("error")
+                    )
+                    db.commit()
+                    return {
+                        "excelInvoiceId": excel_id,
+                        "status": "invalid",
+                        "error": validation.get(
+                            "error"
+                        ),
+                        "response": response,
+                    }
+                if TEST_MODE:
+                    extracted = {
+                        "invoiceNumber": response.get(
+                            "invoiceNumber"
+                        )
+                    }
+                else:
+                    extracted = (
+                        extract_fbr_invoice_numbers(
+                            response
+                        )
+                    )
+                db_invoice.status = "posted"
+                db_invoice.response_data = (
+                    response
+                )
+                db_invoice.fbrInvoiceNo = (
+                    extracted.get(
+                        "invoiceNumber"
+                    )
+                )
+                db_invoice.error_message = None
                 db.commit()
                 return {
                     "excelInvoiceId": excel_id,
                     "status": "success",
-                    "irn": extracted["invoiceNumber"],
+                    "irn": extracted.get(
+                        "invoiceNumber"
+                    ),
                     "response": response,
                 }
             except Exception as e:
-                error_text = str(e)
+                db.rollback()
+                try:
+                    if "db_invoice" in locals():
+                        db_invoice.status = "failed"
+                        db_invoice.error_message = (
+                            str(e)
+                        )
+                        db.commit()
+                except Exception:
+                    db.rollback()
                 return {
-                    "excelInvoiceId": excel_id,
+                    "excelInvoiceId": inv.get(
+                        "excelInvoiceId"
+                    ),
                     "status": "failed",
-                    "error": error_text,
+                    "error": str(e),
                 }
+            finally:
+                db.close()
     results = await asyncio.gather(
-        *[submit_invoice(inv) for inv in invoices]
+        *[
+            submit_invoice(inv)
+            for inv in invoices
+        ]
     )
     return {
         "results": results
     }
+
+# @router.post("/submit-excel")
+# async def submit_excel(
+#     invoices: List[Dict] = Body(...),
+#     client_id: int = Query(...),
+#     current_user=Depends(get_current_user),
+# ):
+#     """
+#     Safe bulk invoice submission flow:
+#     1. Separate DB session per coroutine
+#     2. Create invoice locally BEFORE FBR post
+#     3. Commit posting state immediately
+#     4. Rollback on every exception
+#     5. Prevent duplicate posting
+#     """
+#     init_db: Session = SessionLocal()
+#     try:
+#         client = (
+#             init_db.query(models.Client)
+#             .filter(
+#                 models.Client.id == client_id,
+#                 models.Client.user_id == current_user["id"],
+#             )
+#             .first()
+#         )
+#         if not client:
+#             raise HTTPException(
+#                 status_code=404,
+#                 detail="Client not found",
+#             )
+#         if not client.token:
+#             raise HTTPException(
+#                 status_code=400,
+#                 detail="Missing FBR token for client",
+#             )
+#         token = client.token
+#     finally:
+#         init_db.close()
+#     semaphore = asyncio.Semaphore(SEM_LIMIT)
+#     async def submit_invoice(inv: Dict):
+#         async with semaphore:
+#             db: Session = SessionLocal()
+#             try:
+#                 excel_id = inv.get("excelInvoiceId")
+#                 internal_invoice_no = (
+#                     inv.get("internalInvoiceNo")
+#                 )
+#                 if not internal_invoice_no:
+#                     return {
+#                         "excelInvoiceId": excel_id,
+#                         "status": "failed",
+#                         "message": "Missing internal invoice number",
+#                     }
+#                 payload = {
+#                     k: v
+#                     for k, v in inv.items()
+#                     if k
+#                     not in [
+#                         "excelInvoiceId",
+#                         "internalInvoiceNo",
+#                     ]
+#                 }
+#                 existing = (
+#                     db.query(models.Invoice)
+#                     .filter(
+#                         models.Invoice.client_id
+#                         == client_id,
+#                         models.Invoice.internal_invoice_no
+#                         == internal_invoice_no,
+#                     )
+#                     .first()
+#                 )
+#                 if existing:
+#                     if existing.status == "posted":
+#                         return {
+#                             "excelInvoiceId": excel_id,
+#                             "status": "already_posted",
+#                             "irn": existing.fbrInvoiceNo,
+#                         }
+#                     if existing.status == "posting":
+#                         return {
+#                             "excelInvoiceId": excel_id,
+#                             "status": "processing",
+#                             "error": "Invoice already being processed",
+#                         }
+#                     if existing.status == "failed":
+#                         existing.status = "posting"
+#                         existing.error_message = None
+#                         db.commit()
+#                         db.refresh(existing)
+#                         db_invoice = existing
+#                     else:
+#                         return {
+#                             "excelInvoiceId": excel_id,
+#                             "status": "error",
+#                             "error": (
+#                                 f"Cannot process invoice "
+#                                 f"with status {existing.status}"
+#                             ),
+#                         }
+#                 else:
+#                     db_invoice = crud.create_invoice(
+#                         db=db,
+#                         payload=payload,
+#                         response_data=None,
+#                         status="posting",
+#                         error_message=None,
+#                         client_id=client_id,
+#                         internal_invoice_no=internal_invoice_no,
+#                     )
+#                     db.commit()
+#                     db.refresh(db_invoice)
+#                 fbr_client = FBRClient(token=token)
+#                 response = await asyncio.wait_for(
+#                     post_to_fbr(
+#                         url=(
+#                             f"{fbr_client.base_url}"
+#                             f"{fbr_client.post_url}"
+#                         ),
+#                         headers=fbr_client.headers,
+#                         payload=payload,
+#                     ),
+#                     timeout=20,
+#                 )
+#                 validation = response.get(
+#                     "validationResponse",
+#                     {},
+#                 )
+#                 business_status = validation.get(
+#                     "status"
+#                 )
+#                 if business_status == "Invalid":
+#                     db_invoice.status = "failed"
+#                     db_invoice.response_data = response
+#                     db_invoice.error_message = (
+#                         validation.get("error")
+#                     )
+#                     db.commit()
+#                     return {
+#                         "excelInvoiceId": excel_id,
+#                         "status": "invalid",
+#                         "error": validation.get("error"),
+#                         "response": response,
+#                     }
+#                 extracted = (
+#                     extract_fbr_invoice_numbers(
+#                         response
+#                     )
+#                 )
+#                 db_invoice.status = "posted"
+#                 db_invoice.response_data = response
+#                 db_invoice.fbrInvoiceNo = (
+#                     extracted.get("invoiceNumber")
+#                 )
+#                 db_invoice.error_message = None
+#                 db.commit()
+#                 return {
+#                     "excelInvoiceId": excel_id,
+#                     "status": "success",
+#                     "irn": extracted.get(
+#                         "invoiceNumber"
+#                     ),
+#                     "response": response,
+#                 }
+#             except Exception as e:
+#                 db.rollback()
+#                 try:
+#                     if "db_invoice" in locals():
+#                         db_invoice.status = "failed"
+#                         db_invoice.error_message = str(e)
+#                         db.commit()
+#                 except Exception:
+#                     db.rollback()
+#                 return {
+#                     "excelInvoiceId": inv.get(
+#                         "excelInvoiceId"
+#                     ),
+#                     "status": "failed",
+#                     "error": str(e),
+#                 }
+#             finally:
+#                 db.close()
+#     results = await asyncio.gather(
+#         *[
+#             submit_invoice(inv)
+#             for inv in invoices
+#         ]
+#     )
+#     return {
+#         "results": results
+#     }
 
 @router.get("/{invoice_id}", response_model=InvoiceOut)
 def get_invoice_detail(

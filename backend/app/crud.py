@@ -29,16 +29,18 @@ def normalize_for_db(value: Union[str, int, float, None]) -> Optional[Decimal]:
     return Decimal(str(value))
 
 def create_invoice(
-        db: Session, payload: dict,
+        db: Session, 
+        payload: dict,
         response_data: dict = None, 
         status: str = "pending", 
         error_message: str = None, 
         client_id: Optional[int] = None, 
+        user_id: Optional[int] = None,
         fbr_invoice_no: Optional[str] = None, 
         internal_invoice_no=None
     ):
     try:
-        buyer = get_or_create_buyer(db, payload, client_id)
+        buyer = get_or_create_buyer(db, payload, client_id, user_id) 
         db_invoice = models.Invoice(
             invoiceRefNo=payload.get("invoiceRefNo"),
             internal_invoice_no=internal_invoice_no,

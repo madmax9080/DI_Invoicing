@@ -376,9 +376,7 @@ export function initExcelImport() {
     if (initialized) {
         destroyExcelImport();
     }
-
     initialized = true;
-
     resetPageState();
     bindEvents();
 }
@@ -387,127 +385,92 @@ export function destroyExcelImport() {
     if (!initialized) {
         return;
     }
-
     $(document).off(EVENTS_NS);
-
     initialized = false;
     excelFile = null;
     excelInvoices = [];
 }
 
 function bindEvents() {
-
     $(document)
-
         .off(`click${EVENTS_NS}`, "#downloadTemplateBtn")
         .on(`click${EVENTS_NS}`, "#downloadTemplateBtn", downloadTemplate)
-
         .off(`click${EVENTS_NS}`, "#importExcelBtn")
         .on(`click${EVENTS_NS}`, "#importExcelBtn", uploadExcel)
-
         .off(`click${EVENTS_NS}`, "#validateExcelBtn")
         .on(`click${EVENTS_NS}`, "#validateExcelBtn", validateInvoices)
-
         .off(`click${EVENTS_NS}`, "#submitInvoicesBtn")
         .on(`click${EVENTS_NS}`, "#submitInvoicesBtn", submitInvoices)
-
         .off(`change${EVENTS_NS}`, "#excelFile")
         .on(`change${EVENTS_NS}`, "#excelFile", handleFileChange)
-
         .off(`click${EVENTS_NS}`, ".toggle-btn")
         .on(`click${EVENTS_NS}`, ".toggle-btn", function () {
-
             const target = $(this).data("target");
             const $row = $(`#${target}`);
-
             const isHidden = $row.is(":hidden");
-
             $row.toggle(isHidden);
-
             $(this).text(isHidden ? "▼" : "▶");
         });
 }
 
 function resetPageState() {
-
     const previewSection = document.getElementById("invoicePreviewSection");
-
     const validateBtn =
         document.getElementById("validateExcelBtn");
-
     const submitBtn =
         document.getElementById("submitInvoicesBtn");
-
     if (previewSection) {
         previewSection.style.display = "none";
     }
-
     if (validateBtn) {
         validateBtn.disabled = true;
     }
-
     if (submitBtn) {
         submitBtn.disabled = true;
     }
 }
 
 function handleFileChange() {
-
     const fileInput =
         document.getElementById("excelFile");
-
     excelFile =
         fileInput?.files?.[0] || null;
-
     const fileNameEl =
         document.getElementById("selectedFileName");
-
     if (fileNameEl) {
         fileNameEl.innerText =
             excelFile ? excelFile.name : "";
     }
-
     if (!excelFile) {
         return;
     }
-
     excelInvoices = [];
-
     resetValidationState();
-
     const previewSection =
         document.getElementById("invoicePreviewSection");
-
     const validateBtn =
         document.getElementById("validateExcelBtn");
-
     const submitBtn =
         document.getElementById("submitInvoicesBtn");
-
     if (previewSection) {
         previewSection.style.display = "none";
     }
-
     if (validateBtn) {
         validateBtn.disabled = true;
     }
-
     if (submitBtn) {
         submitBtn.disabled = true;
     }
 }
 
 function downloadTemplate() {
-
     window.location.assign(
         `${API_BASE}/static/excel/invoice_template.xlsx`
     );
 }
 
 function setButtonLoading(btn, text) {
-
     btn.disabled = true;
-
     btn.innerHTML =
         `<i class="bi bi-arrow-repeat spin"></i> ${text}`;
 }
@@ -517,9 +480,7 @@ function resetButton(
     text,
     icon = "bi-upload"
 ) {
-
     btn.disabled = false;
-
     btn.innerHTML =
         `<i class="bi ${icon}"></i> ${text}`;
 }
@@ -528,9 +489,7 @@ function showError(
     err,
     fallback = "Something went wrong"
 ) {
-
     console.error(err);
-
     alert(
         err?.response?.detail
         || err.message
@@ -539,29 +498,20 @@ function showError(
 }
 
 async function uploadExcel() {
-
     if (!excelFile) {
         alert("Please choose an Excel file first");
         return;
     }
-
     const btn =
         document.getElementById("importExcelBtn");
-
     const previewSection =
         document.getElementById("invoicePreviewSection");
-
     const validateBtn =
         document.getElementById("validateExcelBtn");
-
     setButtonLoading(btn, "Importing...");
-
     try {
-
         const formData = new FormData();
-
         formData.append("file", excelFile);
-
         const data = await apiFetch(
             "/invoices/preview-excel",
             {
@@ -569,7 +519,6 @@ async function uploadExcel() {
                 body: formData,
             }
         );
-
         if (
             !data?.invoices
             || !Array.isArray(data.invoices)
@@ -578,30 +527,21 @@ async function uploadExcel() {
                 "Invalid preview response"
             );
         }
-
         excelInvoices = data.invoices;
-
         resetValidationState();
-
         renderPreviewTable();
-
         if (previewSection) {
             previewSection.style.display = "block";
         }
-
         if (validateBtn) {
             validateBtn.disabled = false;
         }
-
     } catch (err) {
-
         showError(
             err,
             "Excel import failed"
         );
-
     } finally {
-
         resetButton(
             btn,
             "Import Excel"
@@ -610,25 +550,18 @@ async function uploadExcel() {
 }
 
 function renderPreviewTable() {
-
     const tbody =
         document.getElementById(
             "invoicePreviewBody"
         );
-
     if (!tbody) {
         return;
     }
-
     tbody.innerHTML = "";
-
     excelInvoices.forEach((inv, index) => {
-
         const rowId = `items-${index}`;
-
         const tr =
             document.createElement("tr");
-
         tr.innerHTML = `
             <td>
                 <button
@@ -637,22 +570,18 @@ function renderPreviewTable() {
                     ▶
                 </button>
             </td>
-
             <td>${inv.excelInvoiceId}</td>
             <td>${inv.internalInvoiceNo}</td>
-
             <td
                 class="validation-status"
                 data-id="${inv.excelInvoiceId}">
                 🔴 Not validated
             </td>
-
             <td
                 class="submission-status"
                 data-id="${inv.excelInvoiceId}">
                 —
             </td>
-
             <td>${inv.invoiceType}</td>
             <td>${inv.invoiceDate}</td>
             <td>${inv.sellerNTNCNIC}</td>
@@ -665,34 +594,26 @@ function renderPreviewTable() {
             <td>${inv.buyerAddress}</td>
             <td>${inv.buyerRegistrationType}</td>
             <td>${inv.invoiceRefNo}</td>
-
             <td>
                 <span class="badge bg-info">
                     ${(inv.items || []).length} items
                 </span>
             </td>
         `;
-
         const itemRow =
             document.createElement("tr");
-
         itemRow.id = rowId;
-
         itemRow.style.display = "none";
-
         itemRow.innerHTML = `
             <td colspan="18">
                 ${renderItemsTable(inv.items || [])}
             </td>
         `;
-
         tbody.appendChild(tr);
         tbody.appendChild(itemRow);
     });
-
     const count =
         document.getElementById("invoiceCount");
-
     if (count) {
         count.innerText =
             excelInvoices.length;
@@ -740,6 +661,66 @@ function updateValidationStatus(results) {
         }
         const inv = excelInvoices.find(i => i.excelInvoiceId === res.excelInvoiceId);
         if (inv) inv.validationStatus = res.status;
+    });
+}
+
+function updateSubmissionStatus(results) {
+    results.forEach(res => {
+        const cell = document.querySelector(
+            `.submission-status[data-id="${res.excelInvoiceId}"]`
+        );  
+        if (!cell) {
+            return;
+        }
+        if (res.status === "success") {
+            cell.innerHTML = `
+                <span class="text-success fw-semibold">
+                    ✅ ${res.irn || "Posted"}
+                </span>
+            `;
+            return;
+        }
+        if (res.status === "already_posted") {
+            cell.innerHTML = `
+                <span class="text-warning fw-semibold">
+                    ⚠️ Already Posted
+                    <br>
+                    IRN: ${res.irn || "-"}
+                </span>
+            `;
+            return;
+        }
+        if (res.status === "processing") {
+            cell.innerHTML = `
+                <span class="text-info fw-semibold">
+                    ⏳ Processing
+                </span>
+            `;
+            return;
+        }
+        if (res.status === "invalid") {
+            cell.innerHTML = `
+                <span class="text-danger fw-semibold">
+                    ❌ Invalid
+                </span>
+            `;
+            showSubmissionError(res);
+            return;
+        }
+        if (res.status === "failed") {
+            cell.innerHTML = `
+                <span class="text-danger fw-semibold">
+                    ❌ Failed
+                </span>
+            `;
+            showSubmissionError(res);
+            return;
+        }
+        cell.innerHTML = `
+            <span class="text-secondary">
+                Unknown Status
+            </span>
+        `;
     });
 }
 
@@ -885,4 +866,82 @@ function showValidationErrors(res) {
         </td>
     `;
     tbody.insertBefore(errorRow, row.nextSibling);
+}
+
+function showSubmissionError(res) {
+    const row = document.querySelector(
+        `.submission-status[data-id="${res.excelInvoiceId}"]`
+    )?.closest("tr");
+    if (!row) {
+        return;
+    }
+    let next = row.nextElementSibling;
+    while (
+        next &&
+        next.classList.contains("submission-error-row")
+    ) {
+        const temp = next.nextElementSibling;
+        next.remove();
+        next = temp;
+    }
+    let errorHTML = "";
+    const validation =
+        res.response?.validationResponse;
+    if (validation?.error) {
+        errorHTML += `
+            <div>
+                <strong>FBR Error:</strong>
+                ${validation.error}
+            </div>
+            <div
+                style="
+                    font-size:12px;
+                    color:#666;
+                "
+            >
+                Code:
+                ${validation.errorCode || "-"}
+            </div>
+        `;
+    }
+    const statuses =
+        validation?.invoiceStatuses || [];
+    statuses.forEach(item => {
+        if (item.status === "Invalid") {
+            errorHTML += `
+                <div>
+                    Item ${item.itemSNo}:
+                    ${item.error}
+                </div>
+            `;
+        }
+    });
+    if (!errorHTML) {
+        errorHTML = `
+            <div>
+                ${res.error || "Submission failed"}
+            </div>
+        `;
+    }
+    const errorRow =
+        document.createElement("tr");
+    errorRow.classList.add(
+        "submission-error-row"
+    );
+    errorRow.innerHTML = `
+        <td
+            colspan="18"
+            style="
+                color:red;
+                background:#fff5f5;
+                padding:10px;
+            "
+        >
+            ${errorHTML}
+        </td>
+    `;
+    row.parentNode.insertBefore(
+        errorRow,
+        row.nextSibling
+    );
 }
