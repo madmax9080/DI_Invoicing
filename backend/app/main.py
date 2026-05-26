@@ -18,7 +18,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="FBR Digital Invoicing Backend",
     lifespan=lifespan,
-    redirect_slashes=False
+    redirect_slashes=False,
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json"
 )
 app.router.redirect_slashes = True
 app.add_middleware(
