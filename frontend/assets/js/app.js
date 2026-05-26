@@ -108,6 +108,7 @@ async function loadClients() {
                 "client_avatar",
                 initials
             );
+            updateClientUI();
         }
     } catch (err) {
         console.error(
@@ -232,23 +233,23 @@ window.addEventListener("hashchange", async () => {
     }
 });
 
-function hydrateClientUI() {
-    const name =
-        localStorage.getItem("client_name");
-    const business =
-        localStorage.getItem("client_business");
-    const avatar =
-        localStorage.getItem("client_avatar");
-    if (name) {
-        $("#clientNameDisplay").text(name);
-    }
-    if (business) {
-        $("#clientBusiness").text(business);
-    }
-    if (avatar) {
-        $("#clientAvatar").text(avatar);
-    }
-}
+// function hydrateClientUI() {
+//     const name =
+//         localStorage.getItem("client_name");
+//     const business =
+//         localStorage.getItem("client_business");
+//     const avatar =
+//         localStorage.getItem("client_avatar");
+//     if (name) {
+//         $("#clientNameDisplay").text(name);
+//     }
+//     if (business) {
+//         $("#clientBusiness").text(business);
+//     }
+//     if (avatar) {
+//         $("#clientAvatar").text(avatar);
+//     }
+// }
 
 $(document).ready(async function () {
     const token = localStorage.getItem("access_token");
@@ -256,8 +257,8 @@ $(document).ready(async function () {
         window.location.href = "/index.html";
         return;
     }
-    hydrateClientUI();
     await loadClients();
+    updateClientUI();
     const currentHash = window.location.hash || "#dashboard";
     const matchedRoute =
         Object.keys(routes).find(

@@ -607,12 +607,10 @@ export function destroyDashboard() {
         monthlySalesChart.destroy();
         monthlySalesChart = null;
     }
-
     if (quarterlySalesChart) {
         quarterlySalesChart.destroy();
         quarterlySalesChart = null;
     }
-
     if (invoiceCountChart) {
         invoiceCountChart.destroy();
         invoiceCountChart = null;
