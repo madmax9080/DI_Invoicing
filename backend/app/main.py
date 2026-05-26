@@ -19,7 +19,6 @@ app = FastAPI(
     title="FBR Digital Invoicing Backend",
     lifespan=lifespan,
     redirect_slashes=False,
-    root_path="/api",
     docs_url="/api/docs",
     openapi_url="/api/openapi.json"
 )
