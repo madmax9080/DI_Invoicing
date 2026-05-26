@@ -20,8 +20,8 @@ app = FastAPI(
     lifespan=lifespan,
     redirect_slashes=False,
     root_path="/api",
-    docs_url="/api/docs",
-    openapi_url="/api/openapi.json"
+    docs_url="/docs",
+    openapi_url="/openapi.json"
 )
 app.router.redirect_slashes = True
 app.add_middleware(
