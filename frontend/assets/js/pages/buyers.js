@@ -268,22 +268,13 @@ async function saveBuyer() {
                 return;
             }
         }
-        const ntn =
-            payload.ntn_cnic;
-        if (!/^\d+$/.test(ntn)) {
-            showToast(
-                "Registration number must contain digits only",
-                "warning"
-            );
-            resetBtn();
-            return;
-        }
+        const ntn = payload.ntn_cnic;
         if (
             ntn.length !== 7 &&
             ntn.length !== 13
         ) {
             showToast(
-                "Enter valid NTN (7 digits) or CNIC (13 digits)",
+                "Enter a valid registration number with 7 or 13 characters",
                 "warning"
             );
             resetBtn();
