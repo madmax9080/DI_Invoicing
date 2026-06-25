@@ -146,10 +146,10 @@ function getHeaderClientName() {
 }
 
 function getHeaderSubtitle() {
-    const selectedFY = localStorage.getItem("selectedFY") || "current";
-    // if (!selectedFY || selectedFY === "current") {
-    //     return "Here's your business overview for the current financial year";
-    // }
+    const selectedFY = localStorage.getItem("selectedFY");
+    if (!selectedFY) {
+        return "Here's your business overview.";
+    }
     return `Here's your business overview for FY ${selectedFY}`;
 }
 
