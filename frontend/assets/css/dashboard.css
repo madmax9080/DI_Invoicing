@@ -449,21 +449,30 @@ body{
 }
 
 .kpi-header {
-    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.kpi-title-section {
+    display: flex;
+    align-items: center;
+    gap: 14px;
 }
 
 .kpi-icon-circle {
-    width: 58px;
-    height: 58px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
-
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .kpi-icon-circle i {
-    font-size: 26px;
+    font-size: 24px;
 }
 
 .icon-blue {
@@ -499,21 +508,31 @@ body{
 }
 
 .kpi-title {
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 600;
     color: #0f172a;
-    margin-bottom: 10px;
 }
 
-.kpi-value {    
-    font-size: clamp(24px, 2vw, 32px);
+.kpi-trend {
+    display: flex;
+    align-items: center;
+}
+
+.kpi-trend svg,
+.kpi-trend img {
+    width: 56px;
+    height: auto;
+}
+
+.kpi-value {
+    font-size: 22px;
     font-weight: 700;
     color: #0f172a;
-    line-height: 1.2;
     margin-bottom: 12px;
 }
 
 .kpi-subtitle {
     font-size: 14px;
     color: #64748b;
+    line-height: 1.5;
 }

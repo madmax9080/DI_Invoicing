@@ -52,14 +52,16 @@ async function loadKPIs() {
                 value: formatCurrency(data.total_sales),
                 subtitle: "Total sales amount of invoices",
                 iconClass: "bi bi-currency-dollar",
-                iconBgClass: "icon-blue"
+                iconBgClass: "icon-blue",
+                trend: `<i class="bi bi-graph-up-arrow text-success fs-2"></i>`
             },
             {
                 title: "Total Invoices",
                 value: data.total_invoices,
                 subtitle: "All posted invoices",
                 iconClass: "bi bi-file-earmark-text",
-                iconBgClass: "icon-purple"
+                iconBgClass: "icon-purple",
+                trend: `<img src="/assets/images/coin.png">`
             },
             {
                 title: "Sale Invoices",
@@ -90,12 +92,17 @@ function renderKPIs(kpis) {
             <div class="col-xl-3 col-lg-6 col-md-6">
                 <div class="kpi-card">
                     <div class="kpi-header">
-                        <div class="kpi-icon-circle ${kpi.iconBgClass}">
-                            <i class="${kpi.iconClass}"></i>
+                        <div class="kpi-title-section">
+                            <div class="kpi-icon-circle ${kpi.iconBgClass}">
+                                <i class="${kpi.iconClass}"></i>
+                            </div>
+                            <div class="kpi-title">
+                                ${kpi.title}
+                            </div>
                         </div>
-                    </div>
-                    <div class="kpi-title">
-                        ${kpi.title}
+                        <div class="kpi-trend">
+                            ${kpi.trend || ""}
+                        </div>
                     </div>
                     <div class="kpi-value">
                         ${kpi.value}
