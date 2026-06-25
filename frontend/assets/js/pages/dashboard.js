@@ -53,7 +53,7 @@ async function loadKPIs() {
                 subtitle: "Total sales amount of invoices",
                 iconClass: "bi bi-currency-dollar",
                 iconBgClass: "icon-blue",
-                trend: `<i class="bi bi-graph-up-arrow text-success fs-2"></i>`
+                trend: getTrend("#2563eb")
             },
             {
                 title: "Total Invoices",
@@ -61,21 +61,23 @@ async function loadKPIs() {
                 subtitle: "All posted invoices",
                 iconClass: "bi bi-file-earmark-text",
                 iconBgClass: "icon-purple",
-                trend: `<img src="/assets/images/coin.png">`
+                trend: getTrend("#8b5cf6")
             },
             {
                 title: "Sale Invoices",
                 value: data.total_sale_invoices,
                 subtitle: "Invoices with type sale",
                 iconClass: "bi bi-receipt",
-                iconBgClass: "icon-green"
+                iconBgClass: "icon-green",
+                trend: getTrend("#22c55e")
             },
             {
                 title: "Debit Invoices",
                 value: data.total_debit_invoices,
                 subtitle: "Invoices with type debit",
                 iconClass: "bi bi-file-earmark-medical",
-                iconBgClass: "icon-orange"
+                iconBgClass: "icon-orange",
+                trend: getTrend("#f97316")
             }
         ];
         renderKPIs(kpis);
@@ -91,29 +93,42 @@ function renderKPIs(kpis) {
         container.append(`
             <div class="col-xl-3 col-lg-6 col-md-6">
                 <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-title-section">
-                            <div class="kpi-icon-circle ${kpi.iconBgClass}">
-                                <i class="${kpi.iconClass}"></i>
-                            </div>
-                            <div class="kpi-title">
-                                ${kpi.title}
-                            </div>
+                    <div class="kpi-icon-circle ${kpi.iconBgClass}">
+                        <i class="${kpi.iconClass}"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-title">
+                            ${kpi.title}
                         </div>
-                        <div class="kpi-trend">
-                            ${kpi.trend || ""}
+                        <div class="kpi-value">
+                            ${kpi.value}
+                        </div>
+                        <div class="kpi-subtitle">
+                            ${kpi.subtitle}
                         </div>
                     </div>
-                    <div class="kpi-value">
-                        ${kpi.value}
-                    </div>
-                    <div class="kpi-subtitle">
-                        ${kpi.subtitle}
+                    <div class="kpi-trend">
+                        ${kpi.trend || ""}
                     </div>
                 </div>
             </div>
         `);
     });
+}
+
+function getTrend(color) {
+    return `
+        <svg width="60" height="40" viewBox="0 0 60 40">
+            <polyline
+                points="2,30 12,22 22,26 34,10 46,18 58,4"
+                fill="none"
+                stroke="${color}"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+            </polyline>
+        </svg>
+    `;
 }
 
 // function renderKPIs(kpis) {
