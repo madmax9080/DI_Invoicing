@@ -567,7 +567,8 @@ export async function initDashboard(){
         return;
     }
     await populateGlobalFYSelect();
-    FYManager.init("globalFySelect"); 
+    FYManager.init("globalFySelect");
+    $(document).trigger("selectedFYChanged");
     bindEvents();
     await Promise.all([
         loadKPIs(),
