@@ -269,6 +269,7 @@ $(document).ready(async function () {
     await loadClients();
     updateClientUI();
     updateHeaderUI();
+    $(document).on("selectedFYChanged", updateHeaderUI);
     const currentHash = window.location.hash || "#dashboard";
     const matchedRoute =
         Object.keys(routes).find(

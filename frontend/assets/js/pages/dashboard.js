@@ -597,6 +597,7 @@ function handleFYChange() {
     dashboardCache.clear();
     loadKPIs();
     loadDashboardCharts();
+    $(document).trigger("selectedFYChanged");
 }
 
 export function destroyDashboard() {
