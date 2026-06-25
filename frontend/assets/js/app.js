@@ -147,9 +147,9 @@ function getHeaderClientName() {
 
 function getHeaderSubtitle() {
     const selectedFY = localStorage.getItem("selectedFY") || "current";
-    if (!selectedFY || selectedFY === "current") {
-        return "Here's your business overview for the current financial year";
-    }
+    // if (!selectedFY || selectedFY === "current") {
+    //     return "Here's your business overview for the current financial year";
+    // }
     return `Here's your business overview for FY ${selectedFY}`;
 }
 
