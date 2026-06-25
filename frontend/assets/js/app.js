@@ -140,6 +140,27 @@ function updateClientUI() {
     $("#clientAvatar").text(initials);
 }
 
+function getUserDisplayName() {
+    const email = localStorage.getItem("user_email") || "";
+    if (!email) return "User";
+    const username = email.split("@")[0];
+    return username
+        .split(/[._\-\s]+/)
+        .map(part =>
+            part
+                ? part[0].toUpperCase() + part.slice(1).toLowerCase()
+                : ""
+        )
+        .join(" ");
+}
+
+function updateHeaderUI() {
+    const userName = getUserDisplayName();
+    const greeting = getGreeting();
+    $(".welcome-title").html(`${greeting}, <span id="headerUserName">${userName}</span> <span class="wave">👋</span>`);
+    $("#welcomeSubtitle").text("Here's your business overview for FY");
+}
+
 async function loadRoute(routeName, updateHash = true) {
     if (isRouting) {
         return;
@@ -233,23 +254,12 @@ window.addEventListener("hashchange", async () => {
     }
 });
 
-// function hydrateClientUI() {
-//     const name =
-//         localStorage.getItem("client_name");
-//     const business =
-//         localStorage.getItem("client_business");
-//     const avatar =
-//         localStorage.getItem("client_avatar");
-//     if (name) {
-//         $("#clientNameDisplay").text(name);
-//     }
-//     if (business) {
-//         $("#clientBusiness").text(business);
-//     }
-//     if (avatar) {
-//         $("#clientAvatar").text(avatar);
-//     }
-// }
+function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+}
 
 $(document).ready(async function () {
     const token = localStorage.getItem("access_token");
@@ -259,6 +269,7 @@ $(document).ready(async function () {
     }
     await loadClients();
     updateClientUI();
+    updateHeaderUI();
     const currentHash = window.location.hash || "#dashboard";
     const matchedRoute =
         Object.keys(routes).find(

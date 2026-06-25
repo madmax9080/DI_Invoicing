@@ -6,16 +6,6 @@ export async function apiFetch(endpoint, options = {}) {
     const fy = localStorage.getItem("selectedFY");
     const isFormData = options.body instanceof FormData;
     let url = `${API_BASE}${endpoint}`;
-    // if (
-    //     clientId &&
-    //     // !endpoint.startsWith("/api/clients") &&
-    //     !endpoint.startsWith("/clients") &&
-    //     !url.includes("client_id=")
-    // ) 
-    // {
-    //     const sep = url.includes("?") ? "&" : "?";
-    //     url += `${sep}client_id=${clientId}`;
-    // }
     if (
         clientId &&
         !url.includes("client_id=")
