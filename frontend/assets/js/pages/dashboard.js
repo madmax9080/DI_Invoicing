@@ -48,32 +48,32 @@ async function loadKPIs() {
         // );
         const kpis = [
             {
-                title: "Total Invoices",
-                value: data.total_invoices,
-                icon: "/assets/images/coin.png",
-                colorStart: "#146e98",
-                colorEnd: "#009be5",
-                textColor: "#ffffff",
-                subtitle: `All posted invoices`,
-                subtitleColor: "#fffb00"
+                title: "Total Revenue",
+                value: formatCurrency(data.total_sales),
+                subtitle: "Total sales amount of invoices",
+                iconClass: "bi bi-currency-dollar",
+                iconBgClass: "icon-blue"
             },
             {
-                title: "Total Sales",
-                value: formatCurrency(data.total_sales),
-                icon: "/assets/images/trend.png",
-                subtitle: `Total sales amount of invoices`,
+                title: "Total Invoices",
+                value: data.total_invoices,
+                subtitle: "All posted invoices",
+                iconClass: "bi bi-file-earmark-text",
+                iconBgClass: "icon-purple"
             },
             {
                 title: "Sale Invoices",
                 value: data.total_sale_invoices,
-                icon: "/assets/images/invoice.png",
-                subtitle: `Invoices with type sale`,
+                subtitle: "Invoices with type sale",
+                iconClass: "bi bi-receipt",
+                iconBgClass: "icon-green"
             },
             {
                 title: "Debit Invoices",
                 value: data.total_debit_invoices,
-                icon: "/assets/images/bill.png",
-                subtitle: `Invoices with type debit`,
+                subtitle: "Invoices with type debit",
+                iconClass: "bi bi-file-earmark-medical",
+                iconBgClass: "icon-orange"
             }
         ];
         renderKPIs(kpis);
@@ -87,20 +87,20 @@ function renderKPIs(kpis) {
     container.empty();
     kpis.forEach(kpi => {
         container.append(`
-            <div class="col-xl-3 col-lg-4 col-md-6 col-6">
-                <div class="card-custom kpi-square" style="background: linear-gradient(to left, ${kpi.colorStart}, ${kpi.colorEnd}); color: ${kpi.textColor};">
-                    <div class="card-header-row">
-                        <div class="card-title ">
-                            ${kpi.title}
-                        </div>
-                        <div class="card-icon">
-                            ${kpi.icon ? `<img src="${kpi.icon}" class="kpi-icon-img">` : ""}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon-circle ${kpi.iconBgClass}">
+                            <i class="${kpi.iconClass}"></i>
                         </div>
                     </div>
-                    <div class="card-value">
+                    <div class="kpi-title">
+                        ${kpi.title}
+                    </div>
+                    <div class="kpi-value">
                         ${kpi.value}
                     </div>
-                    <div class="card-subtitle" style="color: ${kpi.subtitleColor || "#64748b"};">
+                    <div class="kpi-subtitle">
                         ${kpi.subtitle}
                     </div>
                 </div>
@@ -108,6 +108,33 @@ function renderKPIs(kpis) {
         `);
     });
 }
+
+// function renderKPIs(kpis) {
+//     const container = $("#kpiRow");
+//     container.empty();
+//     kpis.forEach(kpi => {
+//         container.append(`
+//             <div class="col-xl-3 col-lg-4 col-md-6 col-6">
+//                 <div class="card-custom kpi-square" style="background: linear-gradient(to left, ${kpi.colorStart}, ${kpi.colorEnd}); color: ${kpi.textColor};">
+//                     <div class="card-header-row">
+//                         <div class="card-title ">
+//                             ${kpi.title}
+//                         </div>
+//                         <div class="card-icon">
+//                             ${kpi.icon ? `<img src="${kpi.icon}" class="kpi-icon-img">` : ""}
+//                         </div>
+//                     </div>
+//                     <div class="card-value">
+//                         ${kpi.value}
+//                     </div>
+//                     <div class="card-subtitle" style="color: ${kpi.subtitleColor || "#64748b"};">
+//                         ${kpi.subtitle}
+//                     </div>
+//                 </div>
+//             </div>
+//         `);
+//     });
+// }
 
 let monthlySalesChart = null;
 async function loadMonthlySalesChart() {
