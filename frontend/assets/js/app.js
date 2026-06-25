@@ -140,25 +140,24 @@ function updateClientUI() {
     $("#clientAvatar").text(initials);
 }
 
-function getUserDisplayName() {
-    const email = localStorage.getItem("user_email") || "";
-    if (!email) return "User";
-    const username = email.split("@")[0];
-    return username
-        .split(/[._\-\s]+/)
-        .map(part =>
-            part
-                ? part[0].toUpperCase() + part.slice(1).toLowerCase()
-                : ""
-        )
-        .join(" ");
+function getHeaderClientName() {
+    const clientName = localStorage.getItem("client_name") || "";
+    return clientName || "there";
+}
+
+function getHeaderSubtitle() {
+    const selectedFY = localStorage.getItem("selectedFY") || "current";
+    if (!selectedFY || selectedFY === "current") {
+        return "Here's your business overview for the current financial year";
+    }
+    return `Here's your business overview for FY ${selectedFY}`;
 }
 
 function updateHeaderUI() {
-    const userName = getUserDisplayName();
+    const clientName = getHeaderClientName();
     const greeting = getGreeting();
-    $(".welcome-title").html(`${greeting}, <span id="headerUserName">${userName}</span> <span class="wave">👋</span>`);
-    $("#welcomeSubtitle").text("Here's your business overview for FY");
+    $(".welcome-title").html(`${greeting}, <span id="headerUserName">${clientName}</span> <span class="wave">👋</span>`);
+    $("#welcomeSubtitle").text(getHeaderSubtitle());
 }
 
 async function loadRoute(routeName, updateHash = true) {
