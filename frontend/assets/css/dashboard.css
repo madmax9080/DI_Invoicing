@@ -385,3 +385,139 @@ body{
     box-shadow: 0 0 0 3px rgba(99,102,241,0.08);
     background: #ffffff;
 }
+
+/* new code */
+.dashboard-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 20px;
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 18px;
+}
+
+.toolbar-btn {
+    height: 48px;
+    min-width: 190px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all .2s ease;
+}
+
+.toolbar-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+
+#importExcelBtn i {
+    color: #22c55e;
+    font-size: 20px;
+}
+
+#addBuyerBtn i {
+    color: #8b5cf6;
+    font-size: 20px;
+}
+
+#generateReportBtn i {
+    color: #fb923c;
+    font-size: 20px;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.tax-year-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tax-year-label {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.tax-year-select-wrapper {
+    position: relative;
+}
+
+.tax-year-select-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+}
+
+.tax-year-select {
+    height: 48px;
+    min-width: 155px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+
+    padding-left: 40px;
+    padding-right: 14px;
+
+    background: #fff;
+
+    font-weight: 600;
+}
+
+.create-invoice-btn {
+    height: 48px;
+    padding: 0 24px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: #2563eb;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    transition: all .2s ease;
+}
+
+.create-invoice-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 1200px) {
+
+    .dashboard-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-actions {
+        flex-wrap: wrap;
+    }
+
+    .toolbar-right {
+        justify-content: space-between;
+    }
+}
