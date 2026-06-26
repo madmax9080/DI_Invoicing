@@ -433,38 +433,6 @@ body{
     }
 }
 
-#kpiRow {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 1rem;
-    align-items: stretch;
-    overflow-x: auto;
-    padding-bottom: 0.25rem;
-}
-
-#kpiRow .kpi-col {
-    flex: 0 0 25%;
-    max-width: 25%;
-    min-width: 240px;
-}
-
-@media (max-width: 1200px) {
-    #kpiRow .kpi-col {
-        flex: 0 0 33.333%;
-        max-width: 33.333%;
-    }
-}
-
-@media (max-width: 992px) {
-    #kpiRow {
-        flex-wrap: wrap;
-    }
-    #kpiRow .kpi-col {
-        flex: 0 0 50%;
-        max-width: 50%;
-    }
-}
-
 .kpi-card {
     background: #fff;
     border: 1px solid #e8edf4;
