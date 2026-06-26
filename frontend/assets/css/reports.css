@@ -221,6 +221,42 @@
     padding: 16px 18px;
 }
 
+/* CLIENTS PAGE */
+.client-page-shell {
+    gap: 16px;
+}
+
+.client-hero {
+    padding: 22px 24px;
+}
+
+.client-hero-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.client-profile-card {
+    padding: 22px 20px;
+}
+
+.donezo-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.donezo-form-group label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.donezo-form-footer {
+    margin-top: 18px;
+    display: flex;
+    justify-content: flex-end;
+}
+
 .buyer-table-shell {
     overflow-x: auto;
     border: 1px solid var(--border);

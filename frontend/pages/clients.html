@@ -1,114 +1,76 @@
-<div class="donezo-page">
-    <!-- PROFILE CARD -->
-    <div class="donezo-card client-profile-card">
-        <!-- HEADER -->
-        <div class="donezo-card-header">
-            <div>
-                <div class="donezo-card-title">
-                    Seller Profile
+<div class="reports-container client-page-shell">
+    <section class="reports-hero client-hero">
+        <div>
+            <div class="hero-chip">Seller profile</div>
+            <h2>View and maintain your business profile details.</h2>
+            <p>Keep your seller information up to date with a clean, modern workspace.</p>
+        </div>
+        <div class="client-hero-actions">
+            <button id="editClientBtn" class="export-btn">
+                <i class="bi bi-pencil-square"></i>
+                <span>Edit Profile</span>
+            </button>
+            <button id="cancelClientEditBtn" class="btn btn-donezo-secondary d-none">
+                Cancel
+            </button>
+        </div>
+    </section>
+
+    <section class="panel-card client-profile-card">
+        <form id="clientProfileForm">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="donezo-form-group">
+                        <label>Client Name</label>
+                        <input type="text" id="sellerName" class="donezo-input" disabled>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="donezo-form-group">
+                        <label>NTN / CNIC</label>
+                        <input type="text" id="sellerNTNCNIC" class="donezo-input" disabled>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="donezo-form-group">
+                        <label>Business Name</label>
+                        <input type="text" id="sellerBusinessName" class="donezo-input" disabled>
+                    </div>
+                </div>
+                <div class="col-lg-6" id="provinceViewWrapper">
+                    <div class="donezo-form-group">
+                        <label>Province</label>
+                        <input type="text" id="sellerProvinceText" class="donezo-input" disabled>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-none" id="provinceEditWrapper">
+                    <div class="donezo-form-group">
+                        <label>Province</label>
+                        <select id="sellerProvince" class="donezo-input" disabled>
+                            <option value="" disabled selected></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="donezo-form-group">
+                        <label>FBR Token</label>
+                        <input type="text" id="sellerFbrToken" class="donezo-input" disabled>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="donezo-form-group">
+                        <label>Business Address</label>
+                        <input type="text" id="sellerAddress" class="donezo-input" disabled>
+                    </div>
                 </div>
             </div>
-            <div class="donezo-card-actions">
-                <button id="editClientBtn"
-                        class="btn donezo-btn-primary btn-sm">
-                    Edit Profile
-                </button>
-                <button id="cancelClientEditBtn"
-                        class="btn donezo-btn-secondary d-none btn-sm">
-                    Cancel
+            <div class="donezo-form-footer d-none" id="clientSaveWrapper">
+                <button type="submit" class="btn btn-donezo-primary">
+                    Update Client Profile
                 </button>
             </div>
-        </div>
-        <!-- BODY -->
-        <div class="donezo-card-body">
-            <form id="clientProfileForm">
-                <div class="row g-4">
-                    <!-- CLIENT NAME -->
-                    <div class="col-lg-6">
-                        <div class="donezo-form-group">
-                            <label>Client Name</label>
-                            <input type="text"
-                                   id="sellerName"
-                                   class="donezo-input"
-                                   disabled>
-                        </div>
-                    </div>
-                    <!-- NTN -->
-                    <div class="col-lg-6">
-                        <div class="donezo-form-group">
-                            <label>NTN / CNIC</label>
-                            <input type="text"
-                                   id="sellerNTNCNIC"
-                                   class="donezo-input"
-                                   disabled>
-                        </div>
-                    </div>
-                    <!-- BUSINESS NAME -->
-                    <div class="col-lg-6">
-                        <div class="donezo-form-group">
-                            <label>Business Name</label>
-                            <input type="text"
-                                   id="sellerBusinessName"
-                                   class="donezo-input"
-                                   disabled>
-                        </div>
-                    </div>
-                    <!-- PROVINCE VIEW -->
-                    <div class="col-lg-6"
-                         id="provinceViewWrapper">
-                        <div class="donezo-form-group">
-                            <label>Province</label>
-                            <input type="text"
-                                   id="sellerProvinceText"
-                                   class="donezo-input"
-                                   disabled>
-                        </div>
-                    </div>
-                    <!-- PROVINCE EDIT -->
-                    <div class="col-lg-6 d-none"
-                         id="provinceEditWrapper">
-                        <div class="donezo-form-group">
-                            <label>Province</label>
-                            <select id="sellerProvince"
-                                    class="donezo-input"
-                                    disabled>
-                                <option value="" disabled selected>
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <!-- FBR TOKEN -->
-                    <div class="col-lg-6">
-                        <div class="donezo-form-group">
-                            <label>FBR Token</label>
-                            <input type="text"
-                                   id="sellerFbrToken"
-                                   class="donezo-input"
-                                   disabled>
-                        </div>
-                    </div>
-                    <!-- ADDRESS -->
-                    <div class="col-lg-12">
-                        <div class="donezo-form-group">
-                            <label>Business Address</label>
-                            <input type="text"
-                                   id="sellerAddress"
-                                   class="donezo-input"
-                                   disabled>
-                        </div>
-                    </div>
-                </div>
-                <!-- FOOTER ACTION -->
-                <div class="donezo-form-footer d-none"
-                     id="clientSaveWrapper">
-                    <button type="submit"
-                            class="btn donezo-btn-success btn-sm">
-                        Update Client Profile
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+        </form>
+    </section>
 </div>
 
 <!-- TOAST -->
