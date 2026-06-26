@@ -53,7 +53,7 @@ async function loadKPIs() {
                 subtitle: "Total sales amount of invoices",
                 iconText: "PKR",
                 iconBgClass: "icon-blue",
-                trend: getTrend("#2563eb")
+                trendIconClass: "bi bi-graph-up"
             },
             {
                 title: "Total Invoices",
@@ -61,7 +61,7 @@ async function loadKPIs() {
                 subtitle: "All posted invoices",
                 iconClass: "bi bi-file-earmark-text",
                 iconBgClass: "icon-purple",
-                trend: getTrend("#8b5cf6")
+                trendIconClass: "bi bi-list-check"
             },
             {
                 title: "Sale Invoices",
@@ -69,7 +69,7 @@ async function loadKPIs() {
                 subtitle: "Invoices with type sale",
                 iconClass: "bi bi-receipt",
                 iconBgClass: "icon-green",
-                trend: getTrend("#22c55e")
+                trendIconClass: "bi bi-cart-check"
             },
             {
                 title: "Debit Invoices",
@@ -77,7 +77,7 @@ async function loadKPIs() {
                 subtitle: "Invoices with type debit",
                 iconClass: "bi bi-file-earmark-medical",
                 iconBgClass: "icon-orange",
-                trend: getTrend("#f97316")
+                trendIconClass: "bi bi-arrow-down-right"
             }
         ];
         renderKPIs(kpis);
@@ -108,55 +108,13 @@ function renderKPIs(kpis) {
                         </div>
                     </div>
                     <div class="kpi-trend">
-                        ${kpi.trend || ""}
+                        ${kpi.trendIconClass ? `<i class="${kpi.trendIconClass}"></i>` : ""}
                     </div>
                 </div>
             </div>
         `);
     });
 }
-
-function getTrend(color) {
-    return `
-        <svg width="60" height="40" viewBox="0 0 60 40">
-            <polyline
-                points="2,30 12,22 22,26 34,10 46,18 58,4"
-                fill="none"
-                stroke="${color}"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round">
-            </polyline>
-        </svg>
-    `;
-}
-
-// function renderKPIs(kpis) {
-//     const container = $("#kpiRow");
-//     container.empty();
-//     kpis.forEach(kpi => {
-//         container.append(`
-//             <div class="col-xl-3 col-lg-4 col-md-6 col-6">
-//                 <div class="card-custom kpi-square" style="background: linear-gradient(to left, ${kpi.colorStart}, ${kpi.colorEnd}); color: ${kpi.textColor};">
-//                     <div class="card-header-row">
-//                         <div class="card-title ">
-//                             ${kpi.title}
-//                         </div>
-//                         <div class="card-icon">
-//                             ${kpi.icon ? `<img src="${kpi.icon}" class="kpi-icon-img">` : ""}
-//                         </div>
-//                     </div>
-//                     <div class="card-value">
-//                         ${kpi.value}
-//                     </div>
-//                     <div class="card-subtitle" style="color: ${kpi.subtitleColor || "#64748b"};">
-//                         ${kpi.subtitle}
-//                     </div>
-//                 </div>
-//             </div>
-//         `);
-//     });
-// }
 
 let monthlySalesChart = null;
 async function loadMonthlySalesChart() {
