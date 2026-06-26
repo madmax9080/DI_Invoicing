@@ -15,10 +15,10 @@
 
 .invoice-create-page .form-control,
 .invoice-create-page .form-select {
-  min-height: 36px;
-  padding: 0.45rem 0.7rem;
-  font-size: 0.9rem;
-  border-radius: 10px;
+  min-height: 32px;
+  padding: 0.28rem 0.65rem;
+  font-size: 0.88rem;
+  border-radius: 9px;
   border: 1px solid #dbeafe;
   background: #f8fbff;
 }
@@ -70,22 +70,21 @@
 }
 
 .invoice-summary-card .row {
-  justify-content: stretch;
-  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
 }
 
-.invoice-summary-card .col-lg-2,
-.invoice-summary-card .col-md-6 {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+.invoice-summary-card .row > * {
+  flex: 1 1 180px;
+  max-width: 100%;
   min-width: 0;
 }
 
-.invoice-summary-card .col-lg-2 .form-control,
-.invoice-summary-card .col-lg-2 .form-select,
-.invoice-summary-card .col-md-6 .form-control,
-.invoice-summary-card .col-md-6 .form-select {
+.invoice-summary-card .row .form-control,
+.invoice-summary-card .row .form-select {
   width: 100%;
 }
 
@@ -178,9 +177,9 @@ input[type="number"] {
 }
 
 .select2-container--default .select2-selection--single {
-  min-height: 42px;
-  padding: 0.35rem 0.7rem;
-  border-radius: 12px;
+  min-height: 32px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9px;
   border: 1px solid #dbeafe;
   background: #f8fbff;
 }
