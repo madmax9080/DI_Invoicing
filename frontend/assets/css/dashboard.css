@@ -437,10 +437,6 @@ body{
     align-items: stretch;
 }
 
-#kpiRow .kpi-card {
-    height: 100%;
-}
-
 .kpi-card {
     background: #fff;
     border: 1px solid #e8edf4;
