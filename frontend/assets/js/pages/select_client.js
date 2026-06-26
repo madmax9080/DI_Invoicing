@@ -115,7 +115,11 @@ async function loadClients() {
 
 function renderClients(clients) {
     const grid = document.getElementById("clientGrid");
+    const countBadge = document.getElementById("clientCount");
     grid.innerHTML = "";
+    if (countBadge) {
+        countBadge.textContent = clients.length;
+    }
     const savedClient = localStorage.getItem("client_id");
     if (!clients.length) {
         grid.innerHTML = `
@@ -123,8 +127,8 @@ function renderClients(clients) {
                 <div class="empty-card">
                     <div class="empty-icon">🏢</div>
                     <h2>No Clients Yet</h2>
-                    <p>Create your first workspace to continue</p>
-                    <button class="btn btn-dark empty-btn" id="emptyAddBtn">
+                    <p>Create your first workspace to continue with a polished invoicing flow.</p>
+                    <button class="btn empty-btn" id="emptyAddBtn">
                         + Add Your First Client
                     </button>
                 </div>
