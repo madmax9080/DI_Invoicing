@@ -1,143 +1,113 @@
 <div class="reports-container">
-    <div class="header">
-        <div class="card-body reports-header">
-             <div>
-                <div style="font-size:15px;font-weight:600;color:#009be5;">
-                    INSIGHTS & INVOICE REPORTING
-                </div>
-                <div class="text-muted" style="font-size:12px;font-weight:400">VIEW SALES AND POSTED INVOICES</div>
+    <section class="reports-hero">
+        <div>
+            <div class="hero-chip">Insights & reporting</div>
+            <h2>Review sales performance and posted invoices.</h2>
+            <p>Track buyer activity, filter invoice records, and export the details you need in one streamlined workspace.</p>
+        </div>
+        <button id="exportExcelBtn" class="export-btn">
+            <i class="bi bi-download"></i>
+            <span>Export Excel</span>
+        </button>
+    </section>
+
+    <section class="panel-card chart-panel">
+        <div class="panel-header">
+            <div>
+                <div class="panel-title">Sales by Buyer</div>
+                <div class="panel-subtitle" id="buyerChartFYLabel">Fiscal Year</div>
             </div>
-            <div class="reports-actions">
-                <button id="exportExcelBtn" class="btn btn-donezo-success btn-sm">
-                    Export Excel
+        </div>
+        <div class="buyer-chart-scroll">
+            <div id="buyerSalesChart"></div>
+        </div>
+    </section>
+
+    <section class="panel-card filter-panel">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-2 col-md-6">
+                <label class="donezo-label">Status</label>
+                <select id="filterStatus" class="form-select donezo-input">
+                    <option value="">All</option>
+                    <option value="posted">Posted</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <label class="donezo-label">From Date</label>
+                <input type="date" id="filterDateFrom" class="form-control donezo-input">
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <label class="donezo-label">To Date</label>
+                <input type="date" id="filterDateTo" class="form-control donezo-input">
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <label class="donezo-label">Month</label>
+                <input type="month" id="filterMonth" class="form-control donezo-input">
+            </div>
+            <div class="col-lg-4 col-md-12 d-flex gap-2">
+                <button id="applyFiltersBtn" class="btn btn-donezo-primary flex-fill">
+                    Apply
+                </button>
+                <button id="resetFiltersBtn" class="btn btn-donezo-secondary flex-fill">
+                    Reset
                 </button>
             </div>
         </div>
-    </div>
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body">
-            <div class="donezo-card-header d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <div class="fw-semibold" style="color: #009be5;">
-                        Sales by Buyer
-                    </div>
-                    <div class="text-muted small" id="buyerChartFYLabel">
-                        Fiscal Year
-                    </div>
-                </div>
+    </section>
+
+    <section class="panel-card table-panel">
+        <div class="table-wrapper">
+            <table class="donezo-table table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Actions</th>
+                        <th>Download PDF</th>
+                        <th>Date</th>
+                        <th>FBR Inv. No</th>
+                        <th>System Inv. No</th>
+                        <th>Inv. Ref #</th>
+                        <th>Buyer Business Name</th>
+                        <th>Buyer NTN/CNIC</th>
+                        <th>Buyer Registration Type</th>
+                        <th>Inv. Status</th>
+                        <th>HS Code</th>
+                        <th>Product Description</th>
+                        <th>UOM</th>
+                        <th>QTY</th>
+                        <th>Sale Type</th>
+                        <th>Value Exc. STax</th>
+                        <th>Fixed Retail Price</th>
+                        <th>Rate</th>
+                        <th>S.Tax</th>
+                        <th>STWH</th>
+                        <th>Extra Tax</th>
+                        <th>F.Tax</th>
+                        <th>FED Payable</th>
+                        <th>Discount</th>
+                        <th>SRO Sch. #</th>
+                        <th>SRO Item Sr. #</th>
+                        <th>Total Value</th>
+                    </tr>
+                </thead>
+                <tbody id="reportsTableBody"></tbody>
+            </table>
+        </div>
+        <div class="donezo-pagination">
+            <div class="pagination-info">
+                Showing
+                <span id="paginationStart">0</span>
+                to
+                <span id="paginationEnd">0</span>
+                of
+                <span id="paginationTotal">0</span>
+                entries
             </div>
-            <div class="buyer-chart-scroll">
-                <div id="buyerSalesChart"></div>
+            <div class="pagination-buttons">
+                <button id="prevPageBtn" class="btn btn-donezo-secondary btn-sm">Previous</button>
+                <button id="nextPageBtn" class="btn btn-donezo-secondary btn-sm">Next</button>
             </div>
         </div>
-    </div>
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-lg-2">
-                    <label class="donezo-label">
-                        Status
-                    </label>
-                    <select id="filterStatus"
-                            class="form-select donezo-input">
-                        <option value="">
-                            All
-                        </option>
-                        <option value="posted">
-                            Posted
-                        </option>
-                        <option value="failed">
-                            Failed
-                        </option>
-                    </select>
-                </div>
-                <div class="col-lg-2">
-                    <label class="donezo-label">
-                        From Date
-                    </label>
-                    <input type="date" id="filterDateFrom" class="form-control donezo-input">
-                </div>
-                <div class="col-lg-2">
-                    <label class="donezo-label">
-                        To Date
-                    </label>
-                    <input type="date" id="filterDateTo" class="form-control donezo-input">
-                </div>
-                <div class="col-lg-2">
-                    <label class="donezo-label">
-                        Month
-                    </label>
-                    <input type="month" id="filterMonth" class="form-control donezo-input">
-                </div>
-                <div class="col-lg-2 d-flex gap-2">
-                    <button id="applyFiltersBtn" class="btn btn-donezo-primary btn-sm flex-fill">
-                        Apply
-                    </button>
-                    <button id="resetFiltersBtn" class="btn btn-donezo-secondary btn-sm flex-fill">
-                        Reset
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-0">
-            <div class="donezo-table-wrapper">
-                <table class="donezo-table table table-striped">
-                    <thead class="table-dark">
-                        <tr>
-                            <th style="font-size:12px;font-weight:400">#</th>
-                            <th style="font-size:12px;font-weight:400">Actions</th>
-                            <th style="font-size:12px;font-weight:400">Download PDF</th>
-                            <th style="font-size:12px;font-weight:400">Date</th>
-                            <th style="font-size:12px;font-weight:400">FBR Inv. No</th>
-                            <th style="font-size:12px;font-weight:400">System Inv. No</th>
-                            <th style="font-size:12px;font-weight:400">Inv. Ref #</th>
-                            <th style="font-size:12px;font-weight:400">Buyer Business Name</th>
-                            <th style="font-size:12px;font-weight:400">Buyer NTN/CNIC</th>
-                            <th style="font-size:12px;font-weight:400">Buyer Registration Type</th>
-                            <th style="font-size:12px;font-weight:400">Inv. Status</th>
-                            <th style="font-size:12px;font-weight:400">HS Code</th>
-                            <th style="font-size:12px;font-weight:400">Product Description</th>
-                            <th style="font-size:12px;font-weight:400">UOM</th>
-                            <th style="font-size:12px;font-weight:400">QTY</th>
-                            <th style="font-size:12px;font-weight:400">Sale Type</th>
-                            <th style="font-size:12px;font-weight:400">Value Exc. STax</th>
-                            <th style="font-size:12px;font-weight:400">Fixed Retail Price</th>
-                            <th style="font-size:12px;font-weight:400">Rate</th>
-                            <th style="font-size:12px;font-weight:400">S.Tax</th>
-                            <th style="font-size:12px;font-weight:400">STWH</th>
-                            <th style="font-size:12px;font-weight:400">Extra Tax</th>
-                            <th style="font-size:12px;font-weight:400">F.Tax</th>
-                            <th style="font-size:12px;font-weight:400">FED Payable</th>
-                            <th style="font-size:12px;font-weight:400">Discount</th>
-                            <th style="font-size:12px;font-weight:400">SRO Sch. #</th>
-                            <th style="font-size:12px;font-weight:400">SRO Item Sr. #</th>
-                            <th style="font-size:12px;font-weight:400">Total Value</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reportsTableBody"></tbody>
-                </table>
-            </div>
-            <div class="donezo-pagination">
-                <div class="pagination-info">
-                    Showing
-                    <span id="paginationStart">0</span>
-                    to
-                    <span id="paginationEnd">0</span>
-                    of
-                    <span id="paginationTotal">0</span>
-                    entries
-                </div>
-                <div class="pagination-buttons">
-                    <button id="prevPageBtn" class="btn btn-donezo-secondary btn-sm">
-                        Previous
-                    </button>
-                    <button id="nextPageBtn" class="btn btn-donezo-secondary btn-sm">
-                        Next
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 </div>
