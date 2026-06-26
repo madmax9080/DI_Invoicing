@@ -51,7 +51,7 @@ async function loadKPIs() {
                 title: "Total Revenue",
                 value: formatCurrency(data.total_sales),
                 subtitle: "Total sales amount of invoices",
-                iconClass: "bi bi-currency-dollar",
+                iconClass: "bi bi-currency-rupee",
                 iconBgClass: "icon-blue",
                 trend: getTrend("#2563eb")
             },
