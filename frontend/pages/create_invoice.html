@@ -1,226 +1,246 @@
-<div class="container mt-3 mb-5 position-relative">
-  <div class="invoice-create-page">
-    <div class="erp-invoice-wrapper">
-      <!-- HEADER BAND -->
-      <div class="erp-header-bar md-4">
-          <div class="erp-title">
-              Sales Tax Invoice
-          </div>
-          <div class="erp-header-fields">
-              <div class="field-inline">
-                <label for="internalInvoiceNo">Invoice No</label>
-                <input type="text" id="internalInvoiceNo" class="form-control form-control-sm" placeholder="eg. 1">
-              </div>  
-              <div class="field-inline">
-                  <label for="invoiceType">Invoice Type</label>
-                  <select id="invoiceType" class="form-select form-select-sm"></select>
-              </div>
-              <div class="field-inline col-md-4">
-                  <label for="invoiceDate">Date</label>
-                  <input type="date" id="invoiceDate" class="form-control form-control-sm">
-              </div>
-              <div class="field-inline">
-                  <label for="invoiceRefNo">Ref No</label>
-                  <input type="text" id="invoiceRefNo" class="form-control form-control-sm">
-              </div>
-              <div class="field-inline">
-                  <label for="scenarioId">Scenario</label>
-                  <input type="text" id="scenarioId" class="form-control form-control-sm">
-              </div>
-          </div>
+<div class="invoice-create-page">
+  <section class="reports-hero invoice-hero">
+    <div>
+      <div class="hero-chip">Create invoice</div>
+      <h2>Prepare and submit sales tax invoices with confidence.</h2>
+      <p>Capture seller and buyer details, add invoice items, and send the finalized document to FBR in one streamlined flow.</p>
+    </div>
+    <div class="invoice-hero-actions">
+      <button id="submitInvoiceBtn" class="export-btn">
+        <i class="bi bi-send"></i>
+        <span>Submit Invoice</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="panel-card invoice-summary-card">
+    <div class="row g-3 align-items-end">
+      <div class="col-lg-2 col-md-6">
+        <label for="internalInvoiceNo">Invoice No</label>
+        <input type="text" id="internalInvoiceNo" class="form-control" placeholder="eg. 1">
       </div>
-      <!-- PARTY SECTION -->
-      <div class="erp-party-section">
-          <!-- Seller -->
-          <div class="erp-party-box">
-              <div class="box-title">Seller Information</div>
-              <div class="row g-2">
-                  <div class="col-md-6">
-                      <label for="sellerNTNCNIC">NTN/CNIC</label>
-                      <input type="text" id="sellerNTNCNIC" class="form-control form-control-sm">
-                  </div>
-                  <div class="col-md-6">
-                      <label for="sellerBusinessName">Business Name</label>
-                      <input type="text" id="sellerBusinessName" class="form-control form-control-sm">
-                  </div>
-                  <div class="col-md-6">
-                      <label for="sellerProvince">Province</label>
-                      <input type="text" id="sellerProvince" class="form-control form-control-sm">
-                  </div>
-                  <div class="col-md-6">
-                      <label for="sellerAddress">Address</label>
-                      <input type="text" id="sellerAddress" class="form-control form-control-sm">
-                  </div>
-              </div>
-          </div>
-          <!-- Buyer -->
-          <div class="erp-party-box">
-              <div class="box-title">Buyer Information</div>
-              <div class="row g-2">
-                  <div class="col-md-6">
-                      <label for="buyerNTNCNIC">NTN/CNIC</label>
-                      <input type="text" id="buyerNTNCNIC" class="form-control form-control-sm">
-                  </div>
-                  <div class="col-md-6">
-                      <label for="buyerBusinessName">Business Name</label>
-                      <input type="text" id="buyerBusinessName" class="form-control form-control-sm">
-                  </div>
-                  <div class="col-md-6">
-                      <label for="buyerProvince">Province</label>
-                      <select id="buyerProvince" class="form-select form-select-sm"></select>
-                  </div>
-                  <div class="col-md-6">
-                      <label for="buyerRegistrationType">Registration Type</label>
-                      <select id="buyerRegistrationType" class="form-select form-select-sm">
-                          <option>Registered</option>
-                          <option>Unregistered</option>
-                      </select>
-                  </div>
-                  <div class="col-12">
-                      <label for="buyerAddress">Address</label>
-                      <input type="text" id="buyerAddress" class="form-control form-control-sm">
-                  </div>
-              </div>
-          </div>
+      <div class="col-lg-2 col-md-6">
+        <label for="invoiceType">Invoice Type</label>
+        <select id="invoiceType" class="form-select"></select>
       </div>
-      <!-- ITEM ENTRY PANEL -->
-      <div class="erp-item-panel">
-          <div class="box-title">Add Item</div>
-          <div class="row g-2 mb-2">
-            <div class="col-12">
-              <label for="hsCode">HS Code</label>
-              <select id="hsCode" class="form-select">
-                <option value="" disabled selected></option>
-              </select>
-            </div>
-          </div>
-          <div class="row g-2 mt-1 mb-2">
-              <div class="col-md-3">
-                  <label for="productDescription">product Description</label>
-                  <input type="text" id="productDescription" class="form-control form-control-sm">
-              </div>
-              <div class="col-md-3">
-                  <label for="saleType">Sale Type</label>
-                  <select id="saleType" class="form-select form-select-sm">
-                    <option value="" disabled selected></option>
-                  </select>
-              </div>
-              <div class="col-md-3">
-                  <label>Rate</label>
-                  <select id="rate" class="form-select form-select-sm">
-                    <option value="" disabled selected></option>
-                  </select>
-              </div>
-              <div class="col-md-3">
-                  <label>UOM</label>
-                  <select id="uoM" class="form-select form-select-sm">
-                    <option value="" disabled selected></option>
-                  </select>
-              </div>
-          </div>
-          <div class="row g-2 mt-1 mb-2">
-              <div class="col-md-3">
-                  <label for="quantity">Quantity</label>
-                  <input type="number" id="quantity" class="form-control form-control-sm">
-              </div>
-              <div class="col-md-3">
-                  <label for="valueSalesExcludingST">Value Excl. ST</label>
-                  <input type="number" id="valueSalesExcludingST" class="form-control form-control-sm">
-              </div>
-              <div class="col-md-3">
-                  <label for="salesTaxApplicable">Sales Tax Applicable</label>
-                  <input type="number" id="salesTaxApplicable" class="form-control form-control-sm">
-              </div>
-              <div class="col-md-3">
-                  <label for="fixedNotifiedValueOrRetailPrice">Fixed Retail Price</label>
-                  <input type="number" id="fixedNotifiedValueOrRetailPrice" class="form-control form-control-sm">
-              </div>
-          </div>
-          <div class="row g-2 mt-1 mb-2">
-              <div class="col-md-3">
-                  <label for="salesTaxWithheldAtSource">S.Tax Withheld at Source</label>
-                  <input type="number" id="salesTaxWithheldAtSource" class="form-control form-control-sm">
-              </div>
-              <div class="col-md-3">
-                  <label for="extraTax">Extra Tax</label>
-                  <input type="number" id="extraTax" class="form-control form-control-sm">
-              </div>
-              <div class="col-md-3">
-                  <label for="fedPayable">FED Payable</label>
-                  <input type="number" id="fedPayable" class="form-control form-control-sm">
-              </div>
-              <div class="col-md-3">
-                  <label for="discount">Discount</label>
-                  <input type="number" id="discount" class="form-control form-control-sm">
-              </div>
-          </div>
-          <div class="row g-2 mt-1 mb-2">
-              <div class="col-md-3">
-                  <label for="furtherTax">Further Tax</label>
-                  <input type="number" id="furtherTax" class="form-control form-control-sm">
-              </div>
-              <div class="col-md-3">
-                  <label for="sroSchedule">SRO Schedule No</label>
-                  <select id="sroSchedule" class="form-select">
-                    <option value="" disabled selected></option>
-                  </select>
-              </div>
-              <div class="col-md-3">
-                  <label for="sroItem">SRO Item Serial No</label>
-                  <select id="sroItem" class="form-select">
-                    <option value="" disabled selected></option>
-                  </select>
-              </div>
-              <div class="col-md-3">
-                  <label for="totalValues">Total Value</label>
-                  <input type="number" id="totalValues" class="form-control form-control-sm">
-              </div>
-          </div>
-          <div class="text-end mt-3">
-              <button id="addItemBtn" class="btn btn-primary btn-sm px-4">
-                  Add Item
-              </button>
-          </div>
+      <div class="col-lg-2 col-md-6">
+        <label for="invoiceDate">Date</label>
+        <input type="date" id="invoiceDate" class="form-control">
       </div>
-      <!-- ITEMS GRID -->
-      <div class="erp-grid-section">
-          <div class="box-title">Invoice Items</div>
-          <div class="table-responsive">
-              <table class="table table-sm erp-table table-bordered">
-                  <thead>
-                      <tr>
-                          <th>#</th>
-                          <th class="text-center">Actions</th>
-                          <th>HSC</th>
-                          <th>Description</th>
-                          <th class="text-center">Sale Type</th>
-                          <th class="text-center">Qty</th>
-                          <th class="text-center">UOM</th>
-                          <th class="text-center">Rate</th>
-                          <th class="text-center">Value Exc. STax</th>
-                          <th class="text-center">Fixed Retail Price</th>
-                          <th class="text-center">S.Tax</th>
-                          <th class="text-cenrer">Fur Tax</th>
-                          <th class="text-center">FED</th>
-                          <th class="text-cenrer">Withheld STAX</th>
-                          <th class="text-center">Extra Tax</th>
-                          <th class="text-center">Discount</th>
-                          <th class="text-center total-col">Total Values</th>
-                          <th>SRO Schedule</th>
-                          <th>SRO Item</th>
-                      </tr>
-                  </thead>
-                  <tbody id="itemsTable"></tbody>
-              </table>
-          </div>
+      <div class="col-lg-2 col-md-6">
+        <label for="invoiceRefNo">Ref No</label>
+        <input type="text" id="invoiceRefNo" class="form-control">
       </div>
-      <div class="text-end mt-3">
-          <button id="submitInvoiceBtn" class="btn btn-success btn-sm px-5">
-              Submit Invoice to FBR
-          </button>
+      <div class="col-lg-2 col-md-6">
+        <label for="scenarioId">Scenario</label>
+        <input type="text" id="scenarioId" class="form-control">
       </div>
     </div>
-  </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Party information</div>
+        <div class="panel-subtitle">Seller and buyer details</div>
+      </div>
+    </div>
+    <div class="erp-party-section">
+      <div class="erp-party-box">
+        <div class="box-title">Seller Information</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="sellerNTNCNIC">NTN/CNIC</label>
+            <input type="text" id="sellerNTNCNIC" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label for="sellerBusinessName">Business Name</label>
+            <input type="text" id="sellerBusinessName" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label for="sellerProvince">Province</label>
+            <input type="text" id="sellerProvince" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label for="sellerAddress">Address</label>
+            <input type="text" id="sellerAddress" class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <div class="erp-party-box">
+        <div class="box-title">Buyer Information</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="buyerNTNCNIC">NTN/CNIC</label>
+            <input type="text" id="buyerNTNCNIC" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label for="buyerBusinessName">Business Name</label>
+            <input type="text" id="buyerBusinessName" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label for="buyerProvince">Province</label>
+            <select id="buyerProvince" class="form-select"></select>
+          </div>
+          <div class="col-md-6">
+            <label for="buyerRegistrationType">Registration Type</label>
+            <select id="buyerRegistrationType" class="form-select">
+              <option>Registered</option>
+              <option>Unregistered</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label for="buyerAddress">Address</label>
+            <input type="text" id="buyerAddress" class="form-control">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Add item</div>
+        <div class="panel-subtitle">Invoice line details</div>
+      </div>
+    </div>
+    <div class="erp-item-panel">
+      <div class="row g-3 mb-2">
+        <div class="col-12">
+          <label for="hsCode">HS Code</label>
+          <select id="hsCode" class="form-select">
+            <option value="" disabled selected></option>
+          </select>
+        </div>
+      </div>
+      <div class="row g-3 mt-1 mb-2">
+        <div class="col-md-3">
+          <label for="productDescription">Product Description</label>
+          <input type="text" id="productDescription" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label for="saleType">Sale Type</label>
+          <select id="saleType" class="form-select">
+            <option value="" disabled selected></option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label>Rate</label>
+          <select id="rate" class="form-select">
+            <option value="" disabled selected></option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label>UOM</label>
+          <select id="uoM" class="form-select">
+            <option value="" disabled selected></option>
+          </select>
+        </div>
+      </div>
+      <div class="row g-3 mt-1 mb-2">
+        <div class="col-md-3">
+          <label for="quantity">Quantity</label>
+          <input type="number" id="quantity" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label for="valueSalesExcludingST">Value Excl. ST</label>
+          <input type="number" id="valueSalesExcludingST" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label for="salesTaxApplicable">Sales Tax Applicable</label>
+          <input type="number" id="salesTaxApplicable" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label for="fixedNotifiedValueOrRetailPrice">Fixed Retail Price</label>
+          <input type="number" id="fixedNotifiedValueOrRetailPrice" class="form-control">
+        </div>
+      </div>
+      <div class="row g-3 mt-1 mb-2">
+        <div class="col-md-3">
+          <label for="salesTaxWithheldAtSource">S.Tax Withheld at Source</label>
+          <input type="number" id="salesTaxWithheldAtSource" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label for="extraTax">Extra Tax</label>
+          <input type="number" id="extraTax" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label for="fedPayable">FED Payable</label>
+          <input type="number" id="fedPayable" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label for="discount">Discount</label>
+          <input type="number" id="discount" class="form-control">
+        </div>
+      </div>
+      <div class="row g-3 mt-1 mb-2">
+        <div class="col-md-3">
+          <label for="furtherTax">Further Tax</label>
+          <input type="number" id="furtherTax" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label for="sroSchedule">SRO Schedule No</label>
+          <select id="sroSchedule" class="form-select">
+            <option value="" disabled selected></option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="sroItem">SRO Item Serial No</label>
+          <select id="sroItem" class="form-select">
+            <option value="" disabled selected></option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="totalValues">Total Value</label>
+          <input type="number" id="totalValues" class="form-control">
+        </div>
+      </div>
+      <div class="text-end mt-3">
+        <button id="addItemBtn" class="btn btn-donezo-primary">
+          Add Item
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Invoice items</div>
+        <div class="panel-subtitle">Current line items</div>
+      </div>
+    </div>
+    <div class="table-responsive invoice-table-shell">
+      <table class="table table-sm erp-table table-bordered align-middle">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="text-center">Actions</th>
+            <th>HSC</th>
+            <th>Description</th>
+            <th class="text-center">Sale Type</th>
+            <th class="text-center">Qty</th>
+            <th class="text-center">UOM</th>
+            <th class="text-center">Rate</th>
+            <th class="text-center">Value Exc. STax</th>
+            <th class="text-center">Fixed Retail Price</th>
+            <th class="text-center">S.Tax</th>
+            <th class="text-center">Fur Tax</th>
+            <th class="text-center">FED</th>
+            <th class="text-center">Withheld STAX</th>
+            <th class="text-center">Extra Tax</th>
+            <th class="text-center">Discount</th>
+            <th class="text-center total-col">Total Values</th>
+            <th>SRO Schedule</th>
+            <th>SRO Item</th>
+          </tr>
+        </thead>
+        <tbody id="itemsTable"></tbody>
+      </table>
+    </div>
+  </section>
 </div>
 
 <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index: 1100;"></div>
