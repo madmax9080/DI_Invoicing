@@ -506,7 +506,10 @@ async function handleSubmitInvoice() {
         const num = Number(v);
         return Number.isFinite(num) ? Number(num.toFixed(2)) : 0;
     };
-    $btn.prop("disabled", true).text("Submitting...");
+    const originalText = $btn.data("originalText") || $btn.html();
+    $btn.data("originalText", originalText);
+    $btn.prop("disabled", true)
+        .html('<i class="bi bi-arrow-repeat spin"></i> <span>Submitting...</span>');
     try {
         if (!currentItems.length) {
             const err = new Error("Please add at least one item");
@@ -636,7 +639,7 @@ async function handleSubmitInvoice() {
         // console.error("Invoice submission error:", err);
     } finally {
         $btn.prop("disabled", false)
-            .text("Submit Invoice to FBR");
+            .html($btn.data("originalText") || '<i class="bi bi-send"></i> <span>Submit Invoice to FBR</span>');
     }
 };
 
