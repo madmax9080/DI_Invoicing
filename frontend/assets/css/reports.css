@@ -111,24 +111,28 @@
 
 .btn-donezo-primary {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    padding: 7px 14px;
     color: white;
     border: none;
 }
 
 .btn-donezo-success {
     background: #0f766e;
+    padding: 7px 14px;
     color: white;
     border: none;
 }
 
 .btn-donezo-danger {
     background: #dc2626;
+    padding: 7px 14px;
     color: white;
     border: none;
 }
 
 .btn-donezo-secondary {
     background: var(--surface-soft);
+    padding: 7px 14px;
     border: 1px solid var(--border);
     color: #334155;
 }
