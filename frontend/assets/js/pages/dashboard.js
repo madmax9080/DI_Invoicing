@@ -156,25 +156,36 @@ async function loadMonthlySalesChart() {
                 "#monthlySalesChart"
             ),
             {
-               chart: {
+                chart: {
                     type: "area",
                     height: 320,
                     toolbar: { show: false },
                     zoom: { enabled: false },
+                    background: "transparent",
+                    foreColor: "#64748b",
                     animations: {
                         enabled: true,
                         easing: "easeinout",
                         speed: 500
                     },
+                    dropShadow: {
+                        enabled: true,
+                        color: "#009be5",
+                        top: 8,
+                        blur: 14,
+                        opacity: 0.16
+                    }
                 },
                 colors:["#009be5"],
                 title: {
-                    text:
-                        `(${fiscalYear})`,
-                    align: "center",
+                    text: `(${fiscalYear})`,
+                    align: "left",
+                    margin: 0,
+                    offsetX: 2,
                     style: {
                         fontSize: "13px",
-                        fontWeight: fontWeight
+                        fontWeight: 700,
+                        color: "#146e98"
                     }
                 },
                 annotations: {
@@ -198,13 +209,14 @@ async function loadMonthlySalesChart() {
                     name: "Monthly Sales",
                     data: seriesData
                 }],
+                legend: { show: false },
                 xaxis: {
                     categories: labels,
                     axisBorder: { show: false },
                     axisTicks: { show: false },
                     labels: {
                         style: {
-                            colors: "#6f7d6c",
+                            colors: "#64748b",
                             fontSize: "12px"
                         }
                     }
@@ -214,15 +226,22 @@ async function loadMonthlySalesChart() {
                     max: paddedMax,
                     tickAmount: 5,
                     forceNiceScale: true,
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
                     labels: {
                         formatter: function(val) {
                             return formatCompactPKR(val);
+                        },
+                        style: {
+                            colors: "#64748b",
+                            fontSize: "12px"
                         }
                     }
                 },
                 stroke: {
                     curve: "smooth",
-                    width: 3
+                    width: 3,
+                    lineCap: "round"
                 },
                 fill: {
                     type: "gradient",
@@ -230,32 +249,47 @@ async function loadMonthlySalesChart() {
                         shade: "dark",
                         type: "vertical",
                         gradientToColors: ["#046593"],
+                        opacityFrom: 0.75,
+                        opacityTo: 0.18,
                         stops: [0, 100]
                     }
                 },
                 grid: {
-                    borderColor: "#f1f3f5",
+                    borderColor: "#e2e8f0",
                     strokeDashArray: 4,
+                    xaxis: { lines: { show: false } },
+                    yaxis: { lines: { show: true } },
                     padding: {
-                        left: 10,
-                        right: 10
+                        left: 8,
+                        right: 8
                     }
                 },
                 markers: {
-                    size: 4,
-                    strokeWidth: 0,
+                    size: 0,
+                    strokeWidth: 2,
+                    strokeColors: "#fff",
+                    colors: ["#009be5"],
                     hover: {
                         size: 6
                     }
                 },
                 tooltip: {
                     theme: "light",
+                    style: { fontSize: "13px" },
                     y: {
-                        formatter: val => "PKR." + val.toLocaleString()
+                        formatter: val => "PKR " + val.toLocaleString("en-PK")
                     }
                 },
                 dataLabels: {
                     enabled: false
+                },
+                states: {
+                    hover: {
+                        filter: {
+                            type: "lighten",
+                            value: 0.08
+                        }
+                    }
                 }
             }
         );
@@ -280,55 +314,78 @@ async function loadQuarterlySalesChart(){
         chart:{
             type:"bar",
             height:320,
-            toolbar:{show:false}
+            toolbar:{show:false},
+            background:"transparent",
+            foreColor:"#64748b",
+            animations:{ enabled:true, easing:"easeout", speed:600 }
         },
         series:[{
             name:"Sales",
             data:response.series
         }],
         xaxis:{
-            categories:response.labels
+            categories:response.labels,
+            labels:{ style:{ colors:"#64748b", fontSize:"12px" } },
+            axisBorder:{ show:false },
+            axisTicks:{ show:false }
         },
         plotOptions:{
             bar: {
-                    columnWidth: "40%",
-                    distributed: false
-                }
+                columnWidth: "58%",
+                borderRadius: 10,
+                distributed: false
+            }
         },
         title:{
             text:`(${response.fiscal_year})`,
-            align:"center",
+            align:"left",
+            margin: 0,
+            offsetX: 2,
             style: {
                 fontSize: "13px",
-                fontWeight: fontWeight
+                fontWeight: 700,
+                color: "#146e98"
             }
         },
         yaxis:{
+            axisBorder:{ show:false },
+            axisTicks:{ show:false },
             labels:{
                 formatter: function(val) {
                     return formatCompactPKR(val);
-                }
+                },
+                style:{ colors:"#64748b", fontSize:"12px" }
             }
         },
         fill: {
-                type: "gradient",
-                gradient: {
-                    shade: "dark",
-                    type: "vertical",
-                    gradientToColors: ["#015176"],
-                    stops: [0, 100]
-                }
-            },
+            type: "gradient",
+            gradient: {
+                shade: "dark",
+                type: "vertical",
+                gradientToColors: ["#015176"],
+                opacityFrom: 0.82,
+                opacityTo: 0.35,
+                stops: [0, 100]
+            }
+        },
+        grid: {
+            borderColor: "#e2e8f0",
+            strokeDashArray: 4,
+            xaxis: { lines: { show: false } },
+            yaxis: { lines: { show: true } }
+        },
         tooltip:{
+            theme:"light",
+            style:{ fontSize:"13px" },
             y:{
                 formatter:(val)=>
                     "Rs." + val.toLocaleString("en-PK")
             }
         },
-        dataLabels: {
-            enabled: false,
-        },
-        colors:["#009be5"]
+        dataLabels: { enabled: false },
+        colors:["#009be5"],
+        legend:{ show:false },
+        states:{ hover:{ filter:{ type:"lighten", value:0.06 } } }
     };
     const el =
         document.querySelector(
@@ -381,122 +438,142 @@ async function loadInvoiceCountChart() {
         new ApexCharts(invoiceCountChartEl, {
             chart: {
                 type: "area",
-                height: 300,
+                height: 320,
                 toolbar: { show: false },
                 background: "transparent",
+                foreColor: "#64748b",
                 fontFamily: "Inter, sans-serif",
                 zoom: { enabled: false },
                 animations: {
                     enabled: true,
                     easing: "easeout",
                     speed: 500
+                },
+                dropShadow: {
+                    enabled: true,
+                    color: "#009be5",
+                    top: 8,
+                    blur: 12,
+                    opacity: 0.14
                 }
             },
-                title: {
-                    text:
-                        `(${fiscalYear})`,
-                    align: "center",
-                    style: {
-                        fontSize: "13px",
-                        fontWeight: fontWeight
-                    }
-                },
-                annotations: {
-                    points: [{
-                        x: labels[labels.length - 1],
-                        y: values[values.length - 1],
-                        marker: {
-                            size: 6,
-                            fillColor: "#146e98"
-                        },
-                        label: {
-                            borderColor: "#009be5",
-                            style: {
-                                background: "#146e98",
-                                color: "#fff"
-                            }
-                        }
-                    }]
-                },
-                series: [{
-                    name: "Invoices",
-                    data: values
-                }],
-                colors: ["#009be5"],
-                stroke: {
-                    curve: "smooth",
-                    width: 2.5
-                },
-                fill: {
-                    type: "gradient",
-                    gradient: {
-                        shade: "dark",
-                        type: "vertical",
-                        gradientToColors: ["#146e98"],
-                        stops: [0, 100]
-                    }
-                },
-                markers: {
-                    size: 0,
-                    hover: {
-                        size: 5
-                    }
-                },
-                grid: {
-                    borderColor: "#f1f5f9",
-                    strokeDashArray: 3,
-                    padding: {
-                        left: 5,
-                        right: 10
-                    }
-                },
-                xaxis: {
-                    categories: labels,
-                    axisBorder: { show: false },
-                    axisTicks: { show: false },
-                    labels: {
-                        style: {
-                            colors: "#94a3b8",
-                            fontSize: "12px",
-                            fontWeight: 500
-                        }
-                    }
-                },
-                yaxis: {
-                    labels: {
-                        style: {
-                            colors: "#94a3b8",
-                            fontSize: "12px"
-                        },
-                        formatter: val =>
-                            val.toLocaleString()
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                tooltip: {
-                    theme: "light",
-                    style: {
-                        fontSize: "13px"
-                    },
+            title: {
+                text: `(${fiscalYear})`,
+                align: "left",
+                margin: 0,
+                offsetX: 2,
+                style: {
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    color: "#146e98"
+                }
+            },
+            annotations: {
+                points: [{
+                    x: labels[labels.length - 1],
+                    y: values[values.length - 1],
                     marker: {
-                        show: true
+                        size: 6,
+                        fillColor: "#146e98"
                     },
-                    y: {
-                        formatter: val =>
-                            `${val.toLocaleString()} invoices`
-                    }
-                },
-                states: {
-                    hover: {
-                        filter: {
-                            type: "lighten",
-                            value: 0.06
+                    label: {
+                        borderColor: "#009be5",
+                        style: {
+                            background: "#146e98",
+                            color: "#fff"
                         }
+                    }
+                }]
+            },
+            series: [{
+                name: "Invoices",
+                data: values
+            }],
+            colors: ["#009be5"],
+            stroke: {
+                curve: "smooth",
+                width: 2.8,
+                lineCap: "round"
+            },
+            fill: {
+                type: "gradient",
+                gradient: {
+                    shade: "dark",
+                    type: "vertical",
+                    gradientToColors: ["#146e98"],
+                    opacityFrom: 0.75,
+                    opacityTo: 0.2,
+                    stops: [0, 100]
+                }
+            },
+            markers: {
+                size: 0,
+                strokeWidth: 2,
+                strokeColors: "#fff",
+                colors: ["#009be5"],
+                hover: {
+                    size: 5
+                }
+            },
+            grid: {
+                borderColor: "#e2e8f0",
+                strokeDashArray: 3,
+                xaxis: { lines: { show: false } },
+                yaxis: { lines: { show: true } },
+                padding: {
+                    left: 5,
+                    right: 10
+                }
+            },
+            xaxis: {
+                categories: labels,
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+                labels: {
+                    style: {
+                        colors: "#64748b",
+                        fontSize: "12px",
+                        fontWeight: 500
+                    }
+                }
+            },
+            yaxis: {
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+                labels: {
+                    style: {
+                        colors: "#64748b",
+                        fontSize: "12px"
+                    },
+                    formatter: val =>
+                        val.toLocaleString()
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            tooltip: {
+                theme: "light",
+                style: {
+                    fontSize: "13px"
+                },
+                marker: {
+                    show: true
+                },
+                y: {
+                    formatter: val =>
+                        `${val.toLocaleString()} invoices`
+                }
+            },
+            states: {
+                hover: {
+                    filter: {
+                        type: "lighten",
+                        value: 0.06
                     }
                 }
             }
+        }
         );
     invoiceCountChart.render();
 }
