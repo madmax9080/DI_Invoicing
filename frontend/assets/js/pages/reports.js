@@ -41,48 +41,58 @@ async function loadSalesByBuyerChart() {
         chart: {
             type: "bar",
             height: 360,
-            stacked: true, 
+            stacked: true,
             stackType: "normal",
             offsetY: 0,
             toolbar: { show: false },
+            zoom: { enabled: false },
+            background: "transparent",
+            foreColor: "#64748b",
+            animations: {
+                enabled: true,
+                easing: "easeinout",
+                speed: 500
+            },
+            dropShadow: {
+                enabled: true,
+                color: "#009be5",
+                top: 8,
+                blur: 12,
+                opacity: 0.16
+            }
         },
         series: [
-            // GREEN first
             {
                 name: "Sales",
                 data: values
             },
-            // WHITE second (track)
             {
                 name: "Track",
                 data: trackSeries
             }
         ],
-        colors: [
-            "#009be5", // blue fill
-            "#DCDCDC"
-        ],
+        colors: ["#009be5", "#e2e8f0"],
         plotOptions: {
             bar: {
-                columnWidth: "30%",
+                columnWidth: "34%",
+                borderRadius: 8,
+                distributed: false
             }
         },
         fill: {
             type: "gradient",
             gradient: {
-                shade: "dark",
+                shade: "light",
                 type: "vertical",
                 gradientToColors: ["#146e98"],
                 stops: [0, 100]
             }
         },
-        dataLabels: {
-            enabled: false,
-        },
+        dataLabels: { enabled: false },
         grid: {
-            padding: {
-                bottom: 0   
-            }
+            borderColor: "#e2e8f0",
+            strokeDashArray: 4,
+            padding: { bottom: 0 }
         },
         tooltip: {
             shared: false,
@@ -91,22 +101,35 @@ async function loadSalesByBuyerChart() {
                 formatter: function(val, opts) {
                     if (opts.seriesIndex === 1)
                         return null;
-                    return "Rs." +
-                        val.toLocaleString("en-PK");
+                    return "Rs." + val.toLocaleString("en-PK");
                 }
             }
         },
         xaxis: {
             categories: labels,
+            axisBorder: { show: false },
+            axisTicks: { show: false },
+            labels: {
+                style: {
+                    colors: "#64748b",
+                    fontSize: "12px"
+                }
+            }
         },
         yaxis: {
-            min: 0,                 
+            min: 0,
             max: paddedMax,
-            forceNiceScale: false,  
+            forceNiceScale: false,
             tickAmount: 5,
+            axisBorder: { show: false },
+            axisTicks: { show: false },
             labels: {
                 formatter: function(val) {
                     return formatCompactPKR(val);
+                },
+                style: {
+                    colors: "#64748b",
+                    fontSize: "12px"
                 }
             }
         },
