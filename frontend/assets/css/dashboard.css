@@ -433,6 +433,14 @@ body{
     }
 }
 
+#kpiRow {
+    align-items: stretch;
+}
+
+#kpiRow .kpi-card {
+    height: 100%;
+}
+
 .kpi-card {
     background: #fff;
     border: 1px solid #e8edf4;
@@ -502,7 +510,7 @@ body{
 }
 
 .kpi-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: #0f172a;
     margin-bottom: 6px;
@@ -516,7 +524,7 @@ body{
 }
 
 .kpi-value {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: #0f172a;
     margin-bottom: 4px;
