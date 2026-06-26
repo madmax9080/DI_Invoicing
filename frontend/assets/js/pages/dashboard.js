@@ -91,7 +91,7 @@ function renderKPIs(kpis) {
     container.empty();
     kpis.forEach(kpi => {
         container.append(`
-            <div class="col-xl-3 col-lg-3 col-md-6">
+            <div class="kpi-col">
                 <div class="kpi-card">
                     <div class="kpi-icon-circle ${kpi.iconBgClass}">
                         <i class="${kpi.iconClass}"></i>
