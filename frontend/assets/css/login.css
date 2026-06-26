@@ -187,25 +187,36 @@ body {
 
 .visual-card {
     position: relative;
-    margin: 14px 0 18px;
-    border-radius: 18px;
+    margin: 16px 0 20px;
+    border-radius: 22px;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,0.24);
     background: rgba(255,255,255,0.16);
-    box-shadow: 0 14px 30px rgba(2, 6, 23, 0.16);
+    box-shadow: 0 16px 34px rgba(2, 6, 23, 0.18);
+    min-height: 240px;
+}
+
+.visual-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 93, 132, 0.05) 0%, rgba(2, 6, 23, 0.28) 100%);
+    pointer-events: none;
 }
 
 .visual-card img {
     display: block;
     width: 100%;
-    height: 220px;
+    height: 100%;
+    min-height: 240px;
     object-fit: cover;
+    object-position: center;
 }
 
 .floating-chip {
     position: absolute;
-    right: 12px;
-    bottom: 12px;
+    left: 14px;
+    bottom: 14px;
     display: flex;
     flex-direction: column;
     padding: 10px 12px;
@@ -213,6 +224,7 @@ body {
     background: rgba(255,255,255,0.95);
     color: #0f5d84;
     box-shadow: 0 10px 20px rgba(2, 6, 23, 0.14);
+    z-index: 1;
 }
 
 .floating-chip span {
