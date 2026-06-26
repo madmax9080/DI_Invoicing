@@ -463,7 +463,11 @@ body{
 .kpi-icon-circle i {
     font-size: 18px;
 }
-
+.kpi-icon-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2563eb;
+}
 .icon-blue {
     background: #eff6ff;
 }

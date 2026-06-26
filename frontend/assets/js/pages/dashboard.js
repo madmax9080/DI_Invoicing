@@ -51,7 +51,7 @@ async function loadKPIs() {
                 title: "Total Revenue",
                 value: formatCurrency(data.total_sales),
                 subtitle: "Total sales amount of invoices",
-                iconClass: "bi bi-currency-rupee",
+                iconText: "PKR",
                 iconBgClass: "icon-blue",
                 trend: getTrend("#2563eb")
             },
@@ -94,7 +94,7 @@ function renderKPIs(kpis) {
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
                 <div class="kpi-card">
                     <div class="kpi-icon-circle ${kpi.iconBgClass}">
-                        <i class="${kpi.iconClass}"></i>
+                        ${kpi.iconText ? `<span class="kpi-icon-text">${kpi.iconText}</span>` : `<i class="${kpi.iconClass}"></i>`}
                     </div>
                     <div class="kpi-content">
                         <div class="kpi-title">
