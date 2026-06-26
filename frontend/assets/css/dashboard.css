@@ -451,8 +451,8 @@ body{
 }
 
 .kpi-icon-circle {
-    width: 52px;
-    height: 52px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -461,7 +461,7 @@ body{
 }
 
 .kpi-icon-circle i {
-    font-size: 22px;
+    font-size: 18px;
 }
 
 .icon-blue {
@@ -502,7 +502,7 @@ body{
 }
 
 .kpi-title {
-    font-size: 14px;
+    font-size: 10px;
     font-weight: 600;
     color: #0f172a;
     margin-bottom: 4px;
@@ -516,14 +516,14 @@ body{
 }
 
 .kpi-value {
-    font-size: 16px;
+    font-size: 10px;
     font-weight: 700;
     color: #0f172a;
     margin-bottom: 2px;
 }
 
 .kpi-subtitle {
-    font-size: 12px;
+    font-size: 10px;
     color: #64748b;
     line-height: 1.3;
 }
