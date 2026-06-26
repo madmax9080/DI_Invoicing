@@ -592,6 +592,39 @@ function bindEvents() {
     $("#logoutBtn")
         .off("click.dashboard")
         .on("click.dashboard", forceLogout);
+
+    $("#importExcelBtn")
+        .off("click.dashboard")
+        .on("click.dashboard", () => navigateToRoute("import_excel"));
+
+    $("#addBuyerBtn")
+        .off("click.dashboard")
+        .on("click.dashboard", () => navigateToRoute("buyers"));
+
+    $("#generateReportBtn")
+        .off("click.dashboard")
+        .on("click.dashboard", () => navigateToRoute("reports"));
+
+    $("#createInvoiceBtn")
+        .off("click.dashboard")
+        .on("click.dashboard", () => navigateToRoute("create_invoice"));
+}
+
+function navigateToRoute(route) {
+    if (window.loadRoute) {
+        window.loadRoute(route);
+    } else {
+        const hash = {
+            import_excel: "#import",
+            buyers: "#buyers",
+            reports: "#reports",
+            create_invoice: "#create-invoice"
+        }[route];
+        if (hash) {
+            window.location.hash = hash;
+            window.location.reload();
+        }
+    }
 }
 
 function handleFYChange() {

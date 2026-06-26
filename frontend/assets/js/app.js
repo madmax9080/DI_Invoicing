@@ -2,8 +2,6 @@ import { apiFetch } from "./api.js";
 let allClients = [];
 const routes = {
     dashboard: {
-        title: "DASHBOARD",
-        subtitle: "DIGITAL INVOICE MANAGEMENT",
         page: "/pages/dashboard.html",
         url: "#dashboard",
         script: "/assets/js/pages/dashboard.js",
@@ -11,8 +9,6 @@ const routes = {
         destroy: "destroyDashboard"
     },
     create_invoice: {
-        title: "GENERATE & SUBMIT INVOICES",
-        subtitle: "DIGITAL INVOICE MANAGEMENT",
         page: "/pages/create_invoice.html",
         url: "#create-invoice",
         script: "/assets/js/pages/create_invoice.js",
@@ -20,8 +16,6 @@ const routes = {
         destroy: "destroyCreateInvoice"
     },
     reports: {
-        title: "ANALYTICS & REPORTING",
-        subtitle: "DIGITAL INVOICE MANAGEMENT",
         page: "/pages/reports.html",
         url: "#reports",
         script: "/assets/js/pages/reports.js",
@@ -29,8 +23,6 @@ const routes = {
         destroy: "destroyReports"
     },
     seller_profile: {
-        title: "DETAIL OF SELLER",
-        subtitle: "DIGITAL INVOICE MANAGEMENT",
         page: "/pages/clients.html",
         url: "#profile",
         script: "/assets/js/pages/clients.js",
@@ -38,8 +30,6 @@ const routes = {
         destroy: "destroyClients"
     },
     import_excel: {
-        title: "IMPORT INVOICES FROM EXCEL",
-        subtitle: "DIGITAL INVOICE MANAGEMENT",
         page: "/pages/excel_import.html",
         url: "#import",
         script: "/assets/js/pages/excel.js",
@@ -47,8 +37,6 @@ const routes = {
         destroy: "destroyExcelImport"
     },
     buyers: {
-        title: "BUYER MANAGEMENT",
-        subtitle: "DIGITAL INVOICE MANAGEMENT",
         page: "/pages/buyer.html",
         url: "#buyers",
         script: "/assets/js/pages/buyers.js",
