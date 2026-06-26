@@ -208,6 +208,54 @@
     height: 320px;
 }
 
+/* BUYER PAGE */
+.buyer-page-shell {
+    gap: 16px;
+}
+
+.buyer-hero {
+    padding: 22px 24px;
+}
+
+.buyer-filter-panel {
+    padding: 16px 18px;
+}
+
+.buyer-table-shell {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding-bottom: 4px;
+}
+
+.buyer-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.buyer-table thead th {
+    background: #f8fbff;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 12px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.buyer-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.buyer-table tbody tr:hover {
+    background: #f8fbff;
+}
+
 @media (max-width: 768px) {
     .reports-hero {
         flex-direction: column;

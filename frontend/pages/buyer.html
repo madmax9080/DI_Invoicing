@@ -1,218 +1,71 @@
-<div class="reports-container">
-    <div class="header">
-        <div class="card-body reports-header">
-            <div>
-                <div
-                    style="
-                        font-size:15px;
-                        font-weight:600;
-                        color:#009be5;
-                    "
+<div class="reports-container buyer-page-shell">
+    <section class="reports-hero buyer-hero">
+        <div>
+            <div class="hero-chip">Manage buyers</div>
+            <h2>Create, update and organize buyer records.</h2>
+            <p>Find buyers quickly, review their details, and keep your master data in sync.</p>
+        </div>
+        <button id="addBuyerBtn" class="export-btn">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add Buyer</span>
+        </button>
+    </section>
+
+    <section class="panel-card buyer-filter-panel">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-4 col-md-8">
+                <label class="donezo-label">Search Buyer</label>
+                <input
+                    type="text"
+                    id="buyerSearchInput"
+                    class="form-control donezo-input"
+                    placeholder="Search by NTN or Name"
                 >
-                    MANAGE BUYERS
-                </div>
-                <div
-                    class="text-muted"
-                    style="
-                        font-size:12px;
-                        font-weight:400;
-                    "
-                >
-                    CREATE, UPDATE AND DELETE BUYERS
-                </div>
             </div>
-            <div class="reports-actions">
-                <button
-                    id="addBuyerBtn"
-                    class="btn btn-donezo-primary btn-sm" style="background-color: #009be5;"
-                >
-                    Add Buyer
-                </button>
+            <div class="col-lg-2 col-md-4 d-flex gap-2">
+                <button id="searchBuyerBtn" class="btn btn-donezo-primary flex-fill">Search</button>
+                <button id="resetBuyerBtn" class="btn btn-donezo-secondary flex-fill">Reset</button>
             </div>
         </div>
-    </div>
-    <!-- FILTER CARD -->
-    <div
-        class="
-            card
-            shadow-sm
-            border-0
-            rounded-4
-            mb-3
-        "
-    >
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-lg-4">
-                    <label class="donezo-label">
-                        Search Buyer
-                    </label>
-                    <input
-                        type="text"
-                        id="buyerSearchInput"
-                        class="form-control donezo-input"
-                        placeholder="
-                            Search by NTN or Name
-                        "
-                    >
-                </div>
-                <div class="col-lg-2 d-flex gap-2">
-                    <button
-                        id="searchBuyerBtn"
-                        class="
-                            btn
-                            btn-donezo-primary
-                            btn-sm
-                            flex-fill
-                        "
-                        style="background-color: #009be5;" 
-                    >
-                        Search
-                    </button>
-                    <button
-                        id="resetBuyerBtn"
-                        class="
-                            btn
-                            btn-donezo-secondary
-                            btn-sm
-                            flex-fill
-                        "
-                    >
-                        Reset
-                    </button>
-                </div>
+    </section>
+
+    <section class="panel-card table-panel">
+        <div class="buyer-table-shell">
+            <table class="donezo-table buyer-table table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Actions</th>
+                        <th>NTN/CNIC</th>
+                        <th>Name</th>
+                        <th>Province</th>
+                        <th>Address</th>
+                        <th>Registration Type</th>
+                    </tr>
+                </thead>
+                <tbody id="buyersTableBody">
+                    <tr>
+                        <td colspan="7">Loading buyers...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="donezo-pagination">
+            <div class="pagination-info">
+                Showing
+                <span id="paginationStart">0</span>
+                to
+                <span id="paginationEnd">0</span>
+                of
+                <span id="paginationTotal">0</span>
+                entries
+            </div>
+            <div class="pagination-buttons">
+                <button id="prevPageBtn" class="btn btn-donezo-secondary btn-sm">Previous</button>
+                <button id="nextPageBtn" class="btn btn-donezo-secondary btn-sm">Next</button>
             </div>
         </div>
-    </div>
-    <!-- TABLE CARD -->
-    <div
-        class="
-            card
-            shadow-sm
-            border-0
-            rounded-4
-        "
-    >
-        <div class="card-body p-0">
-            <div class="donezo-table-wrapper">
-                <table
-                    class="
-                        donezo-table
-                        table
-                        table-striped
-                    "
-                >
-                    <thead class="table-dark">
-                        <tr>
-                            <th
-                                style="
-                                    font-size:12px;
-                                    font-weight:400
-                                "
-                            >
-                                #
-                            </th>
-                            <th
-                                style="
-                                    font-size:12px;
-                                    font-weight:400
-                                "
-                            >
-                                Actions
-                            </th>
-                            <th
-                                style="
-                                    font-size:12px;
-                                    font-weight:400
-                                "
-                            >
-                                NTN/CNIC
-                            </th>
-                            <th
-                                style="
-                                    font-size:12px;
-                                    font-weight:400
-                                "
-                            >
-                                Name
-                            </th>
-                            <th
-                                style="
-                                    font-size:12px;
-                                    font-weight:400
-                                "
-                            >
-                                Province
-                            </th>
-                            <th
-                                style="
-                                    font-size:12px;
-                                    font-weight:400
-                                "
-                            >
-                                Address
-                            </th>
-                            <th
-                                style="
-                                    font-size:12px;
-                                    font-weight:400
-                                "
-                            >
-                                Registration Type
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="buyersTableBody">
-                        <tr>
-                            <td colspan="7">
-                                Loading buyers...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <!-- PAGINATION -->
-            <div class="donezo-pagination">
-                <div class="pagination-info">
-                    Showing
-                    <span id="paginationStart">
-                        0
-                    </span>
-                    to
-                    <span id="paginationEnd">
-                        0
-                    </span>
-                    of
-                    <span id="paginationTotal">
-                        0
-                    </span>
-                    entries
-                </div>
-                <div class="pagination-buttons">
-                    <button
-                        id="prevPageBtn"
-                        class="
-                            btn
-                            btn-donezo-secondary
-                            btn-sm
-                        "
-                    >
-                        Previous
-                    </button>
-                    <button
-                        id="nextPageBtn"
-                        class="
-                            btn
-                            btn-donezo-secondary
-                            btn-sm
-                        "
-                    >
-                        Next
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 </div>
 <!-- BUYER MODAL -->
 <div
