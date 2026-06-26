@@ -1,86 +1,84 @@
-<div class="dashboard-toolbar">
-    <!-- LEFT ACTIONS -->
-    <div class="toolbar-actions">
-        <button class="toolbar-btn" id="importExcelBtn">
-            <i class="bi bi-file-earmark-excel"></i>
-            <span>Import Excel</span>
-        </button>
-        <button class="toolbar-btn" id="addBuyerBtn">
-            <i class="bi bi-person-plus"></i>
-            <span>Add Buyer</span>
-        </button>
-        <button class="toolbar-btn" id="generateReportBtn">
-            <i class="bi bi-file-earmark-bar-graph"></i>
-            <span>Generate Report</span>
-        </button>
-    </div>
-    <!-- RIGHT SIDE -->
-    <div class="toolbar-right">
-        <div class="tax-year-group">
-            <label class="tax-year-label">
-                Tax Year
-            </label>
-            <div class="tax-year-select-wrapper">
-                <i class="bi bi-calendar3"></i>
-                <select id="globalFySelect" class="tax-year-select">
-                </select>
+<div class="dashboard-shell">
+    <section class="dashboard-hero">
+        <div class="hero-copy">
+            <div class="hero-chip">Business overview</div>
+            <h2>Stay in control of your invoices and revenue.</h2>
+            <p>Monitor sales performance, track invoice activity, and keep every finance touchpoint aligned in one place.</p>
+        </div>
+        <div class="hero-badges">
+            <div class="hero-badge">
+                <strong>Live</strong>
+                <span>KPIs</span>
+            </div>
+            <div class="hero-badge alt">
+                <strong>FY</strong>
+                <span>Insights</span>
             </div>
         </div>
-        <button class="create-invoice-btn" id="createInvoiceBtn">
-            <i class="bi bi-plus-lg"></i>
-            <span>Create Invoice</span>
-        </button>
+    </section>
+
+    <div class="dashboard-toolbar">
+        <div class="toolbar-actions">
+            <button class="toolbar-btn" id="importExcelBtn">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span>Import Excel</span>
+            </button>
+            <button class="toolbar-btn" id="addBuyerBtn">
+                <i class="bi bi-person-plus"></i>
+                <span>Add Buyer</span>
+            </button>
+            <button class="toolbar-btn" id="generateReportBtn">
+                <i class="bi bi-file-earmark-bar-graph"></i>
+                <span>Generate Report</span>
+            </button>
+        </div>
+
+        <div class="toolbar-right">
+            <div class="tax-year-group">
+                <label class="tax-year-label">Tax Year</label>
+                <div class="tax-year-select-wrapper">
+                    <i class="bi bi-calendar3"></i>
+                    <select id="globalFySelect" class="tax-year-select"></select>
+                </div>
+            </div>
+            <button class="create-invoice-btn" id="createInvoiceBtn">
+                <i class="bi bi-plus-lg"></i>
+                <span>Create Invoice</span>
+            </button>
+        </div>
     </div>
-</div>
-<!-- KPI ROW -->
-<div class="row g-3 mb-2" id="kpiRow"></div>
-<!-- CHARTS -->
-<div class="row g-3">
-    <div class="col-lg-12">
-        <div class="card shadow-sm border-0 rounded-4 mb-3">
-            <div class="card-body">
-                <div class="donezo-card-header d-flex justify-content-between align-items-center mb-2">
+
+    <div class="row g-3 mb-3" id="kpiRow"></div>
+
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="panel-card chart-panel">
+                <div class="panel-header">
                     <div>
-                        <div class="fw-semibold" style="color: #009be5;">
-                            Monthly Sales
-                        </div>
-                        <div class="text-muted small">
-                            Sales trend by month
-                        </div>
+                        <div class="panel-title">Monthly Sales</div>
+                        <div class="panel-subtitle">Sales trend by month</div>
                     </div>
                 </div>
                 <div id="monthlySalesChart"></div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="card shadow-sm border-0 rounded-4 mb-3">
-            <div class="card-body">
-                <div class="donezo-card-header d-flex justify-content-between align-items-center mb-3">
+        <div class="col-xl-6 col-lg-12">
+            <div class="panel-card chart-panel">
+                <div class="panel-header">
                     <div>
-                        <div class="fw-semibold" style="color: #009be5;">
-                            Sales Distribution
-                        </div>
-                        <div class="text-muted small">
-                            Distributed by Quarters
-                        </div>
+                        <div class="panel-title">Sales Distribution</div>
+                        <div class="panel-subtitle">Distributed by quarters</div>
                     </div>
                 </div>
                 <div id="quarterlySalesChart"></div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="card shadow-sm border-0 rounded-4 mb-3">
-            <div class="card-body">
-                <div class="donezo-card-header d-flex justify-content-between align-items-center mb-3">
+        <div class="col-xl-6 col-lg-12">
+            <div class="panel-card chart-panel">
+                <div class="panel-header">
                     <div>
-                        <div class="fw-semibold" style="color: #009be5;">
-                            Monthly Invoices
-                        </div>
-                        <div class="text-muted small">
-                            Last 12 months performance
-                        </div>
+                        <div class="panel-title">Monthly Invoices</div>
+                        <div class="panel-subtitle">Last 12 months performance</div>
                     </div>
                 </div>
                 <div id="invoiceCountChart"></div>
