@@ -96,21 +96,35 @@
     color: #fff;
 }
 
-@media (max-width: 768px) {
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 20px;
-    }
+.sidebar {
+    display: flex;
+    flex-direction: column;
+}
 
-    .client-card {
-        width: 100%;
-        min-width: auto;
-    }
+.menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+}
 
-    .welcome-title {
-        font-size: 24px;
-    }
+.menu-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-footer {
+    padding-top: 10px;
+}
+
+.client-card {
+    width: 100%;
+    min-width: auto;
+}
+
+.welcome-title {
+    font-size: 24px;
 }
 </style>
 </head>
@@ -119,35 +133,39 @@
 <div class="sidebar">
     <img src="./assets/images/brand_white.png" class="brand-logo">
     <div class="menu">
-        <div class="menu-section">MENU</div>
-        <a class="menu-item active" data-route="dashboard">
-            <i class="bi bi-grid"></i>
-            <span>Dashboard</span>
-        </a>
-        <a class="menu-item" data-route="create_invoice">
-            <i class="bi bi-receipt"></i>
-            <span>Create Invoice</span>
-        </a>
-         <a class="menu-item" data-route="import_excel">
-            <i class="bi bi-file-earmark-excel"></i>
-            <span>Import Excel</span>
-        </a>
-        <a class="menu-item" data-route="reports">
-            <i class="bi bi-bar-chart"></i>
-            <span>Reports</span>
-        </a>
-        <a class="menu-item" data-route="buyers">
-            <i class="bi bi-people"></i>
-            <span>Buyers</span>
-        </a>
-        <a class="menu-item" data-route="seller_profile">
-            <i class="bi bi-person"></i>
-            <span>Seller Profile</span>
-        </a><br><br><br><br>
-        <a class="menu-item" id="logoutBtn">
-            <i class="bi bi-box-arrow-right"></i>
-            <span>Logout</span>
-        </a><br><br><br><br><br><br><br><br><br><br><br><br>
+        <div class="menu-links">
+            <div class="menu-section">MENU</div>
+            <a class="menu-item active" data-route="dashboard">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="menu-item" data-route="create_invoice">
+                <i class="bi bi-receipt"></i>
+                <span>Create Invoice</span>
+            </a>
+            <a class="menu-item" data-route="import_excel">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span>Import Excel</span>
+            </a>
+            <a class="menu-item" data-route="reports">
+                <i class="bi bi-bar-chart"></i>
+                <span>Reports</span>
+            </a>
+            <a class="menu-item" data-route="buyers">
+                <i class="bi bi-people"></i>
+                <span>Buyers</span>
+            </a>
+            <a class="menu-item" data-route="seller_profile">
+                <i class="bi bi-person"></i>
+                <span>Seller Profile</span>
+            </a>
+        </div>
+        <div class="sidebar-footer">
+            <a class="menu-item" id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Logout</span>
+            </a>
+        </div>
     </div>
 </div>
 <!-- MAIN -->
