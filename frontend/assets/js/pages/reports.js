@@ -266,7 +266,7 @@ function renderTable() {
     if (!state.invoices.length) {
         tbody.append(`
             <tr>
-                <td colspan="27"
+                <td colspan="28"
                     class="text-center text-muted py-4">
                     <<<<<< No invoices found >>>>>>
                 </td>
@@ -347,6 +347,7 @@ function renderRow(inv, item, index) {
             <td>${deleteBtn}</td>
             <td>${downloadBtn}</td>
             <td>${formatDate(inv.invoiceDate)}</td>
+            <td>${formatDate(inv.created_at)}</td>
             <td>${inv.fbrInvoiceNo || "-"}</td>
             <td>${inv.internal_invoice_no || "-"}</td>
             <td>${inv.invoiceRefNo || "-"}</td>

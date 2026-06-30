@@ -1,5 +1,6 @@
 import { apiFetch } from "./api.js";
-let allClients = [];
+const ASSET_VERSION = "1.1";
+
 const routes = {
     dashboard: {
         page: "/pages/dashboard.html",
@@ -192,14 +193,16 @@ async function loadRoute(routeName, updateHash = true) {
             .removeClass("active");
         $(`.menu-item[data-route="${routeName}"]`)
             .addClass("active");
+        const versionedPage = `${route.page}?v=${ASSET_VERSION}`;
+        const versionedScript = `${route.script}?v=${ASSET_VERSION}`;
         const html = await fetch(
-            route.page,
+            versionedPage,
             {
                 cache: "no-store"
             }
         ).then(r => r.text());
         $("#appContent").html(html);
-        const module = await import(route.script);
+        const module = await import(versionedScript);
         currentModule = module;
         const initFn = module[route.init];
         if (typeof initFn === "function") {

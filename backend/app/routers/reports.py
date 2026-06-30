@@ -67,63 +67,6 @@ def sales_by_buyer(
     set_cache(cache_key, output)
     return output
 
-# @router.get("/invoices")
-# def reports_invoices(
-#     fy: Optional[str] = Query(None),
-#     page: int = Query(1, ge=1),
-#     per_page: int = Query(25, ge=1, le=200),
-#     status: Optional[str] = Query(None),
-#     date_from: Optional[date] = Query(None),
-#     date_to: Optional[date] = Query(None),
-#     month: Optional[str] = Query(None),
-#     db: Session = Depends(get_db),
-#     fbr=Depends(get_fbr_client_secure)
-# ):
-#     client_id = fbr.client_id
-#     today = date.today()
-#     if fy:
-#         start_year = int(fy.split("-")[0])
-#     else:
-#         start_year = today.year if today.month >= 7 else today.year - 1
-#     fiscal_start = date(start_year, 7, 1)
-#     fiscal_end = date(start_year + 1, 6, 30)
-#     query = (
-#         db.query(Invoice)
-#         .options(joinedload(Invoice.items))
-#         .filter(
-#             Invoice.client_id == client_id,
-#             Invoice.invoiceDate >= fiscal_start,
-#             Invoice.invoiceDate <= fiscal_end
-#         )
-#         .order_by(Invoice.invoiceDate.desc())
-#     )
-#     if status:
-#         query = query.filter(Invoice.status == status)
-#     if month:
-#         query = query.filter(
-#             func.to_char(Invoice.invoiceDate, "YYYY-MM") == month
-#         )
-#     else:
-#         if date_from:
-#             query = query.filter(Invoice.invoiceDate >= date_from)
-#         if date_to:
-#             query = query.filter(Invoice.invoiceDate <= date_to)
-#     total = query.count()
-#     pages = (total + per_page - 1) // per_page
-#     invoices = (
-#         query
-#         .offset((page - 1) * per_page)
-#         .limit(per_page)
-#         .all()
-#     )
-#     return {
-#         "data": invoices,
-#         "total": total,
-#         "page": page,
-#         "per_page": per_page,
-#         "pages": pages
-#     }
-
 @router.get("/invoices")
 def reports_invoices(
     fy: Optional[str] = Query(None),
@@ -165,8 +108,63 @@ def reports_invoices(
         .limit(per_page)
         .all()
     )
+
+    def serialize_item(item: InvoiceItem) -> dict:
+        return {
+            "id": item.id,
+            "invoice_id": item.invoice_id,
+            "hsCode": item.hsCode,
+            "productDescription": item.productDescription,
+            "uom": item.uom,
+            "quantity": float(item.quantity or 0),
+            "rate": item.rate,
+            "valueSalesExcludingST": float(item.valueSalesExcludingST or 0),
+            "salesTaxApplicable": float(item.salesTaxApplicable or 0),
+            "salesTaxWithheldAtSource": float(item.salesTaxWithheldAtSource or 0),
+            "furtherTax": float(item.furtherTax or 0),
+            "extraTax": float(item.extraTax or 0),
+            "fedPayable": float(item.fedPayable or 0),
+            "discount": float(item.discount or 0),
+            "sroScheduleNo": item.sroScheduleNo,
+            "sroItemSerialNo": item.sroItemSerialNo,
+            "saleType": item.saleType,
+            "totalValues": float(item.totalValues or 0),
+            "fixedNotifiedValueOrRetailPrice": float(item.fixedNotifiedValueOrRetailPrice or 0)
+        }
+
+    def serialize_invoice(invoice: Invoice) -> dict:
+        return {
+            "id": invoice.id,
+            "invoiceRefNo": invoice.invoiceRefNo,
+            "internal_invoice_no": invoice.internal_invoice_no,
+            "fbrInvoiceNo": invoice.fbrInvoiceNo,
+            "invoiceType": invoice.invoiceType,
+            "invoiceDate": invoice.invoiceDate.isoformat() if invoice.invoiceDate else None,
+            "created_at": invoice.created_at.isoformat() if invoice.created_at else None,
+            "sellerNTNCNIC": invoice.sellerNTNCNIC,
+            "sellerBusinessName": invoice.sellerBusinessName,
+            "sellerProvince": invoice.sellerProvince,
+            "sellerAddress": invoice.sellerAddress,
+            "buyerNTNCNIC": invoice.buyerNTNCNIC,
+            "buyerBusinessName": invoice.buyerBusinessName,
+            "buyerProvince": invoice.buyerProvince,
+            "buyerAddress": invoice.buyerAddress,
+            "buyerRegistrationType": invoice.buyerRegistrationType,
+            "scenarioId": invoice.scenarioId,
+            "buyer_id": invoice.buyer_id,
+            "client_id": invoice.client_id,
+            "status": invoice.status,
+            "request_payload": invoice.request_payload,
+            "response_data": invoice.response_data,
+            "error_message": invoice.error_message,
+            "updated_at": invoice.updated_at.isoformat() if invoice.updated_at else None,
+            "printed_count": invoice.printed_count,
+            "last_printed_at": invoice.last_printed_at.isoformat() if invoice.last_printed_at else None,
+            "items": [serialize_item(item) for item in invoice.items]
+        }
+
     return {
-        "data": invoices,
+        "data": [serialize_invoice(inv) for inv in invoices],
         "total": total,
         "page": page,
         "per_page": per_page,
