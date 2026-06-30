@@ -1,5 +1,6 @@
 import { apiFetch } from "./api.js";
 const ASSET_VERSION = "1.1";
+let allClients = [];
 
 const routes = {
     dashboard: {
