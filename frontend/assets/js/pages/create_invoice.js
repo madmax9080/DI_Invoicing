@@ -502,94 +502,16 @@ async function loadBuyerByNTN(ntn) {
 async function handleSubmitInvoice() {
     const $btn = $(this);
     if ($btn.prop("disabled")) return;
-    const n = v => {
-        const num = Number(v);
-        return Number.isFinite(num) ? Number(num.toFixed(2)) : 0;
-    };
     const originalText = $btn.data("originalText") || $btn.html();
     $btn.data("originalText", originalText);
     $btn.prop("disabled", true)
         .html('<i class="bi bi-arrow-repeat spin"></i> <span>Submitting...</span>');
     try {
-        if (!currentItems.length) {
-            const err = new Error("Please add at least one item");
-            err.isValidation = true;
-            throw err;
-        }
-        const invoiceDate = $("#invoiceDate").val();
-        if (!invoiceDate) {
-            const err = new Error("Invoice Date is required");
-            err.isValidation = true;
-            throw err;
-        }
-        const buyerBusinessName =
-            $("#buyerBusinessName").val().trim();
-        if (!buyerBusinessName) {
-            const err = new Error("Buyer Business Name is required");
-            err.isValidation = true;
-            throw err;
-        }
-        const client =
-            currentClient || await loadClientDetails();
-        if (!client) {
-            const err = new Error("Client details not available");
-            err.isValidation = true;
-            throw err;
-        }
-        const internalInvoiceNo = $("#internalInvoiceNo").val().trim();
-        if (!internalInvoiceNo) {
-            const err = new Error("Invoice Number is required");
-            err.isValidation = true;
-            throw err;
-        }
-        const payload = {
-            internalInvoiceNo,
-            invoiceType: $("#invoiceType option:selected").text(),
-            invoiceDate,
-            invoiceRefNo: $("#invoiceRefNo").val() || "",
-            // scenarioId: $("#scenarioId").val() || "",
-            sellerNTNCNIC: client.sellerNTNCNIC,
-            sellerBusinessName: client.sellerBusinessName,
-            sellerProvince: getProvinceTextById(client.sellerProvince),
-            sellerAddress: client.sellerAddress,
-            buyerNTNCNIC: $("#buyerNTNCNIC").val(),
-            buyerBusinessName,
-            buyerProvince: $("#buyerProvince option:selected").text(),
-            buyerAddress: $("#buyerAddress").val(),
-            buyerRegistrationType: $("#buyerRegistrationType").val(),
-            items: currentItems.map(item => ({
-                hsCode: item.hsCode,
-                productDescription: item.productDescription,
-                rate: item.rateLabel,
-                uoM: item.uomText,
-                quantity: n(item.quantity),
-                valueSalesExcludingST: n(item.valueSalesExcludingST),
-                salesTaxApplicable: n(item.salesTaxApplicable),
-                totalValues: n(item.totalValues),
-                fixedNotifiedValueOrRetailPrice: n(
-                    item.fixedNotifiedValueOrRetailPrice
-                ),
-                salesTaxWithheldAtSource: n(
-                    item.salesTaxWithheldAtSource
-                ),
-                furtherTax: n(item.furtherTax),
-                extraTax: normalizeExtraTax(
-                    item.extraTax,
-                    item.saleTypeLabel
-                ),
-                fedPayable: n(item.fedPayable),
-                discount: n(item.discount),
-                saleType: item.saleTypeLabel,
-                sroScheduleNo: item.sroText || "",
-                sroItemSerialNo: item.sroItemText || ""
-            }))
-        };
-        // console.log("Submitting to FBR:", payload);
+        const payload = buildInvoicePayload();
         const response = await apiFetch("/invoices/post", {
             method: "POST",
             body: payload
         });
-        // console.log("Backend Response:", response);
         if (response?.status === "success") {
             showToast(
                 `Invoice Posted. FBR No: ${response.fbrInvoiceNumber}`,
@@ -626,7 +548,7 @@ async function handleSubmitInvoice() {
         }
         if (response?.status === "already_posted") {
             showToast(
-                `Invoice No. ${internalInvoiceNo} already posted with FBR No: ${response.fbrInvoiceNumber}`,
+                `Invoice No. ${payload.internalInvoiceNo} already posted with FBR No: ${response.fbrInvoiceNumber}`,
                 "warning",
                 "Duplicate"
             );
@@ -636,12 +558,144 @@ async function handleSubmitInvoice() {
         if (err.isValidation) {
             showToast(err.message, "warning");
         }
-        // console.error("Invoice submission error:", err);
     } finally {
         $btn.prop("disabled", false)
             .html($btn.data("originalText") || '<i class="bi bi-send"></i> <span>Submit Invoice to FBR</span>');
     }
 };
+
+function buildInvoicePayload() {
+    if (!currentItems.length) {
+        const err = new Error("Please add at least one item");
+        err.isValidation = true;
+        throw err;
+    }
+    const invoiceDate = $("#invoiceDate").val();
+    if (!invoiceDate) {
+        const err = new Error("Invoice Date is required");
+        err.isValidation = true;
+        throw err;
+    }
+    const buyerBusinessName = $("#buyerBusinessName").val().trim();
+    if (!buyerBusinessName) {
+        const err = new Error("Buyer Business Name is required");
+        err.isValidation = true;
+        throw err;
+    }
+    const internalInvoiceNo = $("#internalInvoiceNo").val().trim();
+    if (!internalInvoiceNo) {
+        const err = new Error("Invoice Number is required");
+        err.isValidation = true;
+        throw err;
+    }
+    const client = currentClient;
+    if (!client) {
+        const err = new Error("Client details not available");
+        err.isValidation = true;
+        throw err;
+    }
+    return {
+        internalInvoiceNo,
+        invoiceType: $("#invoiceType option:selected").text(),
+        invoiceDate,
+        invoiceRefNo: $("#invoiceRefNo").val() || "",
+        sellerNTNCNIC: client.sellerNTNCNIC,
+        sellerBusinessName: client.sellerBusinessName,
+        sellerProvince: getProvinceTextById(client.sellerProvince),
+        sellerAddress: client.sellerAddress,
+        buyerNTNCNIC: $("#buyerNTNCNIC").val(),
+        buyerBusinessName,
+        buyerProvince: $("#buyerProvince option:selected").text(),
+        buyerAddress: $("#buyerAddress").val(),
+        buyerRegistrationType: $("#buyerRegistrationType").val(),
+        items: currentItems.map(item => ({
+            hsCode: item.hsCode,
+            productDescription: item.productDescription,
+            rate: item.rateLabel,
+            uoM: item.uomText,
+            quantity: Number(item.quantity) || 0,
+            valueSalesExcludingST: Number(item.valueSalesExcludingST) || 0,
+            salesTaxApplicable: Number(item.salesTaxApplicable) || 0,
+            totalValues: Number(item.totalValues) || 0,
+            fixedNotifiedValueOrRetailPrice: Number(item.fixedNotifiedValueOrRetailPrice) || 0,
+            salesTaxWithheldAtSource: Number(item.salesTaxWithheldAtSource) || 0,
+            furtherTax: Number(item.furtherTax) || 0,
+            extraTax: normalizeExtraTax(item.extraTax, item.saleTypeLabel),
+            fedPayable: Number(item.fedPayable) || 0,
+            discount: Number(item.discount) || 0,
+            saleType: item.saleTypeLabel,
+            sroScheduleNo: item.sroText || "",
+            sroItemSerialNo: item.sroItemText || ""
+        }))
+    };
+}
+
+async function handleSaveDraft() {
+    const $btn = $(this);
+    if ($btn.prop("disabled")) return;
+    const originalText = $btn.data("originalText") || $btn.html();
+    $btn.data("originalText", originalText);
+    $btn.prop("disabled", true)
+        .html('<i class="bi bi-arrow-repeat spin"></i> <span>Saving...</span>');
+    try {
+        const payload = buildInvoicePayload();
+        const response = await apiFetch("/invoices/draft", {
+            method: "POST",
+            body: payload
+        });
+        showToast(
+            `Draft saved as invoice ${response.internalInvoiceNo}`,
+            "success",
+            "Draft Saved"
+        );
+        return response;
+    } catch (err) {
+        if (err.isValidation) {
+            showToast(err.message, "warning");
+        }
+    } finally {
+        $btn.prop("disabled", false)
+            .html($btn.data("originalText") || '<i class="bi bi-save"></i> <span>Save Draft</span>');
+    }
+}
+
+async function handleDownloadDraft() {
+    const $btn = $(this);
+    if ($btn.prop("disabled")) return;
+    const originalText = $btn.data("originalText") || $btn.html();
+    $btn.data("originalText", originalText);
+    $btn.prop("disabled", true)
+        .html('<i class="bi bi-arrow-repeat spin"></i> <span>Preparing...</span>');
+    try {
+        const saveResponse = await handleSaveDraft.call(this);
+        if (!saveResponse?.invoiceId) {
+            return;
+        }
+        const blob = await apiFetch(
+            `/reports/pdf/${saveResponse.invoiceId}`,
+            { responseType: "blob" }
+        );
+        downloadFile(blob, `invoice_${saveResponse.internalInvoiceNo}.pdf`);
+    } catch (err) {
+        if (err.isValidation) {
+            showToast(err.message, "warning");
+        }
+    } finally {
+        $btn.prop("disabled", false)
+            .html($btn.data("originalText") || '<i class="bi bi-download"></i> <span>Download Draft</span>');
+    }
+}
+
+function downloadFile(blob, filename) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+}
 
 const SALE_TYPES_WITH_EMPTY_EXTRA_TAX = new Set([
     "Goods at Reduced Rate", "Exempt goods"
@@ -716,6 +770,12 @@ function bindStaticEvents() {
     $("#addItemBtn")
         .off(`click${EVENTS_NS}`)
         .on(`click${EVENTS_NS}`, handleAddItem);
+    $("#saveDraftBtn")
+        .off(`click${EVENTS_NS}`)
+        .on(`click${EVENTS_NS}`, handleSaveDraft);
+    $("#downloadDraftBtn")
+        .off(`click${EVENTS_NS}`)
+        .on(`click${EVENTS_NS}`, handleDownloadDraft);
     $("#submitInvoiceBtn")
         .off(`click${EVENTS_NS}`)
         .on(`click${EVENTS_NS}`, handleSubmitInvoice);
@@ -757,6 +817,8 @@ export function destroyCreateInvoice() {
         "#rate",
         "#sroSchedule",
         "#addItemBtn",
+        "#saveDraftBtn",
+        "#downloadDraftBtn",
         "#submitInvoiceBtn",
         "#cancelEditBtn",
         "#invoiceDate",

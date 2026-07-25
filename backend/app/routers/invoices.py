@@ -63,9 +63,52 @@ async def post_invoice_to_fbr(
                 status_code=409,
                 detail="Invoice is already being processed",
             )
-        db_invoice = existing
-        db_invoice.status = "posting"
+        buyer = crud.get_or_create_buyer(db, payload, client_id, current_user["id"])
+        existing.invoiceRefNo = payload.get("invoiceRefNo")
+        existing.invoiceType = payload["invoiceType"]
+        existing.invoiceDate = datetime.fromisoformat(payload["invoiceDate"])
+        existing.sellerNTNCNIC = payload["sellerNTNCNIC"]
+        existing.sellerBusinessName = payload["sellerBusinessName"]
+        existing.sellerProvince = payload["sellerProvince"]
+        existing.sellerAddress = payload.get("sellerAddress")
+        existing.buyerNTNCNIC = payload.get("buyerNTNCNIC")
+        existing.buyerBusinessName = payload.get("buyerBusinessName")
+        existing.buyerProvince = payload.get("buyerProvince")
+        existing.buyerAddress = payload.get("buyerAddress")
+        existing.buyerRegistrationType = payload.get("buyerRegistrationType")
+        existing.scenarioId = payload.get("scenarioId")
+        existing.status = "posting"
+        existing.request_payload = payload
+        existing.response_data = None
+        existing.error_message = None
+        existing.fbrInvoiceNo = None
+        existing.buyer_id = buyer.id if buyer else None
+        db.query(models.InvoiceItem).filter(models.InvoiceItem.invoice_id == existing.id).delete(synchronize_session=False)
+        for item in payload["items"]:
+            db_item = models.InvoiceItem(
+                invoice_id=existing.id,
+                hsCode=item["hsCode"],
+                productDescription=item["productDescription"],
+                uom=item.get("uoM"),
+                quantity=item["quantity"],
+                rate=item["rate"],
+                valueSalesExcludingST=item["valueSalesExcludingST"],
+                salesTaxApplicable=item["salesTaxApplicable"],
+                furtherTax=item.get("furtherTax"),
+                extraTax=crud.normalize_for_db(item.get("extraTax")),
+                fedPayable=item.get("fedPayable"),
+                discount=item.get("discount"),
+                totalValues=item.get("totalValues"),
+                fixedNotifiedValueOrRetailPrice=item.get("fixedNotifiedValueOrRetailPrice"),
+                salesTaxWithheldAtSource=item.get("salesTaxWithheldAtSource"),
+                sroScheduleNo=item.get("sroScheduleNo", ""),
+                sroItemSerialNo=item.get("sroItemSerialNo", ""),
+                saleType=item.get("saleType"),
+            )
+            db.add(db_item)
         db.commit()
+        db.refresh(existing)
+        db_invoice = existing
     else:
         db_invoice = crud.create_invoice(
             db=db,
@@ -111,6 +154,49 @@ async def post_invoice_to_fbr(
         db.commit()
         raise HTTPException(
             status_code=502,
+            detail=str(exc)
+        )
+
+@router.post("/draft", status_code=status.HTTP_201_CREATED)
+def save_invoice_draft(
+    invoice: InvoiceCreate,
+    client_id: int = Query(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    client = db.query(models.Client).filter(
+        models.Client.id == client_id,
+        models.Client.user_id == current_user["id"]
+    ).first()
+    if not client:
+        raise HTTPException(
+            status_code=404,
+            detail="Client not found"
+        )
+    internal_invoice_no = invoice.internalInvoiceNo
+    if not internal_invoice_no:
+        raise HTTPException(
+            status_code=400,
+            detail="Internal invoice number is required"
+        )
+    payload = invoice.model_dump(mode="json")
+    payload.pop("internalInvoiceNo", None)
+    try:
+        db_invoice = crud.save_invoice_draft(
+            db=db,
+            payload=payload,
+            client_id=client.id,
+            user_id=current_user["id"],
+            internal_invoice_no=internal_invoice_no,
+        )
+        return {
+            "status": "draft_saved",
+            "invoiceId": db_invoice.id,
+            "internalInvoiceNo": db_invoice.internal_invoice_no,
+        }
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
             detail=str(exc)
         )
 

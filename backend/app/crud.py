@@ -95,6 +95,81 @@ def create_invoice(
         db.rollback()
         raise e
 
+def save_invoice_draft(
+        db: Session,
+        payload: dict,
+        client_id: int,
+        user_id: int,
+        internal_invoice_no: str,
+    ):
+    existing = (
+        db.query(models.Invoice)
+        .filter(
+            models.Invoice.client_id == client_id,
+            models.Invoice.internal_invoice_no == internal_invoice_no,
+        )
+        .first()
+    )
+    if existing:
+        if existing.status == "posted":
+            raise ValueError("Cannot overwrite a posted invoice")
+        if existing.status == "posting":
+            raise ValueError("Invoice is currently being processed")
+        buyer = get_or_create_buyer(db, payload, client_id, user_id)
+        existing.invoiceRefNo = payload.get("invoiceRefNo")
+        existing.invoiceType = payload["invoiceType"]
+        existing.invoiceDate = datetime.fromisoformat(payload["invoiceDate"])
+        existing.sellerNTNCNIC = payload["sellerNTNCNIC"]
+        existing.sellerBusinessName = payload["sellerBusinessName"]
+        existing.sellerProvince = payload["sellerProvince"]
+        existing.sellerAddress = payload.get("sellerAddress")
+        existing.buyerNTNCNIC = payload.get("buyerNTNCNIC")
+        existing.buyerBusinessName = payload.get("buyerBusinessName")
+        existing.buyerProvince = payload.get("buyerProvince")
+        existing.buyerAddress = payload.get("buyerAddress")
+        existing.buyerRegistrationType = payload.get("buyerRegistrationType")
+        existing.scenarioId = payload.get("scenarioId")
+        existing.status = "pending"
+        existing.request_payload = payload
+        existing.response_data = None
+        existing.error_message = None
+        existing.fbrInvoiceNo = None
+        existing.buyer_id = buyer.id if buyer else None
+        db.query(models.InvoiceItem).filter(models.InvoiceItem.invoice_id == existing.id).delete(synchronize_session=False)
+        for item in payload["items"]:
+            db_item = models.InvoiceItem(
+                invoice_id=existing.id,
+                hsCode=item["hsCode"],
+                productDescription=item["productDescription"],
+                uom=item.get("uoM"),
+                quantity=item["quantity"],
+                rate=item["rate"],
+                valueSalesExcludingST=item["valueSalesExcludingST"],
+                salesTaxApplicable=item["salesTaxApplicable"],
+                furtherTax=item.get("furtherTax"),
+                extraTax=normalize_for_db(item.get("extraTax")),
+                fedPayable=item.get("fedPayable"),
+                discount=item.get("discount"),
+                totalValues=item.get("totalValues"),
+                fixedNotifiedValueOrRetailPrice=item.get("fixedNotifiedValueOrRetailPrice"),
+                salesTaxWithheldAtSource=item.get("salesTaxWithheldAtSource"),
+                sroScheduleNo=item.get("sroScheduleNo", ""),
+                sroItemSerialNo=item.get("sroItemSerialNo", ""),
+                saleType=item.get("saleType"),
+            )
+            db.add(db_item)
+        db.commit()
+        db.refresh(existing)
+        return existing
+    return create_invoice(
+        db=db,
+        payload=payload,
+        status="pending",
+        client_id=client_id,
+        user_id=user_id,
+        internal_invoice_no=internal_invoice_no,
+    )
+
 def normalize_ntn(ntn: str):
     return ntn.replace("-", "").strip()
 

@@ -17,6 +17,13 @@ const routes = {
         init: "initCreateInvoice",
         destroy: "destroyCreateInvoice"
     },
+    pending_invoices: {
+        page: "/pages/pending_invoices.html",
+        url: "#pending-invoices",
+        script: "/assets/js/pages/pending_invoices.js",
+        init: "initPendingInvoices",
+        destroy: "destroyPendingInvoices"
+    },
     reports: {
         page: "/pages/reports.html",
         url: "#reports",

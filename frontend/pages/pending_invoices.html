@@ -1,0 +1,40 @@
+<div class="pending-invoices-page">
+  <section class="reports-hero invoice-hero">
+    <div>
+      <div class="hero-chip">Pending Invoices</div>
+      <h2>Review invoices saved as drafts before final submission.</h2>
+      <p>View your pending invoice drafts, download draft PDFs, or remove drafts that are no longer needed.</p>
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Draft invoice queue</div>
+        <div class="panel-subtitle">Pending invoices saved from the invoice creation page</div>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-info text-dark" id="pendingInvoiceCount">0</span>
+      </div>
+    </div>
+
+    <div class="table-responsive invoice-table-shell">
+      <table class="table table-sm erp-table table-bordered align-middle">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Actions</th>
+            <th>Date</th>
+            <th>Invoice No</th>
+            <th>Ref No</th>
+            <th>Buyer</th>
+            <th>NTN/CNIC</th>
+            <th>Status</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody id="pendingInvoicesTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>

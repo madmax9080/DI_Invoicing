@@ -7,8 +7,10 @@ from sqlalchemy import extract, func
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, selectinload
 from app.routers.dashboard import get_cache, get_fiscal_range
+from app.dependencies.auth_dependency import get_current_user
 from ..dependencies.fbr import get_fbr_client_secure
 from ..database import get_db
+from .. import models
 from ..models import Buyer, Invoice, InvoiceItem
 from fastapi.responses import StreamingResponse
 import openpyxl
@@ -298,12 +300,11 @@ def format_pk(value):
 async def generate_invoice_pdf(
     invoice_id: int,
     db: Session = Depends(get_db),
-    fbr=Depends(get_fbr_client_secure),
+    current_user=Depends(get_current_user),
 ):
-    client_id = fbr.client_id
-    invoice = db.query(Invoice).filter(
+    invoice = db.query(Invoice).join(models.Client).filter(
         Invoice.id == invoice_id,
-        Invoice.client_id == client_id
+        models.Client.user_id == current_user["id"]
     ).first()
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
@@ -353,7 +354,8 @@ async def generate_invoice_pdf(
         - total_discount
         - st_wh
     )
-    qr_img = qrcode.make(invoice.fbrInvoiceNo)
+    qr_text = invoice.fbrInvoiceNo or invoice.internal_invoice_no or ""
+    qr_img = qrcode.make(qr_text)
     qr_buffer = BytesIO()
     qr_img.save(qr_buffer, format="PNG")
     qr_buffer.seek(0)
@@ -365,7 +367,7 @@ async def generate_invoice_pdf(
         "buyer_name": invoice.buyerBusinessName,
         "buyer_address": invoice.buyerAddress,
         "buyer_ntn": invoice.buyerNTNCNIC,
-        "invoice_no": invoice.fbrInvoiceNo,
+        "invoice_no": invoice.fbrInvoiceNo or invoice.internal_invoice_no,
         "date": invoice.invoiceDate.strftime('%d-%m-%Y'),
         "sale_type": invoice.invoiceType,
         "items": [{
