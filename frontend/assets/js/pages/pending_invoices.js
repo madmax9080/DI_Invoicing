@@ -21,7 +21,7 @@ function downloadFile(blob, filename) {
 
 async function loadPendingInvoices() {
     try {
-        const data = await apiFetch("/invoices?status=pending");
+        const data = await apiFetch("/invoices/?status=pending");
         pendingInvoices = Array.isArray(data) ? data : [];
         renderTable();
     } catch (err) {
