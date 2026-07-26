@@ -631,6 +631,7 @@ function buildInvoicePayload() {
 }
 
 async function handleSaveDraft() {
+    console.log("Save Draft clicked");
     const $btn = $(this);
     if ($btn.prop("disabled")) return;
     const originalText = $btn.data("originalText") || $btn.html();
@@ -660,6 +661,7 @@ async function handleSaveDraft() {
 }
 
 async function handleDownloadDraft() {
+    console.log("Download Draft clicked");
     const $btn = $(this);
     if ($btn.prop("disabled")) return;
     const originalText = $btn.data("originalText") || $btn.html();
@@ -770,12 +772,12 @@ function bindStaticEvents() {
     $("#addItemBtn")
         .off(`click${EVENTS_NS}`)
         .on(`click${EVENTS_NS}`, handleAddItem);
-    $("#saveDraftBtn")
-        .off(`click${EVENTS_NS}`)
-        .on(`click${EVENTS_NS}`, handleSaveDraft);
-    $("#downloadDraftBtn")
-        .off(`click${EVENTS_NS}`)
-        .on(`click${EVENTS_NS}`, handleDownloadDraft);
+    $(document)
+    .off(`click${EVENTS_NS}`, "#saveDraftBtn")
+    .on(`click${EVENTS_NS}`,"#saveDraftBtn",handleSaveDraft);
+    $(document)
+    .off(`click${EVENTS_NS}`, "#downloadDraftBtn")
+    .on(`click${EVENTS_NS}`,"#downloadDraftBtn",handleDownloadDraft);
     $("#submitInvoiceBtn")
         .off(`click${EVENTS_NS}`)
         .on(`click${EVENTS_NS}`, handleSubmitInvoice);
