@@ -772,12 +772,20 @@ function bindStaticEvents() {
     $("#addItemBtn")
         .off(`click${EVENTS_NS}`)
         .on(`click${EVENTS_NS}`, handleAddItem);
-    $(document)
-    .off(`click${EVENTS_NS}`, "#saveDraftBtn")
-    .on(`click${EVENTS_NS}`,"#saveDraftBtn",handleSaveDraft);
-    $(document)
-    .off(`click${EVENTS_NS}`, "#downloadDraftBtn")
-    .on(`click${EVENTS_NS}`,"#downloadDraftBtn",handleDownloadDraft);
+    console.log("Binding save");
+    $("#saveDraftBtn")
+        .off(`click${EVENTS_NS}`)
+        .on(`click${EVENTS_NS}`, () => {
+            console.log("save handler attached");
+            handleSaveDraft.apply(this, arguments);
+        });
+    console.log("Binding download");
+    $("#downloadDraftBtn")
+        .off(`click${EVENTS_NS}`)
+        .on(`click${EVENTS_NS}`, () => {
+            console.log("download handler attached");
+            handleDownloadDraft.apply(this, arguments);
+        });
     $("#submitInvoiceBtn")
         .off(`click${EVENTS_NS}`)
         .on(`click${EVENTS_NS}`, handleSubmitInvoice);
