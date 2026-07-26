@@ -6,6 +6,8 @@
     --text: #0f172a;
     --muted: #64748b;
     --border: #e2e8f0;
+    --save1: #00699a;
+    --save2: #79d2fc;
 }
 
 .reports-container {
@@ -67,7 +69,7 @@
     border: none;
     border-radius: 999px;
     padding: 7px 16px;
-    background: linear-gradient(135deg, var(--muted) 0%, var(--border) 100%);
+    background: linear-gradient(135deg, var(--save1) 0%, var(--save2) 100%);
     color: white;
     font-weight: 600;
     box-shadow: 0 10px 20px rgba(0, 155, 229, 0.2);
