@@ -43,6 +43,7 @@ async function downloadDraft(invoiceId, buyerBusinessName) {
 async function submitDraft(invoiceId) {
     try {
         const invoice = pendingInvoices.find(item => item.id === invoiceId);
+        console.log(invoice);
         if (!invoice) {
             return;
         }
