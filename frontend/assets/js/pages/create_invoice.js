@@ -741,6 +741,10 @@ export async function initCreateInvoice() {
 }
 
 function bindStaticEvents() {
+    console.log("bindStaticEvents called");
+    console.log($("#saveDraftBtn").length);
+    console.log($("#downloadDraftBtn").length);
+    console.log($("#submitInvoiceBtn").length);
     $(document)
     .off(`blur${EVENTS_NS}`, "#buyerNTNCNIC")
     .on(    
@@ -775,17 +779,17 @@ function bindStaticEvents() {
     console.log("Binding save");
     $("#saveDraftBtn")
         .off(`click${EVENTS_NS}`)
-        .on(`click${EVENTS_NS}`, () => {
-            console.log("save handler attached");
-            handleSaveDraft.apply(this, arguments);
-        });
+        .on(`click${EVENTS_NS}`, function (e) {
+        console.log("save handler attached");
+        handleSaveDraft.call(this, e);
+    });
     console.log("Binding download");
     $("#downloadDraftBtn")
         .off(`click${EVENTS_NS}`)
-        .on(`click${EVENTS_NS}`, () => {
-            console.log("download handler attached");
-            handleDownloadDraft.apply(this, arguments);
-        });
+        .on(`click${EVENTS_NS}`, function (e) {
+        console.log("download handler attached");
+        handleDownloadDraft.call(this, e);
+    });
     $("#submitInvoiceBtn")
         .off(`click${EVENTS_NS}`)
         .on(`click${EVENTS_NS}`, handleSubmitInvoice);
