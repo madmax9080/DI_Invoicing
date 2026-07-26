@@ -42,7 +42,7 @@ async function downloadDraft(invoiceId, buyerBusinessName) {
 
 async function submitDraft(invoiceId) {
     try {
-        const invoice = pendingInvoices.find(item => item.id == invoiceId);
+        const invoice = pendingInvoices.find(item => item.id === invoiceId);
         if (!invoice) {
             return;
         }
@@ -179,26 +179,28 @@ function renderTable() {
 export async function initPendingInvoices() {
     await loadPendingInvoices();
     document
-        .getElementById("pendingInvoicesTableBody")
-        .addEventListener("click", async (event) => {
-            const button = event.target.closest("button");
-            if (!button) return;
-            if (button.classList.contains("download-draft")) {
-                const id = button.dataset.id;
-                const name = button.dataset.name;
-                await downloadDraft(id, name);
-            }
-            if (button.classList.contains("delete-draft")) {
-                const id = button.dataset.id;
-                await deleteDraft(id);
-            }
-            if (button.classList.contains("submit-draft")) {
-                await submitDraft(Number(button.dataset.id));
-            }
-            if (button.classList.contains("edit-draft")) {
-                await editDraft(Number(button.dataset.id));
-            }
-        });
+    .getElementById("pendingInvoicesTableBody")
+    .addEventListener("click", async (event) => {
+        const button = event.target.closest("button");
+        if (!button) return;
+        const id = Number(button.dataset.id);
+        if (button.classList.contains("download-draft")) {
+            await downloadDraft(id, button.dataset.name);
+            return;
+        }
+        if (button.classList.contains("submit-draft")) {
+            await submitDraft(id);
+            return;
+        }
+        if (button.classList.contains("edit-draft")) {
+            await editDraft(id);
+            return;
+        }
+        if (button.classList.contains("delete-draft")) {
+            await deleteDraft(id);
+            return;
+        }
+    });
 }
 
 export function destroyPendingInvoices() {

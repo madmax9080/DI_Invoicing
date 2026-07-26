@@ -701,10 +701,6 @@ export async function initCreateInvoice() {
 }
 
 function bindStaticEvents() {
-    console.log("bindStaticEvents called");
-    console.log($("#saveDraftBtn").length);
-    console.log($("#downloadDraftBtn").length);
-    console.log($("#submitInvoiceBtn").length);
     $(document)
     .off(`blur${EVENTS_NS}`, "#buyerNTNCNIC")
     .on(    
