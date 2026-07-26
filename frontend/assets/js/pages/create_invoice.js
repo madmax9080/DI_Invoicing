@@ -631,7 +631,6 @@ function buildInvoicePayload() {
 }
 
 async function handleSaveDraft() {
-    console.log("Save Draft clicked");
     const $btn = $(this);
     if ($btn.prop("disabled")) return;
     const originalText = $btn.data("originalText") || $btn.html();
@@ -658,45 +657,6 @@ async function handleSaveDraft() {
         $btn.prop("disabled", false)
             .html($btn.data("originalText") || '<i class="bi bi-save"></i> <span>Save Draft</span>');
     }
-}
-
-async function handleDownloadDraft() {
-    console.log("Download Draft clicked");
-    const $btn = $(this);
-    if ($btn.prop("disabled")) return;
-    const originalText = $btn.data("originalText") || $btn.html();
-    $btn.data("originalText", originalText);
-    $btn.prop("disabled", true)
-        .html('<i class="bi bi-arrow-repeat spin"></i> <span>Preparing...</span>');
-    try {
-        const saveResponse = await handleSaveDraft.call(this);
-        if (!saveResponse?.invoiceId) {
-            return;
-        }
-        const blob = await apiFetch(
-            `/reports/pdf/${saveResponse.invoiceId}`,
-            { responseType: "blob" }
-        );
-        downloadFile(blob, `invoice_${saveResponse.internalInvoiceNo}.pdf`);
-    } catch (err) {
-        if (err.isValidation) {
-            showToast(err.message, "warning");
-        }
-    } finally {
-        $btn.prop("disabled", false)
-            .html($btn.data("originalText") || '<i class="bi bi-download"></i> <span>Download Draft</span>');
-    }
-}
-
-function downloadFile(blob, filename) {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
 }
 
 const SALE_TYPES_WITH_EMPTY_EXTRA_TAX = new Set([
@@ -776,19 +736,10 @@ function bindStaticEvents() {
     $("#addItemBtn")
         .off(`click${EVENTS_NS}`)
         .on(`click${EVENTS_NS}`, handleAddItem);
-    console.log("Binding save");
     $("#saveDraftBtn")
         .off(`click${EVENTS_NS}`)
         .on(`click${EVENTS_NS}`, function (e) {
-        console.log("save handler attached");
         handleSaveDraft.call(this, e);
-    });
-    console.log("Binding download");
-    $("#downloadDraftBtn")
-        .off(`click${EVENTS_NS}`)
-        .on(`click${EVENTS_NS}`, function (e) {
-        console.log("download handler attached");
-        handleDownloadDraft.call(this, e);
     });
     $("#submitInvoiceBtn")
         .off(`click${EVENTS_NS}`)

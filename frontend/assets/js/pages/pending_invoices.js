@@ -37,13 +37,12 @@ async function downloadDraft(invoiceId, buyerBusinessName) {
         );
         downloadFile(blob, `${buyerBusinessName || "invoice"}.pdf`);
     } catch (err) {
-        // error handled by apiFetch
     }
 }
 
 async function submitDraft(invoiceId) {
     try {
-        const invoice = pendingInvoices.find(item => item.id === invoiceId);
+        const invoice = pendingInvoices.find(item => item.id == invoiceId);
         if (!invoice) {
             return;
         }
@@ -138,11 +137,30 @@ function renderTable() {
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td>
-                <button class="btn btn-outline-danger btn-sm download-draft" data-id="${invoice.id}" data-name="${invoice.buyerBusinessName || "draft"}">
+            <td class="text-nowrap">
+                <button
+                    class="btn btn-outline-primary btn-sm edit-draft"
+                    data-id="${invoice.id}"
+                    title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button
+                    class="btn btn-outline-success btn-sm submit-draft"
+                    data-id="${invoice.id}"
+                    title="Submit">
+                    <i class="bi bi-send"></i>
+                </button>
+                <button
+                    class="btn btn-outline-danger btn-sm download-draft"
+                    data-id="${invoice.id}"
+                    data-name="${invoice.buyerBusinessName || "draft"}"
+                    title="Download PDF">
                     <i class="bi bi-file-pdf"></i>
                 </button>
-                <button class="btn btn-outline-secondary btn-sm delete-draft" data-id="${invoice.id}">
+                <button
+                    class="btn btn-outline-secondary btn-sm delete-draft"
+                    data-id="${invoice.id}"
+                    title="Delete">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
@@ -173,6 +191,12 @@ export async function initPendingInvoices() {
             if (button.classList.contains("delete-draft")) {
                 const id = button.dataset.id;
                 await deleteDraft(id);
+            }
+            if (button.classList.contains("submit-draft")) {
+                await submitDraft(Number(button.dataset.id));
+            }
+            if (button.classList.contains("edit-draft")) {
+                await editDraft(Number(button.dataset.id));
             }
         });
 }
