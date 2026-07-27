@@ -104,6 +104,19 @@ async function submitDraft(invoiceId) {
     }
 }
 
+async function editDraft(invoiceId) {
+    const invoice = pendingInvoices.find(i => i.id === invoiceId);
+    if (!invoice) {
+        showToast("Invoice not found", "warning");
+        return;
+    }
+    sessionStorage.setItem(
+        "editingInvoice",
+        JSON.stringify(invoice)
+    );
+    window.location.hash = "#create-invoice";
+}
+
 async function deleteDraft(invoiceId) {
     if (!confirm("Delete this draft invoice?")) {
         return;

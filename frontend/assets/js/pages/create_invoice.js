@@ -19,6 +19,7 @@ let editingIndex = null;
 let currentClient = null;
 let initialized = false;
 const EVENTS_NS = ".createInvoice";
+let editingInvoiceId = null;
 
 function getClientId() {
     const id = localStorage.getItem("client_id");
@@ -673,6 +674,60 @@ function normalizeExtraTax(extraTax, saleTypeLabel) {
     return Number(extraTax);
 }
 
+function loadDraftForEditing() {
+    const json = sessionStorage.getItem("editingInvoice");
+    if (!json) {
+        return;
+    }
+    const invoice = JSON.parse(json);
+    editingInvoiceId = invoice.id;
+    // Header
+    $("#internalInvoiceNo").val(invoice.internal_invoice_no);
+    $("#invoiceType").val(invoice.invoiceType).trigger("change");
+    $("#invoiceDate").val(invoice.invoiceDate.substring(0, 10));
+    $("#invoiceRefNo").val(invoice.invoiceRefNo || "");
+    $("#scenarioId").val(invoice.scenarioId || "");
+    // Buyer
+    $("#buyerNTNCNIC").val(invoice.buyerNTNCNIC || "");
+    $("#buyerBusinessName").val(invoice.buyerBusinessName || "");
+    $("#buyerAddress").val(invoice.buyerAddress || "");
+    $("#buyerRegistrationType")
+        .val(invoice.buyerRegistrationType)
+        .trigger("change");
+    $("#buyerProvince option").each(function () {
+        if ($(this).text().trim() === invoice.buyerProvince) {
+            $("#buyerProvince")
+                .val($(this).val())
+                .trigger("change");
+        }
+    });
+    currentItems = (invoice.items || []).map(item => ({
+        hsCode: item.hsCode,
+        productDescription: item.productDescription,
+        quantity: Number(item.quantity),
+        valueSalesExcludingST: Number(item.valueSalesExcludingST),
+        salesTaxApplicable: Number(item.salesTaxApplicable),
+        totalValues: Number(item.totalValues),
+        fixedNotifiedValueOrRetailPrice:
+            Number(item.fixedNotifiedValueOrRetailPrice),
+        salesTaxWithheldAtSource:
+            Number(item.salesTaxWithheldAtSource),
+        furtherTax: Number(item.furtherTax),
+        extraTax: Number(item.extraTax),
+        fedPayable: Number(item.fedPayable),
+        discount: Number(item.discount),
+        rateLabel: item.rate,
+        rateValue: 0,
+        uomText: item.uom,
+        saleTypeLabel: item.saleType,
+        sroText: item.sroScheduleNo,
+        sroItemText: item.sroItemSerialNo
+    }));
+    renderItemsTable();
+    syncInvoiceMeta();
+    sessionStorage.removeItem("editingInvoice");
+}
+
 export async function initCreateInvoice() {
     if (initialized) {
         destroyCreateInvoice();
@@ -698,6 +753,7 @@ export async function initCreateInvoice() {
         .prop("readonly", true)
         .addClass("bg-light text-muted");
     renderItemsTable();
+    loadDraftForEditing();
 }
 
 function bindStaticEvents() {
