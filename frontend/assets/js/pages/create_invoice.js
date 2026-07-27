@@ -391,6 +391,26 @@ function clearItemInputs() {
     $("#cancelEditBtn").addClass("d-none");
 }
 
+function resetInvoiceForm() {
+    editingInvoiceId = null;
+    editingIndex = null;
+    currentItems = [];
+    $("#internalInvoiceNo").val("");
+    $("#invoiceRefNo").val("");
+    $("#buyerNTNCNIC").val("");
+    $("#buyerBusinessName").val("");
+    $("#buyerAddress").val("");
+    $("#buyerProvince")
+        .val("")
+        .trigger("change");
+    $("#buyerRegistrationType")
+        .val("")
+        .trigger("change");
+    clearItemInputs();
+    renderItemsTable();
+    syncInvoiceMeta();
+}
+
 async function editItem(index) {
     const item = currentItems[index];
     editingIndex = index;   
@@ -646,7 +666,6 @@ async function handleSaveDraft() {
             : "/invoices/draft";
 
         const method = isEditing ? "PUT" : "POST";
-
         const response = await apiFetch(endpoint, {
             method,
             body: payload
@@ -661,6 +680,7 @@ async function handleSaveDraft() {
         if (isEditing) {
             editingInvoiceId = null;
         }
+        resetInvoiceForm();
         return response;
     } catch (err) {
         if (err.isValidation) {
