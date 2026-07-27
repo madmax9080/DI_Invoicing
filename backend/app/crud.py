@@ -141,8 +141,10 @@ def save_invoice_draft(
                 invoice_id=existing.id,
                 hsCode=item["hsCode"],
                 productDescription=item["productDescription"],
+                uomId=item.get("uomId"),
                 uom=item.get("uoM"),
                 quantity=item["quantity"],
+                rateId=item.get("rateId"),
                 rate=item["rate"],
                 valueSalesExcludingST=item["valueSalesExcludingST"],
                 salesTaxApplicable=item["salesTaxApplicable"],
@@ -153,8 +155,11 @@ def save_invoice_draft(
                 totalValues=item.get("totalValues"),
                 fixedNotifiedValueOrRetailPrice=item.get("fixedNotifiedValueOrRetailPrice"),
                 salesTaxWithheldAtSource=item.get("salesTaxWithheldAtSource"),
+                sroId=item.get("sroId"),
                 sroScheduleNo=item.get("sroScheduleNo", ""),
+                sroItemId=item.get("sroItemId"),
                 sroItemSerialNo=item.get("sroItemSerialNo", ""),
+                saleTypeId=item.get("saleTypeId"),
                 saleType=item.get("saleType"),
             )
             db.add(db_item)

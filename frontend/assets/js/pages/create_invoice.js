@@ -612,7 +612,9 @@ function buildInvoicePayload() {
         items: currentItems.map(item => ({
             hsCode: item.hsCode,
             productDescription: item.productDescription,
+            rateId: item.rateId,
             rate: item.rateLabel,
+            uomId: item.uomId,
             uoM: item.uomText,
             quantity: Number(item.quantity) || 0,
             valueSalesExcludingST: Number(item.valueSalesExcludingST) || 0,
@@ -624,8 +626,11 @@ function buildInvoicePayload() {
             extraTax: normalizeExtraTax(item.extraTax, item.saleTypeLabel),
             fedPayable: Number(item.fedPayable) || 0,
             discount: Number(item.discount) || 0,
+            saleTypeId: item.saleTypeId,
             saleType: item.saleTypeLabel,
+            sroId: item.sroId,
             sroScheduleNo: item.sroText || "",
+            sroItemId: item.sroItemId,
             sroItemSerialNo: item.sroItemText || ""
         }))
     };

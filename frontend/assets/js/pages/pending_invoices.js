@@ -110,6 +110,7 @@ async function editDraft(invoiceId) {
         showToast("Invoice not found", "warning");
         return;
     }
+    console.log("Invoice object:", invoice);
     sessionStorage.setItem(
         "editingInvoice",
         JSON.stringify(invoice)
