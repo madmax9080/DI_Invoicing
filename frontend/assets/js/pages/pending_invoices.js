@@ -133,6 +133,34 @@ async function deleteDraft(invoiceId) {
     }
 }
 
+function getTotalQuantity(invoice) {
+    return (invoice.items || []).reduce(
+        (sum, item) => sum + Number(item.quantity || 0),
+        0
+    );
+}
+
+function getTaxableValue(invoice) {
+    return (invoice.items || []).reduce(
+        (sum, item) => sum + Number(item.valueSalesExcludingST || 0),
+        0
+    ).toFixed(2);
+}
+
+function getSalesTax(invoice) {
+    return (invoice.items || []).reduce(
+        (sum, item) => sum + Number(item.salesTaxApplicable || 0),
+        0
+    ).toFixed(2);
+}
+
+function getGrandTotal(invoice) {
+    return (invoice.items || []).reduce(
+        (sum, item) => sum + Number(item.totalValues || 0),
+        0
+    ).toFixed(2);
+}
+
 function renderTable() {
     const tbody = document.getElementById("pendingInvoicesTableBody");
     const countEl = document.getElementById("pendingInvoiceCount");
@@ -184,6 +212,11 @@ function renderTable() {
             <td>${invoice.invoiceRefNo || "-"}</td>
             <td>${invoice.buyerBusinessName || "-"}</td>
             <td>${invoice.buyerNTNCNIC || "-"}</td>
+            <td>${invoice.items.length}</td>
+            <td>${getTotalQuantity(invoice)}</td>
+            <td>${getTaxableValue(invoice)}</td>
+            <td>${getSalesTax(invoice)}</td>
+            <td>${getGrandTotal(invoice)}</td>
             <td><span class="badge bg-warning text-dark">${invoice.status}</span></td>
             <td>${formatDate(invoice.created_at)}</td>
         `;
