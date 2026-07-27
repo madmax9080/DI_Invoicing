@@ -98,9 +98,7 @@ class InvoiceItemOut(BaseModel):
     id: int
     hsCode: str
     productDescription: str
-    rateId: Optional[str]
     rate: str
-    uomId: Optional[str]
     uoM: str = Field(alias="uom")
     quantity: Decimal
     totalValues: Decimal
@@ -110,13 +108,10 @@ class InvoiceItemOut(BaseModel):
     salesTaxWithheldAtSource: Decimal
     extraTax: Optional[Decimal]
     furtherTax: Decimal
-    sroId: Optional[str]
     sroScheduleNo: Optional[str]
     fedPayable: Decimal
     discount: Decimal
-    saleTypeId: Optional[str]
     saleType: str
-    sroItemId: Optional[str]
     sroItemSerialNo: Optional[str]
 
     class Config:
