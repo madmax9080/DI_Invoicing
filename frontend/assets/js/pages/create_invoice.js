@@ -624,7 +624,6 @@ function buildInvoicePayload() {
             extraTax: normalizeExtraTax(item.extraTax, item.saleTypeLabel),
             fedPayable: Number(item.fedPayable) || 0,
             discount: Number(item.discount) || 0,
-            saleTypeId: item.saleTypeId,
             saleType: item.saleTypeLabel,
             sroScheduleNo: item.sroText || "",
             sroItemSerialNo: item.sroItemText || ""
