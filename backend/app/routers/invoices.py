@@ -200,6 +200,38 @@ def save_invoice_draft(
             detail=str(exc)
         )
 
+@router.put("/draft/{invoice_id}")
+def update_invoice_draft(
+    invoice_id: int,
+    invoice: InvoiceCreate,
+    client_id: int = Query(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    client = db.query(models.Client).filter(
+        models.Client.id == client_id,
+        models.Client.user_id == current_user["id"]
+    ).first()
+    if not client:
+        raise HTTPException(404, "Client not found")
+    payload = invoice.model_dump(mode="json")
+    try:
+        crud.update_invoice_draft(
+            db=db,
+            invoice_id=invoice_id,
+            payload=payload,
+            client_id=client.id,
+            user_id=current_user["id"],
+        )
+        return {
+            "status": "updated"
+        }
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc)
+        )
+
 @router.post("/validate", status_code=status.HTTP_200_OK)
 async def validate_invoice_with_fbr(
     invoice: InvoiceCreate,

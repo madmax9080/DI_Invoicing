@@ -640,15 +640,27 @@ async function handleSaveDraft() {
         .html('<i class="bi bi-arrow-repeat spin"></i> <span>Saving...</span>');
     try {
         const payload = buildInvoicePayload();
-        const response = await apiFetch("/invoices/draft", {
-            method: "POST",
+        const isEditing = editingInvoiceId !== null;
+        const endpoint = isEditing
+            ? `/invoices/draft/${editingInvoiceId}`
+            : "/invoices/draft";
+
+        const method = isEditing ? "PUT" : "POST";
+
+        const response = await apiFetch(endpoint, {
+            method,
             body: payload
         });
         showToast(
-            `Draft saved as invoice ${response.internalInvoiceNo}`,
+            isEditing
+                ? "Draft updated successfully."
+                : `Draft saved as invoice ${response.internalInvoiceNo}`,
             "success",
-            "Draft Saved"
+            isEditing ? "Draft Updated" : "Draft Saved"
         );
+        if (isEditing) {
+            editingInvoiceId = null;
+        }
         return response;
     } catch (err) {
         if (err.isValidation) {
