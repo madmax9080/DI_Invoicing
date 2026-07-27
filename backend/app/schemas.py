@@ -153,14 +153,21 @@ class InvoiceCreate(BaseModel):
 
 class InvoiceOut(BaseModel):
     id: int
+    internalInvoiceNo: str = Field(alias="internal_invoice_no")
     invoiceRefNo: Optional[str]
     fbrInvoiceNo: Optional[str]
     invoiceType: str
     invoiceDate: datetime
     sellerNTNCNIC: str
+    sellerBusinessName: str
+    sellerProvince: str
+    sellerAddress: str
     buyerNTNCNIC: Optional[str]
     buyerBusinessName: str
+    buyerProvince: str
+    buyerAddress: str
     buyerRegistrationType: str
+    scenarioId: Optional[str]
     status: str
     created_at: datetime
     client_id: Optional[int] = None
@@ -169,6 +176,7 @@ class InvoiceOut(BaseModel):
 
     class Config:
         from_attributes = True
+        populate_by_name = True
         
 class ClientBase(BaseModel):
     name: str
