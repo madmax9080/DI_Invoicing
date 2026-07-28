@@ -165,62 +165,153 @@ function renderTable() {
     const tbody = document.getElementById("pendingInvoicesTableBody");
     const countEl = document.getElementById("pendingInvoiceCount");
     tbody.innerHTML = "";
-    countEl.textContent = `${pendingInvoices.length} drafts`;
+    const totalItems = pendingInvoices.reduce(
+        (sum, invoice) => sum + (invoice.items?.length || 0),
+        0
+    );
+    countEl.textContent = `${pendingInvoices.length} drafts (${totalItems} items)`;
     if (!pendingInvoices.length) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="9" class="text-center text-muted py-4">
+                <td colspan="22" class="text-center text-muted py-4">
                     No pending invoices found.
                 </td>
             </tr>
         `;
         return;
     }
-    pendingInvoices.forEach((invoice, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td class="text-nowrap">
-                <button
-                    class="btn btn-outline-primary btn-sm edit-draft"
-                    data-id="${invoice.id}"
-                    title="Edit">
-                    <i class="bi bi-pencil"></i>
-                </button>
-                <button
-                    class="btn btn-outline-success btn-sm submit-draft"
-                    data-id="${invoice.id}"
-                    title="Submit">
-                    <i class="bi bi-send"></i>
-                </button>
-                <button
-                    class="btn btn-outline-danger btn-sm download-draft"
-                    data-id="${invoice.id}"
-                    data-name="${invoice.buyerBusinessName || "draft"}"
-                    title="Download PDF">
-                    <i class="bi bi-file-pdf"></i>
-                </button>
-                <button
-                    class="btn btn-outline-secondary btn-sm delete-draft"
-                    data-id="${invoice.id}"
-                    title="Delete">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-            <td>${formatDate(invoice.invoiceDate)}</td>
-            <td>${invoice.internal_invoice_no || "-"}</td>
-            <td>${invoice.invoiceRefNo || "-"}</td>
-            <td>${invoice.buyerBusinessName || "-"}</td>
-            <td>${invoice.buyerNTNCNIC || "-"}</td>
-            <td>${invoice.items.length}</td>
-            <td>${getTotalQuantity(invoice)}</td>
-            <td>${getTaxableValue(invoice)}</td>
-            <td>${getSalesTax(invoice)}</td>
-            <td>${getGrandTotal(invoice)}</td>
-            <td><span class="badge bg-warning text-dark">${invoice.status}</span></td>
-            <td>${formatDate(invoice.created_at)}</td>
+    let rowNo = 1;
+    pendingInvoices.forEach(invoice => {
+        if (!invoice.items || invoice.items.length === 0) {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${rowNo++}</td>
+                    <td class="text-nowrap">
+                        <button
+                            class="btn btn-outline-primary btn-sm edit-draft"
+                            data-id="${invoice.id}"
+                            title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button
+                            class="btn btn-outline-success btn-sm submit-draft"
+                            data-id="${invoice.id}"
+                            title="Submit">
+                            <i class="bi bi-send"></i>
+                        </button>
+                        <button
+                            class="btn btn-outline-danger btn-sm download-draft"
+                            data-id="${invoice.id}"
+                            data-name="${invoice.buyerBusinessName || "draft"}"
+                            title="Download PDF">
+                            <i class="bi bi-file-pdf"></i>
+                        </button>
+                        <button
+                            class="btn btn-outline-secondary btn-sm delete-draft"
+                            data-id="${invoice.id}"
+                            title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                    <td>${formatDate(invoice.invoiceDate)}</td>
+                    <td>${invoice.internal_invoice_no || "-"}</td>
+                    <td>${invoice.buyerBusinessName || "-"}</td>
+                    <td colspan="17" class="text-center text-muted">
+                        No Items
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        invoice.items.forEach((item, itemIndex) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${rowNo++}</td>
+                    <td class="text-nowrap">
+                        ${
+                            itemIndex === 0
+                                ? `
+                        <button
+                            class="btn btn-outline-primary btn-sm edit-draft"
+                            data-id="${invoice.id}"
+                            title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button
+                            class="btn btn-outline-success btn-sm submit-draft"
+                            data-id="${invoice.id}"
+                            title="Submit">
+                            <i class="bi bi-send"></i>
+                        </button>
+                        <button
+                            class="btn btn-outline-danger btn-sm download-draft"
+                            data-id="${invoice.id}"
+                            data-name="${invoice.buyerBusinessName || "draft"}"
+                            title="Download PDF">
+                            <i class="bi bi-file-pdf"></i>
+                        </button>
+                        <button
+                            class="btn btn-outline-secondary btn-sm delete-draft"
+                            data-id="${invoice.id}"
+                            title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        `
+                                : ""
+                        }
+                    </td>
+                    <td>${formatDate(invoice.invoiceDate)}</td>
+                    <td>${invoice.internal_invoice_no || "-"}</td>
+                    <td>${invoice.buyerBusinessName || "-"}</td>
+                    <td>${item.hsCode || "-"}</td>
+                    <td>${item.productDescription || "-"}</td>
+                    <td>${item.saleType || "-"}</td>
+                    <td class="text-end">${Number(item.quantity || 0).toFixed(2)}</td>
+                    <td>${item.uom || "-"}</td>
+                    <td class="text-end">${item.rate || "-"}</td>
+                    <td class="text-end">${Number(item.valueSalesExcludingST || 0).toFixed(2)}</td>
+                    <td class="text-end">${Number(item.fixedNotifiedValueOrRetailPrice || 0).toFixed(2)}</td>
+                    <td class="text-end">${Number(item.salesTaxApplicable || 0).toFixed(2)}</td>
+                    <td class="text-end">${Number(item.furtherTax || 0).toFixed(2)}</td>
+                    <td class="text-end">${Number(item.fedPayable || 0).toFixed(2)}</td>
+                    <td class="text-end">${Number(item.salesTaxWithheldAtSource || 0).toFixed(2)}</td>
+                    <td class="text-end">
+                        ${
+                            item.extraTax === "" ||
+                            item.extraTax === null ||
+                            item.extraTax === undefined
+                                ? "-"
+                                : Number(item.extraTax).toFixed(2)
+                        }
+                    </td>
+                    <td class="text-end">${Number(item.discount || 0).toFixed(2)}</td>
+                    <td class="text-end fw-semibold">${Number(item.totalValues || 0).toFixed(2)}</td>
+                    <td>${item.sroScheduleNo || "-"}</td>
+                    <td>${item.sroItemSerialNo || "-"}</td>
+                </tr>
+            `;
+        });
+    });
+}
+
+function renderItemsTable(invoice) {
+    const tbody = document.getElementById("pendingInvoiceItemsBody");
+    tbody.innerHTML = "";
+    if (!invoice.items?.length) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="18" class="text-center text-muted">
+                    No items found.
+                </td>
+            </tr>
         `;
-        tbody.appendChild(row);
+        return;
+    }
+    invoice.items.forEach((item, index) => {
+        tbody.insertAdjacentHTML(
+            "beforeend",
+            buildPendingItemRow(item, index)
+        );
     });
 }
 
