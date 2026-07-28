@@ -74,17 +74,49 @@ export function validateItem(item) {
     return null;
 }
 
+// export function computeItemTotals(item) {
+//     const calcItem = {
+//         ...item,
+//         extraTax: item.extraTax === "" ? 0 : item.extraTax
+//     };
+//     const { salesTaxApplicable, totalValues } = calculateTaxes(calcItem);
+//     return {
+//         ...item,
+//         salesTaxApplicable,
+//         totalValues
+//     };
+// }
+
 export function computeItemTotals(item) {
     const calcItem = {
         ...item,
         extraTax: item.extraTax === "" ? 0 : item.extraTax
     };
-    const { salesTaxApplicable, totalValues } =
-        calculateTaxes(calcItem);
+    const {
+        salesTaxApplicable,
+        totalValues
+    } = calculateTaxes(calcItem);
+    // Calculate 236H (on invoice value before discount)
+    const tax236H =
+        (
+            (
+                Number(calcItem.valueSalesExcludingST) || 0
+            ) +
+            salesTaxApplicable +
+            (Number(calcItem.furtherTax) || 0) +
+            (Number(calcItem.extraTax) || 0) +
+            (Number(calcItem.fedPayable) || 0)
+        ) *
+        ((Number(calcItem.tax236HRate) || 0) / 100);
+    const grandTotal = totalValues + tax236H;
+    $("#salesTaxApplicable").val(salesTaxApplicable.toFixed(2));
+    $("#tax236H").val(tax236H.toFixed(2));
+    $("#totalValues").val(grandTotal.toFixed(2));
     return {
         ...item,
         salesTaxApplicable,
-        totalValues
+        tax236H,
+        totalValues: grandTotal
     };
 }
 
@@ -210,6 +242,9 @@ export function initDynamicBindings() {
     $(document)
         .off("change", "#rate", recalcItemTotals)
         .on("change", "#rate", recalcItemTotals);
+     $(document)
+        .off("change", "#tax236HRate", recalcItemTotals)
+        .on("change", "#tax236HRate", recalcItemTotals);
     $(document)
     .off("input.autoFurtherTax", "#valueSalesExcludingST")
     .on("input.autoFurtherTax", "#valueSalesExcludingST", function () {
