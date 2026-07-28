@@ -283,6 +283,29 @@ function renderItemsTable() {
     $("#subtotalCell").text(formatAmount(subtotal));
     $("#taxTotalCell").text(formatAmount(taxTotal));
     $("#grandTotalCell").text(formatAmount(grandTotal));
+    const tax236H = calculate236HTax();
+    $("#grandTotalCell").text(
+        formatAmount(grandTotal + tax236H)
+    );
+}
+
+function calculateInvoiceTotals() {
+    let subtotal = 0;
+    let salesTax = 0;
+    let grandTotal = 0;
+    currentItems.forEach(item => {
+        subtotal += Number(item.valueSalesExcludingST) || 0;
+        salesTax += Number(item.salesTaxApplicable) || 0;
+        grandTotal += Number(item.totalValues) || 0;
+    });
+    const tax236H = calculate236HTax(grandTotal);
+    return {
+        subtotal,
+        salesTax,
+        grandTotal,
+        tax236H,
+        finalTotal: grandTotal + tax236H
+    };
 }
 
 function buildItemRow(item, index) {
@@ -328,6 +351,25 @@ function buildItemRow(item, index) {
     `;
 }
 
+function calculate236HTax() {
+    const rate = Number($("#tax236HPercentage").val()) || 0;
+    let taxableAmount = 0;
+    currentItems.forEach(item => {
+        taxableAmount +=
+            Number(item.valueSalesExcludingST || 0) +
+            Number(item.salesTaxApplicable || 0) +
+            Number(item.furtherTax || 0) +
+            Number(item.extraTax || 0) +
+            Number(item.fedPayable || 0) +
+            Number(item.salesTaxWithheldAtSource || 0);
+        // Notice:
+        // Discount is intentionally NOT subtracted.
+    });
+    const tax236H = taxableAmount * rate / 100;
+    $("#tax236H").val(tax236H.toFixed(2));
+    return tax236H;
+}
+
 function formatQty(val) {
     const n = Number(val);
     return Number.isFinite(n) ? n.toFixed(2) : "0.00";
@@ -366,6 +408,7 @@ function clearItemInputs() {
         "#salesTaxWithheldAtSource",
         "#furtherTax",
         "#extraTax",
+        "#tax236H",
         "#fedPayable",
         "#fixedNotifiedValueOrRetailPrice"
     ];
@@ -374,6 +417,7 @@ function clearItemInputs() {
         "#uoM",
         "#saleType",
         "#rate",
+        "#tax236HRate",
         "#sroSchedule",
         "#sroItem"
     ];
@@ -422,6 +466,8 @@ async function editItem(index) {
     $("#furtherTax").val(item.furtherTax);
     $("#extraTax").val(item.extraTax);
     $("#fedPayable").val(item.fedPayable);
+    $("#tax236HRate").val(item.tax236HRate).trigger("change");
+    $("#tax236H").val(Number(item.tax236H).toFixed(2));
     $("#fixedNotifiedValueOrRetailPrice").val(item.fixedNotifiedValueOrRetailPrice);
     $("#salesTaxApplicable").val(Number(item.salesTaxApplicable).toFixed(2));
     $("#totalValues").val(Number(item.totalValues).toFixed(2));
@@ -644,6 +690,8 @@ function buildInvoicePayload() {
             extraTax: normalizeExtraTax(item.extraTax, item.saleTypeLabel),
             fedPayable: Number(item.fedPayable) || 0,
             discount: Number(item.discount) || 0,
+            tax236HRate: Number(item.tax236HRate) || 0,
+            tax236H: Number(item.tax236H) || 0,
             saleType: item.saleTypeLabel,
             sroScheduleNo: item.sroText || "",
             sroItemSerialNo: item.sroItemText || ""
@@ -748,6 +796,8 @@ function loadDraftForEditing() {
         extraTax: Number(item.extraTax),
         fedPayable: Number(item.fedPayable),
         discount: Number(item.discount),
+        tax236HRate: Number(item.tax236HRate) || 0,
+        tax236H: Number(item.tax236H) || 0,
         rateLabel: item.rate,
         rateValue: 0,
         uomText: item.uom,

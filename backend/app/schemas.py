@@ -88,6 +88,8 @@ class InvoiceItem(BaseModel):
     sroScheduleNo: str = ""
     fedPayable: Union[int, Decimal]
     discount: Union[int, Decimal]
+    tax236HRate: Union[int, Decimal]
+    tax236H: Union[int, Decimal]
     saleType: str
     sroItemSerialNo: str = ""
 

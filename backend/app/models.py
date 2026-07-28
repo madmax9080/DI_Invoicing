@@ -67,6 +67,8 @@ class InvoiceItem(Base):
     extraTax = Column(Numeric(18, 2), nullable=True)
     fedPayable = Column(Numeric(18, 2), nullable=True, default=0.0)
     discount = Column(Numeric(18, 2), nullable=True, default=0.0)
+    tax236HRate = Column(Numeric(5, 2), nullable=True, default=0)
+    tax236H = Column(Numeric(18, 2), nullable=True, default=0)
     sroScheduleNo = Column(String(50), nullable=True)
     sroItemSerialNo = Column(String(50), nullable=True)
     saleType = Column(String(100), nullable=False) 

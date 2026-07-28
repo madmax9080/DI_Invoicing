@@ -50,6 +50,8 @@ export function normalizeItem(raw) {
         furtherTax: num(raw.furtherTax),
         extraTax: raw.extraTax === "" ? "" : num(raw.extraTax),
         fedPayable: num(raw.fedPayable),
+        tax236HRate: num(raw.tax236HRate),
+        tax236H: num(raw.tax236H),
         discount: num(raw.discount),
         salesTaxWithheldAtSource: num(raw.salesTaxWithheldAtSource)
     };
@@ -121,6 +123,8 @@ export function getItemInputValues() {
         furtherTax: parseFloat($("#furtherTax").val()),
         extraTax: optionalFBRField($("#extraTax").val()),
         fedPayable: parseFloat($("#fedPayable").val()),
+        tax236HRate: Number($("#tax236HRate").val()) || 0,
+        tax236H: Number($("#tax236H").val()) || 0,
         fixedNotifiedValueOrRetailPrice: parseFloat($("#fixedNotifiedValueOrRetailPrice").val()),
         sroId,
         sroText,
