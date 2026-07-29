@@ -320,7 +320,9 @@ async def generate_invoice_pdf(
     st_wh = 0
     total_extra_tax = 0
     total_fed = 0
+    total_236h = 0
     sale_type = ""
+    tax236h_rates = set()
     for item in items:
         subtotal_excl_st += float(item.valueSalesExcludingST)
         retail_price += float(item.fixedNotifiedValueOrRetailPrice)
@@ -330,6 +332,9 @@ async def generate_invoice_pdf(
         st_wh += float(item.salesTaxWithheldAtSource)
         total_extra_tax += float(item.extraTax or 0)
         total_fed += float(item.fedPayable or 0)
+        total_236h += float(item.tax236H or 0)
+        if item.tax236HRate and float(item.tax236HRate) > 0:
+            tax236h_rates.add(float(item.tax236HRate))
         sale_type += str(item.saleType)
         item_rows.append({
             "hs_code": item.hsCode,
@@ -351,6 +356,7 @@ async def generate_invoice_pdf(
         + total_further_tax
         + total_extra_tax
         + total_fed
+        + total_236h
         - total_discount
         - st_wh
     )
@@ -385,6 +391,8 @@ async def generate_invoice_pdf(
         "further_tax": total_further_tax,
         "extra_tax": total_extra_tax,
         "fed": total_fed,
+        "tax236H": total_236h,
+        "tax236HRates": sorted(tax236h_rates),
         "discount": total_discount,
         "retail_price": retail_price,
         "st_wh": st_wh,
