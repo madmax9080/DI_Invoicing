@@ -76,6 +76,8 @@ async function submitDraft(invoiceId) {
                 extraTax: item.extraTax,
                 fedPayable: item.fedPayable,
                 discount: item.discount,
+                tax236HRate: item.tax236HRate,
+                tax236H: item.tax236H,
                 saleType: item.saleType,
                 sroScheduleNo: item.sroScheduleNo,
                 sroItemSerialNo: item.sroItemSerialNo
@@ -282,6 +284,13 @@ function renderTable() {
                             item.extraTax === undefined
                                 ? "-"
                                 : Number(item.extraTax).toFixed(2)
+                        }
+                    </td>
+                    <td>
+                        ${
+                            Number(item.tax236HRate || 0) > 0
+                                ? `${Number(item.tax236HRate).toFixed(2)}%<br><small>${Number(item.tax236H || 0).toFixed(2)}</small>`
+                                : "-"
                         }
                     </td>
                     <td class="text-end">${Number(item.discount || 0).toFixed(2)}</td>
