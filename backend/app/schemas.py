@@ -113,6 +113,8 @@ class InvoiceItemOut(BaseModel):
     sroScheduleNo: Optional[str]
     fedPayable: Decimal
     discount: Decimal
+    tax236HRate: Optional[Decimal] = Decimal("0")
+    tax236H: Optional[Decimal] = Decimal("0")
     saleType: str
     sroItemSerialNo: Optional[str]
 
