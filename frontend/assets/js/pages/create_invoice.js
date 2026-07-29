@@ -343,6 +343,10 @@ function buildItemRow(item, index) {
             <td class="text-end">${formatAmount(item.fedPayable)}</td>
             <td class="text-end">${formatAmount(item.salesTaxWithheldAtSource)}</td>
             <td class="text-end">${formatOptional(item.extraTax)}</td>
+            <td class="text-end">${item.tax236HRate > 0
+                ? `${item.tax236HRate}%<br><small>${formatAmount(item.tax236H)}</small>`
+                : "-"}
+            </td>
             <td class="text-end">${formatAmount(item.discount)}</td>
             <td class="text-end fw-semibold">${formatAmount(item.totalValues)}</td>
             <td><small>${escapeHtml(item.sroText || "-")}</small></td>
@@ -466,7 +470,7 @@ async function editItem(index) {
     $("#furtherTax").val(item.furtherTax);
     $("#extraTax").val(item.extraTax);
     $("#fedPayable").val(item.fedPayable);
-    $("#tax236HRate").val(item.tax236HRate).trigger("change");
+    $("#tax236HRate").val(String(item.tax236HRate)).trigger("change");
     $("#tax236H").val(Number(item.tax236H).toFixed(2));
     $("#fixedNotifiedValueOrRetailPrice").val(item.fixedNotifiedValueOrRetailPrice);
     $("#salesTaxApplicable").val(Number(item.salesTaxApplicable).toFixed(2));
