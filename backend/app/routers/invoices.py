@@ -98,6 +98,8 @@ async def post_invoice_to_fbr(
                 extraTax=crud.normalize_for_db(item.get("extraTax")),
                 fedPayable=item.get("fedPayable"),
                 discount=item.get("discount"),
+                tax236HRate=item.get("tax236HRate"),
+                tax236H=item.get("tax236H"),
                 totalValues=item.get("totalValues"),
                 fixedNotifiedValueOrRetailPrice=item.get("fixedNotifiedValueOrRetailPrice"),
                 salesTaxWithheldAtSource=item.get("salesTaxWithheldAtSource"),
