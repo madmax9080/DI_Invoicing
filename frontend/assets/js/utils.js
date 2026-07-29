@@ -172,6 +172,7 @@ export function recalcItemTotals() {
     const quantity = Number($("#quantity").val()) || 0;
     if (!rateOption.val() || Number.isNaN(rateValue)) {
         $("#salesTaxApplicable").val(0);
+        $("#tax236H").val("0.00");
         $("#totalValues").val(0);
         return;
     }
@@ -181,18 +182,18 @@ export function recalcItemTotals() {
         rateLabel,                               
         valueSalesExcludingST: Number($("#valueSalesExcludingST").val()) || 0,
         fixedNotifiedValueOrRetailPrice: Number($("#fixedNotifiedValueOrRetailPrice").val()) || 0,
-        quantity: Number($("#quantity").val()) || 0,
+        // quantity: Number($("#quantity").val()) || 0,
         rateValue,
         furtherTax: Number($("#furtherTax").val()) || 0,
         extraTax: Number($("#extraTax").val()) || 0,
         fedPayable: Number($("#fedPayable").val()) || 0,
         discount: Number($("#discount").val()) || 0,
         salesTaxWithheldAtSource: Number($("#salesTaxWithheldAtSource").val()) || 0,
-        saleTypeText
+        saleTypeText,
+        tax236HRate: Number($("#tax236HRate").val()) || 0,
+        tax236H: Number($("#tax236H").val()) || 0,
     };
-    const { salesTaxApplicable, totalValues } = calculateTaxes(item);
-    $("#salesTaxApplicable").val(salesTaxApplicable);
-    $("#totalValues").val(totalValues);
+    computeItemTotals(item);
 }
 
 export function applyAutoFurtherTax() {

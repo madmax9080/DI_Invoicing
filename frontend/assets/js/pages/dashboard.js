@@ -1,6 +1,6 @@
 import { apiFetch } from "../api.js";
-import { FYManager } from "../utils.js?v=3";
-import { formatCompactPKR } from "../utils.js?v=3";
+import { FYManager } from "../utils.js?v=4";
+import { formatCompactPKR } from "../utils.js?v=4";
 const fontWeight = {style: {fontWeight: 400}};
 
 const dashboardCache = new Map();
