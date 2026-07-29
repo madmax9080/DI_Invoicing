@@ -370,6 +370,7 @@ function renderRow(inv, item, index) {
             <td>${formatAmount(item?.extraTax)}</td>
             <td>${formatAmount(item?.furtherTax)}</td>
             <td>${formatAmount(item?.fedPayable)}</td>
+            <td>${formatAmount(item?.tax236H)}</td>
             <td>${formatAmount(item?.discount)}</td>
             <td>${item?.sroScheduleNo || "-"}</td>
             <td>${item?.sroItemSerialNo || "-"}</td>
@@ -434,45 +435,7 @@ async function reload() {
     await fetchReports();
     renderTable();
     renderPagination();
-}
-
-// export function initReports() {
-//     initReportsFY();
-//     loadSalesByBuyerChart();
-//     $("#globalFySelect")
-//         .off("change.reports")
-//         .on(
-//             "change.reports",
-//             loadSalesByBuyerChart
-//     );
-//      binding();
-//     $("#applyFiltersBtn").click(() => {
-//         state.pagination.page = 1;
-//         reload();
-//     });
-//     $("#resetFiltersBtn")
-//         .off("click")
-//         .on("click", async () => {
-//             resetFiltersUI();
-//             await reload();
-//         });
-//     $(document)
-//         .off("click", ".delete-btn")
-//         .on("click", ".delete-btn", function () {
-//             const id =
-//                 $(this).data("id");
-
-//             deleteInvoice(id);
-//         });
-//     $(document)
-//     .off("click", ".download-pdf")
-//     .on("click", ".download-pdf", function () {
-//         const id = $(this).data("id");
-//         const name = $(this).data("name");
-//         downloadInvoicePDF(id, name);
-//     });
-//     reload();
-// }   
+}   
 
 export async function initReports() {
     initReportsFY();

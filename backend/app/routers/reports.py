@@ -127,6 +127,8 @@ def reports_invoices(
             "extraTax": float(item.extraTax or 0),
             "fedPayable": float(item.fedPayable or 0),
             "discount": float(item.discount or 0),
+            "tax236HRate": float(item.tax236HRate or 0),
+            "tax236H": float(item.tax236H or 0),
             "sroScheduleNo": item.sroScheduleNo,
             "sroItemSerialNo": item.sroItemSerialNo,
             "saleType": item.saleType,
