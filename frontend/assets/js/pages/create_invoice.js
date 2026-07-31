@@ -67,7 +67,7 @@ async function loadClientDetails(forceReload = false) {
         $("#sellerAddress").val(
             currentClient.sellerAddress
         );
-        $("#sellerNTNCNIC, #sellerSTRN #sellerBusinessName, #sellerProvince, #sellerAddress")
+        $("#sellerNTNCNIC, #sellerSTRN, #sellerBusinessName, #sellerProvince, #sellerAddress")
             .prop("readonly", true)
             .addClass("bg-light text-muted");
         return currentClient;

@@ -167,10 +167,12 @@ class InvoiceOut(BaseModel):
     invoiceType: str
     invoiceDate: datetime
     sellerNTNCNIC: str
+    sellerSTRN: Optional[str] = None
     sellerBusinessName: str
     sellerProvince: str
     sellerAddress: str
     buyerNTNCNIC: Optional[str]
+    buyerSTRN: Optional[str] = None
     buyerBusinessName: str
     buyerProvince: str
     buyerAddress: str

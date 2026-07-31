@@ -26,6 +26,146 @@ router = APIRouter(prefix="/invoices", tags=["invoices"])
 logger = logging.getLogger(__name__)   
 SEM_LIMIT = 2
 
+# @router.post("/post", status_code=status.HTTP_201_CREATED)
+# async def post_invoice_to_fbr(
+#     invoice: InvoiceCreate,
+#     fbr_client: FBRClient = Depends(get_fbr_client_secure),
+#     db: Session = Depends(get_db),
+#     current_user=Depends(get_current_user),
+# ):
+#     client_id = fbr_client.client_id
+#     internal_invoice_no = invoice.internalInvoiceNo
+#     if not internal_invoice_no:
+#         raise HTTPException(
+#             status_code=400,
+#             detail="Internal invoice number is required"
+#         )
+#     raw_payload = invoice.model_dump(mode="json")
+#     seller_strn = raw_payload.get("sellerSTRN")
+#     buyer_strn = raw_payload.get("buyerSTRN")
+#     payload = raw_payload.copy()
+#     payload.pop("internalInvoiceNo", None)  # ✅ internal only
+#     existing = (
+#         db.query(models.Invoice)
+#         .filter(
+#             models.Invoice.client_id == client_id,
+#             models.Invoice.internal_invoice_no == internal_invoice_no
+#         )
+#         .first()
+#     )
+#     if existing:
+#         if existing.status == "posted":
+#             return {
+#                 "status": "already_posted",
+#                 "invoiceId": existing.id,
+#                 "fbrInvoiceNumber": existing.fbrInvoiceNo,
+#             }
+#         if existing.status == "posting":
+#             raise HTTPException(
+#                 status_code=409,
+#                 detail="Invoice is already being processed",
+#             )
+#         buyer = crud.get_or_create_buyer(db, payload, client_id, current_user["id"])
+#         existing.invoiceRefNo = payload.get("invoiceRefNo")
+#         existing.invoiceType = payload["invoiceType"]
+#         existing.invoiceDate = datetime.fromisoformat(payload["invoiceDate"])
+#         existing.sellerNTNCNIC = payload["sellerNTNCNIC"]
+#         existing.sellerSTRN = seller_strn
+#         existing.sellerBusinessName = payload["sellerBusinessName"]
+#         existing.sellerProvince = payload["sellerProvince"]
+#         existing.sellerAddress = payload.get("sellerAddress")
+#         existing.buyerNTNCNIC = payload.get("buyerNTNCNIC")
+#         existing.buyerSTRN = buyer_strn
+#         existing.buyerBusinessName = payload.get("buyerBusinessName")
+#         existing.buyerProvince = payload.get("buyerProvince")
+#         existing.buyerAddress = payload.get("buyerAddress")
+#         existing.buyerRegistrationType = payload.get("buyerRegistrationType")
+#         existing.scenarioId = payload.get("scenarioId")
+#         existing.status = "posting"
+#         existing.request_payload = payload
+#         existing.response_data = None
+#         existing.error_message = None
+#         existing.fbrInvoiceNo = None
+#         existing.buyer_id = buyer.id if buyer else None
+#         db.query(models.InvoiceItem).filter(models.InvoiceItem.invoice_id == existing.id).delete(synchronize_session=False)
+#         for item in payload["items"]:
+#             db_item = models.InvoiceItem(
+#                 invoice_id=existing.id,
+#                 hsCode=item["hsCode"],
+#                 productDescription=item["productDescription"],
+#                 uom=item.get("uoM"),
+#                 quantity=item["quantity"],
+#                 rate=item["rate"],
+#                 valueSalesExcludingST=item["valueSalesExcludingST"],
+#                 salesTaxApplicable=item["salesTaxApplicable"],
+#                 furtherTax=item.get("furtherTax"),
+#                 extraTax=crud.normalize_for_db(item.get("extraTax")),
+#                 fedPayable=item.get("fedPayable"),
+#                 discount=item.get("discount"),
+#                 tax236HRate=item.get("tax236HRate"),
+#                 tax236H=item.get("tax236H"),
+#                 totalValues=item.get("totalValues"),
+#                 fixedNotifiedValueOrRetailPrice=item.get("fixedNotifiedValueOrRetailPrice"),
+#                 salesTaxWithheldAtSource=item.get("salesTaxWithheldAtSource"),
+#                 sroScheduleNo=item.get("sroScheduleNo", ""),
+#                 sroItemSerialNo=item.get("sroItemSerialNo", ""),
+#                 saleType=item.get("saleType"),
+#             )
+#             db.add(db_item)
+#         db.commit()
+#         db.refresh(existing)
+#         db_invoice = existing
+#     else:
+#         db_invoice = crud.create_invoice(
+#             db=db,
+#             payload=payload,
+#             response_data=None,
+#             status="posting",
+#             client_id=client_id,
+#             internal_invoice_no=internal_invoice_no,
+#             user_id=current_user["id"],
+#         )
+#         fbr_payload = payload.copy()
+#         fbr_payload.pop("sellerSTRN", None)
+#         fbr_payload.pop("buyerSTRN", None)
+#     try:
+#         fbr_response = await fbr_client.post_invoice(payload)
+#         validation = fbr_response.get("validationResponse", {})
+#         business_status = validation.get("status")
+#         if business_status == "Invalid":
+#             db_invoice.status = "invalid"
+#             db_invoice.response_data = fbr_response
+#             db_invoice.error_message = validation.get("error")
+#             db.commit()
+#             return {
+#                 "status": "invalid",
+#                 "fbr_response": fbr_response,
+#             }
+#         extracted = extract_fbr_invoice_numbers(fbr_response)
+#         db_invoice.status = "posted"
+#         db_invoice.response_data = fbr_response
+#         db_invoice.fbrInvoiceNo = extracted["invoiceNumber"]
+#         db_invoice.error_message = None
+#         db.commit()
+#         clear_cache(f"dashboard:{client_id}:")
+#         clear_cache(f"reports:{client_id}:")
+#         db.refresh(db_invoice)
+#         return {
+#             "status": "success",
+#             "fbr_response": fbr_response,
+#             "fbrInvoiceNumber": extracted["invoiceNumber"],
+#             "itemInvoiceNumbers": extracted["itemInvoiceNumbers"],
+#             "invoiceId": db_invoice.id,
+#         }
+#     except Exception as exc:
+#         db_invoice.status = "failed"
+#         db_invoice.error_message = str(exc)
+#         db.commit()
+#         raise HTTPException(
+#             status_code=502,
+#             detail=str(exc)
+#         )
+
 @router.post("/post", status_code=status.HTTP_201_CREATED)
 async def post_invoice_to_fbr(
     invoice: InvoiceCreate,
@@ -35,19 +175,40 @@ async def post_invoice_to_fbr(
 ):
     client_id = fbr_client.client_id
     internal_invoice_no = invoice.internalInvoiceNo
+
     if not internal_invoice_no:
         raise HTTPException(
             status_code=400,
             detail="Internal invoice number is required"
         )
+
+    # ---------------------------------------------------------
+    # Convert Pydantic model to JSON-compatible dictionary
+    # ---------------------------------------------------------
     raw_payload = invoice.model_dump(mode="json")
+
+    # STRNs are system-only fields.
+    # Keep them for our database, but do NOT send them to FBR.
     seller_strn = raw_payload.get("sellerSTRN")
     buyer_strn = raw_payload.get("buyerSTRN")
+
+    # Payload stored in DB / used for internal processing
     payload = raw_payload.copy()
-    payload.pop("internalInvoiceNo", None)  # ✅ internal only
+
+    # Internal invoice number is also system-only
+    payload.pop("internalInvoiceNo", None)
+
+    # ---------------------------------------------------------
+    # Payload that will actually be sent to FBR
+    # ---------------------------------------------------------
     fbr_payload = payload.copy()
+
     fbr_payload.pop("sellerSTRN", None)
     fbr_payload.pop("buyerSTRN", None)
+
+    # ---------------------------------------------------------
+    # Check whether this internal invoice already exists
+    # ---------------------------------------------------------
     existing = (
         db.query(models.Invoice)
         .filter(
@@ -56,41 +217,85 @@ async def post_invoice_to_fbr(
         )
         .first()
     )
+
+    # =========================================================
+    # EXISTING INVOICE
+    # =========================================================
     if existing:
+
+        # Already successfully posted
         if existing.status == "posted":
             return {
                 "status": "already_posted",
                 "invoiceId": existing.id,
                 "fbrInvoiceNumber": existing.fbrInvoiceNo,
             }
+
+        # Another request is currently posting it
         if existing.status == "posting":
             raise HTTPException(
                 status_code=409,
                 detail="Invoice is already being processed",
             )
-        buyer = crud.get_or_create_buyer(db, payload, client_id, current_user["id"])
+
+        # -----------------------------------------------------
+        # Get/create buyer
+        # -----------------------------------------------------
+        buyer = crud.get_or_create_buyer(
+            db,
+            payload,
+            client_id,
+            current_user["id"]
+        )
+
+        # -----------------------------------------------------
+        # Update invoice header
+        # -----------------------------------------------------
         existing.invoiceRefNo = payload.get("invoiceRefNo")
         existing.invoiceType = payload["invoiceType"]
-        existing.invoiceDate = datetime.fromisoformat(payload["invoiceDate"])
+        existing.invoiceDate = datetime.fromisoformat(
+            payload["invoiceDate"]
+        )
+
         existing.sellerNTNCNIC = payload["sellerNTNCNIC"]
         existing.sellerSTRN = seller_strn
         existing.sellerBusinessName = payload["sellerBusinessName"]
         existing.sellerProvince = payload["sellerProvince"]
         existing.sellerAddress = payload.get("sellerAddress")
+
         existing.buyerNTNCNIC = payload.get("buyerNTNCNIC")
         existing.buyerSTRN = buyer_strn
         existing.buyerBusinessName = payload.get("buyerBusinessName")
         existing.buyerProvince = payload.get("buyerProvince")
         existing.buyerAddress = payload.get("buyerAddress")
-        existing.buyerRegistrationType = payload.get("buyerRegistrationType")
+        existing.buyerRegistrationType = payload.get(
+            "buyerRegistrationType"
+        )
+
         existing.scenarioId = payload.get("scenarioId")
+
+        # -----------------------------------------------------
+        # Reset posting state
+        # -----------------------------------------------------
         existing.status = "posting"
         existing.request_payload = payload
         existing.response_data = None
         existing.error_message = None
         existing.fbrInvoiceNo = None
-        existing.buyer_id = buyer.id if buyer else None
-        db.query(models.InvoiceItem).filter(models.InvoiceItem.invoice_id == existing.id).delete(synchronize_session=False)
+
+        existing.buyer_id = (
+            buyer.id if buyer else None
+        )
+
+        # -----------------------------------------------------
+        # Replace invoice items
+        # -----------------------------------------------------
+        db.query(models.InvoiceItem).filter(
+            models.InvoiceItem.invoice_id == existing.id
+        ).delete(
+            synchronize_session=False
+        )
+
         for item in payload["items"]:
             db_item = models.InvoiceItem(
                 invoice_id=existing.id,
@@ -99,26 +304,50 @@ async def post_invoice_to_fbr(
                 uom=item.get("uoM"),
                 quantity=item["quantity"],
                 rate=item["rate"],
-                valueSalesExcludingST=item["valueSalesExcludingST"],
-                salesTaxApplicable=item["salesTaxApplicable"],
+                valueSalesExcludingST=item[
+                    "valueSalesExcludingST"
+                ],
+                salesTaxApplicable=item[
+                    "salesTaxApplicable"
+                ],
                 furtherTax=item.get("furtherTax"),
-                extraTax=crud.normalize_for_db(item.get("extraTax")),
+                extraTax=crud.normalize_for_db(
+                    item.get("extraTax")
+                ),
                 fedPayable=item.get("fedPayable"),
                 discount=item.get("discount"),
                 tax236HRate=item.get("tax236HRate"),
                 tax236H=item.get("tax236H"),
                 totalValues=item.get("totalValues"),
-                fixedNotifiedValueOrRetailPrice=item.get("fixedNotifiedValueOrRetailPrice"),
-                salesTaxWithheldAtSource=item.get("salesTaxWithheldAtSource"),
-                sroScheduleNo=item.get("sroScheduleNo", ""),
-                sroItemSerialNo=item.get("sroItemSerialNo", ""),
+                fixedNotifiedValueOrRetailPrice=item.get(
+                    "fixedNotifiedValueOrRetailPrice"
+                ),
+                salesTaxWithheldAtSource=item.get(
+                    "salesTaxWithheldAtSource"
+                ),
+                sroScheduleNo=item.get(
+                    "sroScheduleNo",
+                    ""
+                ),
+                sroItemSerialNo=item.get(
+                    "sroItemSerialNo",
+                    ""
+                ),
                 saleType=item.get("saleType"),
             )
+
             db.add(db_item)
+
         db.commit()
         db.refresh(existing)
+
         db_invoice = existing
+
+    # =========================================================
+    # NEW INVOICE
+    # =========================================================
     else:
+
         db_invoice = crud.create_invoice(
             db=db,
             payload=payload,
@@ -128,39 +357,108 @@ async def post_invoice_to_fbr(
             internal_invoice_no=internal_invoice_no,
             user_id=current_user["id"],
         )
+
+    # =========================================================
+    # POST TO FBR
+    # =========================================================
     try:
-        fbr_response = await fbr_client.post_invoice(fbr_payload)
-        validation = fbr_response.get("validationResponse", {})
+
+        # IMPORTANT:
+        # Use fbr_payload, NOT payload.
+        #
+        # fbr_payload contains:
+        #   - sellerNTNCNIC
+        #   - sellerBusinessName
+        #   - buyerNTNCNIC
+        #   - buyerBusinessName
+        #   - items
+        #   - etc.
+        #
+        # But does NOT contain:
+        #   - internalInvoiceNo
+        #   - sellerSTRN
+        #   - buyerSTRN
+        #
+        fbr_response = await fbr_client.post_invoice(
+            fbr_payload
+        )
+
+        # -----------------------------------------------------
+        # FBR validation response
+        # -----------------------------------------------------
+        validation = fbr_response.get(
+            "validationResponse",
+            {}
+        )
+
         business_status = validation.get("status")
+
+        # -----------------------------------------------------
+        # FBR rejected invoice
+        # -----------------------------------------------------
         if business_status == "Invalid":
+
             db_invoice.status = "invalid"
             db_invoice.response_data = fbr_response
-            db_invoice.error_message = validation.get("error")
+            db_invoice.error_message = validation.get(
+                "error"
+            )
+
             db.commit()
+
             return {
                 "status": "invalid",
                 "fbr_response": fbr_response,
             }
-        extracted = extract_fbr_invoice_numbers(fbr_response)
+
+        # -----------------------------------------------------
+        # Successful FBR posting
+        # -----------------------------------------------------
+        extracted = extract_fbr_invoice_numbers(
+            fbr_response
+        )
+
         db_invoice.status = "posted"
         db_invoice.response_data = fbr_response
-        db_invoice.fbrInvoiceNo = extracted["invoiceNumber"]
+        db_invoice.fbrInvoiceNo = extracted[
+            "invoiceNumber"
+        ]
         db_invoice.error_message = None
+
         db.commit()
-        clear_cache(f"dashboard:{client_id}:")
-        clear_cache(f"reports:{client_id}:")
+
+        # Clear cached dashboard/report data
+        clear_cache(
+            f"dashboard:{client_id}:"
+        )
+        clear_cache(
+            f"reports:{client_id}:"
+        )
+
         db.refresh(db_invoice)
+
         return {
             "status": "success",
             "fbr_response": fbr_response,
-            "fbrInvoiceNumber": extracted["invoiceNumber"],
-            "itemInvoiceNumbers": extracted["itemInvoiceNumbers"],
+            "fbrInvoiceNumber": extracted[
+                "invoiceNumber"
+            ],
+            "itemInvoiceNumbers": extracted[
+                "itemInvoiceNumbers"
+            ],
             "invoiceId": db_invoice.id,
         }
+
+    # =========================================================
+    # UNEXPECTED ERROR
+    # =========================================================
     except Exception as exc:
+
         db_invoice.status = "failed"
         db_invoice.error_message = str(exc)
+
         db.commit()
+
         raise HTTPException(
             status_code=502,
             detail=str(exc)
@@ -289,7 +587,7 @@ def list_invoices(
 ):
     query = db.query(models.Invoice).join(models.Client).filter(
         models.Client.user_id == current_user["id"]
-    ).options(joinedload(models.Invoice.items))
+    ).options(joinedload(models.Invoice.items), joinedload(models.Invoice.client))
     if client_id:
         query = query.filter(models.Invoice.client_id == client_id)
     if status:
