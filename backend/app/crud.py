@@ -299,6 +299,10 @@ def get_or_create_buyer(
             payload.get("buyerRegistrationType")
             or buyer.buyer_registration_type
         )
+        buyer.strn = (
+            payload.get("buyerSTRN")
+            or buyer.strn
+        )
         db.flush()
         return buyer
     buyer = models.Buyer(
@@ -309,6 +313,7 @@ def get_or_create_buyer(
         buyer_registration_type=payload.get(
             "buyerRegistrationType"
         ),
+        strn=payload.get("buyerSTRN"),
         client_id=client_id,
     )
     db.add(buyer)
@@ -352,6 +357,7 @@ def create_buyer(
             province=payload.province,
             address=payload.address,
             buyer_registration_type=payload.buyer_registration_type,
+            strn=payload.strn,
             client_id=client_id,
         )
         db.add(buyer)
@@ -457,6 +463,8 @@ def update_buyer(
             buyer.buyer_registration_type = (
                 payload.buyer_registration_type
             )
+        if payload.strn is not None:
+            buyer.strn = payload.strn
         db.commit()
         db.refresh(buyer)
         return buyer

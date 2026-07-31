@@ -243,6 +243,10 @@ async function saveBuyer() {
                 $("#buyerNTN")
                     .val()
                     .trim(),
+            strn:
+                $("#buyerSTRN")
+                    .val()
+                    .trim(),
             name:
                 $("#buyerName")
                     .val()
@@ -258,16 +262,16 @@ async function saveBuyer() {
                 $("#buyerRegistrationType")
                     .val()
         };
-        for (const [key, value] of Object.entries(payload)) {
-            if (!value) {
-                showToast(
-                    `${key} is required`,
-                    "warning"
-                );
-                resetBtn();
-                return;
-            }
-        }
+        // for (const [key, value] of Object.entries(payload)) {
+        //     if (!value) {
+        //         showToast(
+        //             `${key} is required`,
+        //             "warning"
+        //         );
+        //         resetBtn();
+        //         return;
+        //     }
+        // }
         const ntn = payload.ntn_cnic;
         if (
             ntn.length !== 7 &&
@@ -278,6 +282,42 @@ async function saveBuyer() {
                 "warning"
             );
             resetBtn();
+            return;
+        }
+        if (!payload.name) {
+            showToast(
+                "Buyer name is required",
+                "warning"
+            );
+            return;
+        }
+        if (!payload.province) {
+            showToast(
+                "Province is required",
+                "warning"
+            );
+            return;
+        }
+        if (!payload.address) {
+            showToast(
+                "Address is required",
+                "warning"
+            );
+            return;
+        }
+        if (!payload.buyer_registration_type) {
+            showToast(
+                "Registration type is required",
+                "warning"
+            );
+            return;
+        }
+        const strn = payload.strn.trim();
+        if (strn.length > 30) {
+            showToast(
+                "STRN cannot exceed 30 characters",
+                "warning"
+            );
             return;
         }
         if (!buyerId) {
@@ -337,6 +377,9 @@ function handleEditBuyer() {
     );
     $("#buyerNTN").val(
         buyer.ntn_cnic || ""
+    );
+    $("#buyerSTRN").val(
+        buyer.strn || ""
     );
     $("#buyerName").val(
         buyer.name || ""

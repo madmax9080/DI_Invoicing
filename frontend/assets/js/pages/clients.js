@@ -23,6 +23,8 @@ async function loadClientProfile() {
         $("#sellerName").val(data.name);
         $("#sellerNTNCNIC")
             .val(data.sellerNTNCNIC);
+        $("#sellerSTRN")
+            .val(data.sellerSTRN || "");
         $("#sellerBusinessName")
             .val(data.sellerBusinessName);
         const provinceText =
@@ -109,6 +111,8 @@ function bindEvents() {
                     $("#sellerName").val().trim(),
                 sellerNTNCNIC:
                     $("#sellerNTNCNIC").val().trim(),
+                sellerSTRN:
+                    $("#sellerSTRN").val().trim(),
                 sellerBusinessName:
                     $("#sellerBusinessName").val().trim(),
                 sellerProvince:
@@ -118,6 +122,14 @@ function bindEvents() {
                 sellerAddress:
                     $("#sellerAddress").val().trim()
             };
+            const strn = payload.sellerSTRN.trim();
+            if (strn.length > 30) {
+                showToast(
+                    "STRN cannot exceed 30 characters",
+                    "warning"
+                );
+                return;
+            }
             try {
                 await apiFetch(
                     `/clients/${clientId}`,

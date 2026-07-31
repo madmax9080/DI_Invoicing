@@ -17,6 +17,7 @@ class BuyerValidationRequest(BaseModel):
 
 class BuyerBase(BaseModel):
     ntn_cnic: str
+    strn: Optional[str] = None
     name: str
     province: Optional[str] = None
     address: Optional[str] = None
@@ -29,6 +30,7 @@ class BuyerCreate(BuyerBase):
 
 class BuyerUpdate(BaseModel):
     ntn_cnic: Optional[str] = None
+    strn: Optional[str] = None
     name: Optional[str] = None
     province: Optional[str] = None
     address: Optional[str] = None
@@ -185,6 +187,7 @@ class InvoiceOut(BaseModel):
 class ClientBase(BaseModel):
     name: str
     sellerNTNCNIC: str
+    sellerSTRN: Optional[str] = None
     sellerBusinessName: str
     sellerProvince: str
     sellerAddress: str
@@ -196,6 +199,7 @@ class ClientCreate(ClientBase):
 class ClientUpdate(ClientBase):
     name: Optional[str] = None
     sellerNTNCNIC: Optional[str] = None
+    sellerSTRN: Optional[str] = None
     sellerBusinessName: Optional[str] = None
     sellerProvince: Optional[str] = None
     sellerAddress: Optional[str] = None

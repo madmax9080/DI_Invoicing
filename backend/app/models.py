@@ -79,6 +79,7 @@ class Client(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, index=True, nullable=False)
     sellerNTNCNIC = Column(String(20), nullable=False)
+    sellerSTRN = Column(String(30), nullable=True)
     sellerBusinessName = Column(String(100), nullable=False)
     sellerProvince = Column(String(50), nullable=False)
     sellerAddress = Column(String(200), nullable=False)
@@ -104,6 +105,7 @@ class Buyer(Base):
     __tablename__ = "buyers"
     id = Column(Integer, primary_key=True, index=True)
     ntn_cnic = Column(String, index=True, nullable=False)
+    strn = Column(String(30), nullable=True)
     name = Column(String)
     province = Column(String)
     address = Column(String)

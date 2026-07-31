@@ -57,17 +57,66 @@ async function handleCreateClient() {
     const payload = {
         name: document.getElementById("clientNameInput").value.trim(),
         sellerNTNCNIC: document.getElementById("clientNTNInput").value.trim(),
+        sellerSTRN: document.getElementById("clientSTRNInput").value.trim(),
         sellerBusinessName: document.getElementById("clientBusinessInput").value.trim(),
         sellerProvince: document.getElementById("clientProvinceInput").value,
         sellerAddress: document.getElementById("clientAddressInput").value.trim(),
         token: document.getElementById("clientTokenInput").value.trim()
     };
-    for (const [key, val] of Object.entries(payload)) {
-        if (!val) {
-            showToast(`${key} is required`, "warning");
-            resetBtn();
-            return;
-        }
+    // for (const [key, val] of Object.entries(payload)) {
+    //     if (!val) {
+    //         showToast(`${key} is required`, "warning");
+    //         resetBtn();
+    //         return;
+    //     }
+    // }
+    if (!payload.name) {
+        showToast(
+            "Client name is required",
+            "warning"
+        );
+        resetBtn();
+        return;
+    }
+    if (!payload.sellerNTNCNIC) {
+        showToast(
+            "NTN / CNIC is required",
+            "warning"
+        );
+        resetBtn();
+        return;
+    }
+    if (!payload.sellerBusinessName) {
+        showToast(
+            "Business name is required",
+            "warning"
+        );
+        resetBtn();
+        return;
+    }
+    if (!payload.sellerProvince) {
+        showToast(
+            "Province is required",
+            "warning"
+        );
+        resetBtn();
+        return;
+    }
+    if (!payload.sellerAddress) {
+        showToast(
+            "Business address is required",
+            "warning"
+        );
+        resetBtn();
+        return;
+    }
+    if (!payload.token) {
+        showToast(
+            "FBR token is required",
+            "warning"
+        );
+        resetBtn();
+        return;
     }
     const ntn = payload.sellerNTNCNIC;
     if (!/^\d+$/.test(ntn)) {
@@ -78,6 +127,15 @@ async function handleCreateClient() {
     if (ntn.length !== 7 && ntn.length !== 13) {
         showToast("Enter valid NTN (7 digits) or CNIC (13 digits)", "warning");
         resetBtn();
+        return;
+    }
+    const strn = payload.sellerSTRN.trim();
+    if (strn.length > 30) {
+        showToast(
+            "STRN cannot exceed 30 characters",
+            "warning"
+        );
+        resetBtn
         return;
     }
     try {
@@ -202,15 +260,30 @@ function setupSearch() {
     });
 }
 
-// function setupLogout() {
-//     document.getElementById("logoutBtn").addEventListener("click", () => {
-//         localStorage.clear();
-//         sessionStorage.clear();
-//         window.location.href = "/index.html";
-//     });
+// function clearForm() {
+//     document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+//     document.getElementById("clientProvinceInput").value = "";
 // }
-
 function clearForm() {
-    document.querySelectorAll("input, textarea").forEach(el => el.value = "");
-    document.getElementById("clientProvinceInput").value = "";
+    document
+        .getElementById("clientNameInput")
+        .value = "";
+    document
+        .getElementById("clientNTNInput")
+        .value = "";
+    document
+        .getElementById("clientSTRNInput")
+        .value = "";
+    document
+        .getElementById("clientBusinessInput")
+        .value = "";
+    document
+        .getElementById("clientProvinceInput")
+        .value = "";
+    document
+        .getElementById("clientAddressInput")
+        .value = "";
+    document
+        .getElementById("clientTokenInput")
+        .value = "";
 }
