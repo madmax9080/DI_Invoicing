@@ -41,8 +41,13 @@ async def post_invoice_to_fbr(
             detail="Internal invoice number is required"
         )
     raw_payload = invoice.model_dump(mode="json")
+    seller_strn = raw_payload.get("sellerSTRN")
+    buyer_strn = raw_payload.get("buyerSTRN")
     payload = raw_payload.copy()
     payload.pop("internalInvoiceNo", None)  # ✅ internal only
+    fbr_payload = payload.copy()
+    fbr_payload.pop("sellerSTRN", None)
+    fbr_payload.pop("buyerSTRN", None)
     existing = (
         db.query(models.Invoice)
         .filter(
@@ -68,10 +73,12 @@ async def post_invoice_to_fbr(
         existing.invoiceType = payload["invoiceType"]
         existing.invoiceDate = datetime.fromisoformat(payload["invoiceDate"])
         existing.sellerNTNCNIC = payload["sellerNTNCNIC"]
+        existing.sellerSTRN = seller_strn
         existing.sellerBusinessName = payload["sellerBusinessName"]
         existing.sellerProvince = payload["sellerProvince"]
         existing.sellerAddress = payload.get("sellerAddress")
         existing.buyerNTNCNIC = payload.get("buyerNTNCNIC")
+        existing.buyerSTRN = buyer_strn
         existing.buyerBusinessName = payload.get("buyerBusinessName")
         existing.buyerProvince = payload.get("buyerProvince")
         existing.buyerAddress = payload.get("buyerAddress")
@@ -122,7 +129,7 @@ async def post_invoice_to_fbr(
             user_id=current_user["id"],
         )
     try:
-        fbr_response = await fbr_client.post_invoice(payload)
+        fbr_response = await fbr_client.post_invoice(fbr_payload)
         validation = fbr_response.get("validationResponse", {})
         business_status = validation.get("status")
         if business_status == "Invalid":

@@ -53,6 +53,9 @@ async function loadClientDetails(forceReload = false) {
         $("#sellerNTNCNIC").val(
             currentClient.sellerNTNCNIC
         );
+        $("#sellerSTRN").val(
+            currentClient.sellerSTRN || ""
+        );
         $("#sellerBusinessName").val(
             currentClient.sellerBusinessName
         );
@@ -64,7 +67,7 @@ async function loadClientDetails(forceReload = false) {
         $("#sellerAddress").val(
             currentClient.sellerAddress
         );
-        $("#sellerNTNCNIC, #sellerBusinessName, #sellerProvince, #sellerAddress")
+        $("#sellerNTNCNIC, #sellerSTRN #sellerBusinessName, #sellerProvince, #sellerAddress")
             .prop("readonly", true)
             .addClass("bg-light text-muted");
         return currentClient;
@@ -446,6 +449,7 @@ function resetInvoiceForm() {
     $("#internalInvoiceNo").val("");
     $("#invoiceRefNo").val("");
     $("#buyerNTNCNIC").val("");
+    $("#buyerSTRN").val("");
     $("#buyerBusinessName").val("");
     $("#buyerAddress").val("");
     $("#buyerProvince")
@@ -536,6 +540,9 @@ async function loadBuyerByNTN(ntn) {
         }
         $("#buyerBusinessName").val(
             buyer.name || ""
+        );
+        $("#buyerSTRN").val(
+            buyer.strn || ""
         );
         const provinceOption =
         $("#buyerProvince option")
@@ -671,10 +678,12 @@ function buildInvoicePayload() {
         invoiceDate,
         invoiceRefNo: $("#invoiceRefNo").val() || "",
         sellerNTNCNIC: client.sellerNTNCNIC,
+        sellerSTRN: client.sellerSTRN || "",
         sellerBusinessName: client.sellerBusinessName,
         sellerProvince: getProvinceTextById(client.sellerProvince),
         sellerAddress: client.sellerAddress,
         buyerNTNCNIC: $("#buyerNTNCNIC").val(),
+        buyerSTRN: $("#buyerSTRN").val().trim(),
         buyerBusinessName,
         buyerProvince: $("#buyerProvince option:selected").text(),
         buyerAddress: $("#buyerAddress").val(),
@@ -773,6 +782,7 @@ function loadDraftForEditing() {
     $("#scenarioId").val(invoice.scenarioId || "");
     // Buyer
     $("#buyerNTNCNIC").val(invoice.buyerNTNCNIC || "");
+    $("#buyerSTRN").val(invoice.buyerSTRN || "");
     $("#buyerBusinessName").val(invoice.buyerBusinessName || "");
     $("#buyerAddress").val(invoice.buyerAddress || "");
     $("#buyerRegistrationType")

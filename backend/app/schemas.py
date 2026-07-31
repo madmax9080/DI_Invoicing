@@ -131,8 +131,10 @@ class InvoiceCreate(BaseModel):
     sellerBusinessName: str
     sellerProvince: str
     sellerNTNCNIC: str
+    sellerSTRN: Optional[str] = None
     sellerAddress: str
     buyerNTNCNIC: str
+    buyerSTRN: Optional[str] = None
     buyerBusinessName: str
     buyerProvince: str
     buyerAddress: str
