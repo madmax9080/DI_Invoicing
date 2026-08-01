@@ -231,21 +231,22 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     elements.append(Spacer(1, 18))
     # Items table
     table_data = [[
-        "HS Code", "Description", "Sale Type", "Qty", "UOM", "Rate", "SRO", "SRO Item", "Sales Value"
+        "HS Code", "Description", "Sale Type", "UOM", "Qty", "Rate", "S.T Rate", "SRO", "SRO Item", "Sales Value"
     ]]
     for item in data["items"]:
         table_data.append([
             Paragraph(str(item.get("hs_code", "")), cell_style),
             Paragraph(str(item.get("description", "")), cell_style),
             Paragraph(str(item.get("sale_type", "")), cell_style),
-            fmt_money(item.get("quantity", 0)),
             Paragraph(str(item.get("uom", "")), uom_style),
+            fmt_money(item.get("quantity", 0)),
+            fmt_money(item.get("item_rate", 0)),
             str(item.get("rate", "")),
             Paragraph(str(item.get("sro", "")), cell_style),
             Paragraph(str(item.get("sro_item", "")), cell_style),
             fmt_money(item.get("value_excl", 0)),
         ])
-    col_widths = [w * 0.10, w * 0.12, w * 0.27, w * 0.09, w * 0.09, w * 0.06, w * 0.07, w * 0.08, w * 0.12]
+    col_widths = [w * 0.09, w * 0.16, w * 0.20, w * 0.07, w * 0.07, w * 0.08, w * 0.06, w * 0.07, w * 0.08, w * 0.12]
     items = Table(table_data, repeatRows=1, colWidths=col_widths)
     items.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef7fc")),
@@ -259,7 +260,8 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ("ALIGN", (3, 0), (3, -1), "RIGHT"),
         ("ALIGN", (4, 0), (4, -1), "CENTER"),
         ("ALIGN", (5, 1), (5, -1), "RIGHT"),
-        ("ALIGN", (8, 1), (8, -1), "RIGHT"),
+        ("ALIGN", (6, 1), (6, -1), "RIGHT"),
+        ("ALIGN", (9, 1), (9, -1), "RIGHT"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("LEFTPADDING", (0, 0), (-1, -1), 5),
         ("RIGHTPADDING", (0, 0), (-1, -1), 5),
