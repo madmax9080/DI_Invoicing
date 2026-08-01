@@ -970,92 +970,43 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         hAlign="LEFT",
     )
 
-    items.setStyle(
-        TableStyle([
-
-            # -------------------------------------------------
-            # Header
-            # -------------------------------------------------
-
-            ("BACKGROUND", (0, 0), (-1, 0), header_bg),
-            ("TEXTCOLOR", (0, 0), (-1, 0), brand_dark),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, 0), 7.5),
-
-            # -------------------------------------------------
-            # Body
-            # -------------------------------------------------
-
-            ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-            ("FONTSIZE", (0, 1), (-1, -1), 7.3),
-
-            # -------------------------------------------------
-            # Borders
-            # -------------------------------------------------
-
-            ("LINEBELOW", (0, 0), (-1, 0), 1.2, brand),
-            ("LINEBELOW", (0, 1), (-1, -1), 0.3, border),
-
-            # -------------------------------------------------
-            # Horizontal alignment
-            # -------------------------------------------------
-
-            # HS Code
-            ("ALIGN", (0, 0), (0, -1), "LEFT"),
-
-            # Description
-            ("ALIGN", (1, 0), (1, -1), "LEFT"),
-
-            # Sale Type
-            ("ALIGN", (2, 0), (2, -1), "LEFT"),
-
-            # UOM
-            ("ALIGN", (3, 0), (3, -1), "CENTER"),
-
-            # Quantity
-            ("ALIGN", (4, 0), (4, -1), "RIGHT"),
-
-            # Item Rate
-            ("ALIGN", (5, 0), (5, -1), "RIGHT"),
-
-            # Sales Tax Rate
-            ("ALIGN", (6, 0), (6, -1), "RIGHT"),
-
-            # SRO
-            ("ALIGN", (7, 0), (7, -1), "LEFT"),
-
-            # SRO Item
-            ("ALIGN", (8, 0), (8, -1), "LEFT"),
-
-            # Sales Value
-            ("ALIGN", (9, 0), (9, -1), "RIGHT"),
-
-            # -------------------------------------------------
-            # Vertical alignment
-            # -------------------------------------------------
-
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-
-            # -------------------------------------------------
-            # Padding
-            # -------------------------------------------------
-
-            ("LEFTPADDING", (0, 0), (-1, -1), 3),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 3),
-            ("TOPPADDING", (0, 0), (-1, -1), 4),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-        ])
-    )
-
+    items.setStyle(TableStyle([
+        # Header
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef7fc")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), brand_dark),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, 0), 8.2),
+        # Body
+        ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 1), (-1, -1), 8.0),
+        # Borders
+        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#b8c4cf")),
+        ("LINEBELOW", (0, 0), (-1, 0), 1.2, brand),
+        # Alignment
+        ("ALIGN", (0, 0), (0, -1), "CENTER"),   # HS Code
+        ("ALIGN", (1, 0), (1, -1), "LEFT"),     # Description
+        ("ALIGN", (2, 0), (2, -1), "LEFT"),     # Sale Type
+        ("ALIGN", (3, 0), (3, -1), "CENTER"),   # UOM
+        ("ALIGN", (4, 0), (4, -1), "RIGHT"),    # Qty
+        ("ALIGN", (5, 0), (5, -1), "RIGHT"),    # Rate
+        ("ALIGN", (6, 0), (6, -1), "RIGHT"),    # S.T Rate
+        ("ALIGN", (7, 0), (7, -1), "CENTER"),   # SRO
+        ("ALIGN", (8, 0), (8, -1), "CENTER"),   # SRO Item
+        ("ALIGN", (9, 0), (9, -1), "RIGHT"),    # Sales Value
+        # Vertical alignment
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        # Cell padding
+        ("LEFTPADDING", (0, 0), (-1, -1), 5),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+    ]))
     elements.append(items)
     elements.append(Spacer(1, 10))
-
     # =========================================================
     # SUMMARY
     # =========================================================
-
     summary_rows = []
-
     if float(data.get("sales_tax", 0)) > 0:
         summary_rows.append([
             "Sales Tax",
