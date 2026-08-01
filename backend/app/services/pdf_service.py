@@ -118,14 +118,28 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     )
     elements = []
     # Header
+    # left_header = Table(
+    #     [
+    #         [Paragraph(data["seller_name"], title_style)],
+    #         [Paragraph(
+    #             f"{data['seller_address']}<br/>"
+    #             f"NTN/CNIC: {data['seller_ntn']} | "
+    #             f"STRN: {data.get('seller_strn') or 'N/A'} | "
+    #             f"Province: {data['province']}",
+    #             meta_style,
+    #         )],
+    #     ],
+    seller_meta = (
+        f"{data['seller_address']}<br/>"
+        f"NTN/CNIC: {data['seller_ntn']}"
+    )
+    if data.get("seller_strn"):
+        seller_meta += f" | STRN: {data['seller_strn']}"
+    seller_meta += f" | Province: {data['province']}"
     left_header = Table(
         [
             [Paragraph(data["seller_name"], title_style)],
-            [Paragraph(
-                f"{data['seller_address']}<br/>"
-                f"NTN/CNIC: {data['seller_ntn']} | Province: {data['province']}",
-                meta_style,
-            )],
+            [Paragraph(seller_meta, meta_style)],
         ],
         colWidths=[w * 0.78],
     )
@@ -172,8 +186,10 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     buyer_text = (
         f"<b>NAME:</b> {data['buyer_name']}<br/>"
         f"<b>ADDRESS:</b> {data['buyer_address']}<br/>"
-        f"<b>NTN/CNIC:</b> {data['buyer_ntn']}"
+        f"<b>NTN/CNIC:</b> {data['buyer_ntn']}<br/>"
     )
+    if data.get("buyer_strn"):
+        buyer_text += f"<b>STRN:</b> {data['buyer_strn']}<br/>"
     inv_text = (
         f"<b>Inv #:</b>&nbsp;{data['invoice_no']}<br/>"
         f"<b>Date:</b> {data['date']}<br/>"
@@ -253,14 +269,35 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     elements.append(items)
     elements.append(Spacer(1, 10))
     # Summary
-    summary_rows = [
-        ["Sales Tax", fmt_money(data["sales_tax"])],
-        ["Further Tax", fmt_money(data["further_tax"])],
-        ["Extra Tax", fmt_money(data["extra_tax"])],
-        ["FED", fmt_money(data["fed"])],
-    ]
+    # summary_rows = [
+    #     ["Sales Tax", fmt_money(data["sales_tax"])],
+    #     ["Further Tax", fmt_money(data["further_tax"])],
+    #     ["Extra Tax", fmt_money(data["extra_tax"])],
+    #     ["FED", fmt_money(data["fed"])],
+    # ]
+    summary_rows = []
+    if float(data.get("sales_tax", 0)) > 0:
+        summary_rows.append([
+            "Sales Tax",
+            fmt_money(data["sales_tax"])
+        ])
+    if float(data.get("further_tax", 0)) > 0:
+        summary_rows.append([
+            "Further Tax",
+            fmt_money(data["further_tax"])
+        ])
+    if float(data.get("extra_tax", 0)) > 0:
+        summary_rows.append([
+            "Extra Tax",
+            fmt_money(data["extra_tax"])
+        ])
+    if float(data.get("fed", 0)) > 0:
+        summary_rows.append([
+            "FED",
+            fmt_money(data["fed"])
+        ])
     # Show 236H only when applicable
-    if data.get("tax236H", 0) > 0:
+    if float(data.get("tax236H", 0)) > 0:
         rates = data.get("tax236HRates", [])
         if rates:
             rate_text = ", ".join(f"{r:g}%" for r in rates)
@@ -271,11 +308,31 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             label,
             fmt_money(data["tax236H"])
         ])
-    summary_rows.extend([
-        ["Discount", f"-{fmt_money(data['discount'])}"],
-        ["Retail Price", fmt_money(data["retail_price"])],
-        ["Sales Tax WH", f"-{fmt_money(data['st_wh'])}"],
-        ["Grand Total", f"Rs. {fmt_money(data['grand_total'])}"],
+    # summary_rows.extend([
+    #     ["Discount", f"-{fmt_money(data['discount'])}"],
+    #     ["Retail Price", fmt_money(data["retail_price"])],
+    #     ["Sales Tax WH", f"-{fmt_money(data['st_wh'])}"],
+    #     ["Grand Total", f"Rs. {fmt_money(data['grand_total'])}"],
+    # ])
+    if float(data.get("discount", 0)) > 0:
+        summary_rows.append([
+            "Discount",
+            f"-{fmt_money(data['discount'])}"
+        ])
+    if float(data.get("retail_price", 0)) > 0:
+        summary_rows.append([
+            "Retail Price",
+            fmt_money(data["retail_price"])
+        ])
+    if float(data.get("st_wh", 0)) > 0:
+        summary_rows.append([
+            "Sales Tax WH",
+            f"-{fmt_money(data['st_wh'])}"
+        ])
+    # Grand Total is always shown
+    summary_rows.append([
+        "Grand Total",
+        f"Rs. {fmt_money(data['grand_total'])}"
     ])
     summary_tbl = Table(summary_rows, colWidths=[w * 0.26, w * 0.21])
     summary_style = [
