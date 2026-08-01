@@ -134,8 +134,8 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         f"NTN/CNIC: {data['seller_ntn']}"
     )
     if data.get("seller_strn"):
-        seller_meta += f" | STRN: {data['seller_strn']}"
-    seller_meta += f" | Province: {data['province']}"
+        seller_meta += f"<br/>STRN: {data['seller_strn']}"
+    seller_meta += f"<br/>Province: {data['province']}"
     left_header = Table(
         [
             [Paragraph(data["seller_name"], title_style)],
