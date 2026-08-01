@@ -230,41 +230,91 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     # Extra space before items table
     elements.append(Spacer(1, 18))
     # Items table
+    # ---------------------------------------------------------
     table_data = [[
-        "HS Code", "Description", "Sale Type", "UOM", "Qty", "Rate", "S.T Rate", "SRO", "SRO Item", "Sales Value"
+        "HS Code",
+        "Description",
+        "Sale Type",
+        "UOM",
+        "Qty",
+        "Rate",
+        "S.T Rate",
+        "SRO",
+        "SRO Item",
+        "Sales Value",
     ]]
     for item in data["items"]:
         table_data.append([
-            Paragraph(str(item.get("hs_code", "")), cell_style),
-            Paragraph(str(item.get("description", "")), cell_style),
-            Paragraph(str(item.get("sale_type", "")), cell_style),
-            Paragraph(str(item.get("uom", "")), uom_style),
+            Paragraph(
+                str(item.get("hs_code", "")),
+                cell_style
+            ),
+            Paragraph(
+                str(item.get("description", "")),
+                cell_style
+            ),
+            Paragraph(
+                str(item.get("sale_type", "")),
+                cell_style
+            ),
+            Paragraph(
+                str(item.get("uom", "")),
+                uom_style
+            ),
             fmt_money(item.get("quantity", 0)),
             fmt_money(item.get("item_rate", 0)),
             str(item.get("rate", "")),
-            Paragraph(str(item.get("sro", "")), cell_style),
-            Paragraph(str(item.get("sro_item", "")), cell_style),
+            Paragraph(
+                str(item.get("sro", "")),
+                cell_style
+            ),
+            Paragraph(
+                str(item.get("sro_item", "")),
+                cell_style
+            ),
             fmt_money(item.get("value_excl", 0)),
         ])
-    col_widths = [w * 0.09, w * 0.16, w * 0.20, w * 0.07, w * 0.07, w * 0.08, w * 0.06, w * 0.07, w * 0.08, w * 0.12]
-    items = Table(table_data, repeatRows=1, colWidths=col_widths)
+    col_widths = [
+        w * 0.09,   # HS Code
+        w * 0.17,   # Description
+        w * 0.15,   # Sale Type
+        w * 0.06,   # UOM
+        w * 0.06,   # Qty
+        w * 0.09,   # Rate
+        w * 0.07,   # S.T Rate
+        w * 0.07,   # SRO
+        w * 0.09,   # SRO Item
+        w * 0.15,   # Sales Value
+    ]
+    items = Table(
+        table_data,
+        repeatRows=1,
+        colWidths=col_widths,
+        hAlign="LEFT",
+    )
     items.setStyle(TableStyle([
+        # Header
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef7fc")),
         ("TEXTCOLOR", (0, 0), (-1, 0), brand_dark),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, 0), 7.5),
         ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, 0), 8.2),
-        ("FONTSIZE", (0, 1), (-1, -1), 8.0),
+        ("FONTSIZE", (0, 1), (-1, -1), 7.3),
         ("LINEBELOW", (0, 0), (-1, 0), 1.2, brand),
         ("LINEBELOW", (0, 1), (-1, -1), 0.3, colors.HexColor("#d8e0e8")),
-        ("ALIGN", (3, 0), (3, -1), "RIGHT"),
-        ("ALIGN", (4, 0), (4, -1), "CENTER"),
-        ("ALIGN", (5, 1), (5, -1), "RIGHT"),
-        ("ALIGN", (6, 1), (6, -1), "RIGHT"),
-        ("ALIGN", (9, 1), (9, -1), "RIGHT"),
+        ("ALIGN", (0, 0), (0, -1), "LEFT"),
+        ("ALIGN", (1, 0), (1, -1), "LEFT"),
+        ("ALIGN", (2, 0), (2, -1), "LEFT"),
+        ("ALIGN", (3, 0), (3, -1), "CENTER"),
+        ("ALIGN", (4, 0), (4, -1), "RIGHT"),
+        ("ALIGN", (5, 0), (5, -1), "RIGHT"),
+        ("ALIGN", (6, 0), (6, -1), "RIGHT"),
+        ("ALIGN", (7, 0), (7, -1), "LEFT"),
+        ("ALIGN", (8, 0), (8, -1), "LEFT"),
+        ("ALIGN", (9, 0), (9, -1), "RIGHT"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 5),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 3),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 3),
         ("TOPPADDING", (0, 0), (-1, -1), 4),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
