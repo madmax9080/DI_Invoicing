@@ -953,14 +953,14 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     col_widths = [
         w * 0.09,   # HS Code
         w * 0.17,   # Description
-        w * 0.15,   # Sale Type
+        w * 0.17,   # Sale Type
         w * 0.06,   # UOM
         w * 0.06,   # Qty
-        w * 0.09,   # Rate
-        w * 0.07,   # S.T Rate
+        w * 0.08,   # Rate
+        w * 0.08,   # S.T Rate
         w * 0.07,   # SRO
-        w * 0.09,   # SRO Item
-        w * 0.15,   # Sales Value
+        w * 0.08,   # SRO Item
+        w * 0.14,   # Sales Value
     ]
 
     items = Table(
@@ -975,29 +975,47 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef7fc")),
         ("TEXTCOLOR", (0, 0), (-1, 0), brand_dark),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, 0), 8.2),
+        ("FONTSIZE", (0, 0), (-1, 0), 8.0),
+
         # Body
         ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 1), (-1, -1), 8.0),
-        # Borders
-        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#b8c4cf")),
+        ("FONTSIZE", (0, 1), (-1, -1), 7.8),
+
+        # Outer border
+        ("BOX", (0, 0), (-1, -1), 0.7, colors.HexColor("#aeb8c2")),
+
+        # Vertical borders
+        ("INNERGRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#c8d0d8")),
+
+        # Header bottom border
         ("LINEBELOW", (0, 0), (-1, 0), 1.2, brand),
+
         # Alignment
-        ("ALIGN", (0, 0), (0, -1), "CENTER"),   # HS Code
-        ("ALIGN", (1, 0), (1, -1), "LEFT"),     # Description
-        ("ALIGN", (2, 0), (2, -1), "LEFT"),     # Sale Type
-        ("ALIGN", (3, 0), (3, -1), "CENTER"),   # UOM
-        ("ALIGN", (4, 0), (4, -1), "RIGHT"),    # Qty
-        ("ALIGN", (5, 0), (5, -1), "RIGHT"),    # Rate
-        ("ALIGN", (6, 0), (6, -1), "RIGHT"),    # S.T Rate
-        ("ALIGN", (7, 0), (7, -1), "CENTER"),   # SRO
-        ("ALIGN", (8, 0), (8, -1), "CENTER"),   # SRO Item
-        ("ALIGN", (9, 0), (9, -1), "RIGHT"),    # Sales Value
+        ("ALIGN", (0, 0), (0, -1), "CENTER"),
+        ("ALIGN", (1, 0), (2, -1), "LEFT"),
+        ("ALIGN", (3, 0), (3, -1), "CENTER"),
+        ("ALIGN", (4, 0), (4, -1), "CENTER"),
+
+        # Rate
+        ("ALIGN", (5, 0), (5, 0), "CENTER"),
+        ("ALIGN", (5, 1), (5, -1), "RIGHT"),
+
+        # ST Rate
+        ("ALIGN", (6, 0), (6, 0), "CENTER"),
+        ("ALIGN", (6, 1), (6, -1), "RIGHT"),
+
+        # SRO
+        ("ALIGN", (7, 0), (8, -1), "CENTER"),
+
+        # Sales Value
+        ("ALIGN", (9, 0), (9, -1), "RIGHT"),
+
         # Vertical alignment
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        # Cell padding
-        ("LEFTPADDING", (0, 0), (-1, -1), 5),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+
+        # Padding   
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("TOPPADDING", (0, 0), (-1, -1), 4),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
