@@ -1,17 +1,17 @@
 import { showToast } from "../toast.js";
 import { apiFetch } from "../api.js";
 import { loadProvinces, loadDocumentTypes, loadSaleTypes, loadHSCodes } from "../reference.js"
-import { resetSelect, disableSelect, enableSelect } from "../utils.js?v=6";
-import { initDynamicBindings } from "../utils.js?v=6";
-import { getItemInputValues } from "../utils.js?v=6";
-import { syncInvoiceMeta } from "../utils.js?v=6";
-import { computeItemTotals } from "../utils.js?v=6";
-import { normalizeItem } from "../utils.js?v=6";
-import { validateItem } from "../utils.js?v=6";
-import { formatAmount } from "../utils.js?v=6";
+import { resetSelect, disableSelect, enableSelect } from "../utils.js?v=7";
+import { initDynamicBindings } from "../utils.js?v=7";
+import { getItemInputValues } from "../utils.js?v=7";
+import { syncInvoiceMeta } from "../utils.js?v=7";
+import { computeItemTotals } from "../utils.js?v=7";
+import { normalizeItem } from "../utils.js?v=7";
+import { validateItem } from "../utils.js?v=7";
+import { formatAmount } from "../utils.js?v=7";
 import { getProvinceTextById } from "../provinces.js";
-import { buyerTaxState } from "../utils.js?v=6";
-import { applyAutoFurtherTax } from "../utils.js?v=6";
+import { buyerTaxState } from "../utils.js?v=7";
+import { applyAutoFurtherTax } from "../utils.js?v=7";
 import { BuyerService } from "../services/buyer_service.js";
 
 let currentItems = [];

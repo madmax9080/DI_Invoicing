@@ -209,20 +209,23 @@ export function recalcItemTotals() {
     computeItemTotals(item);
 }
 
+let itemValueFirstMode = false;
 export function syncItemRateAndValue(source) {
     const quantityRaw = $("#quantity").val().trim();
     const rateRaw = $("#itemRate").val().trim();
     const valueRaw = $("#valueSalesExcludingST").val().trim();
+
     const quantity = Number(quantityRaw);
     const rate = Number(rateRaw);
     const value = Number(valueRaw);
+
     // ---------------------------------------------------------
-    // USER ENTERED ITEM RATE
-    // Quantity × Item Rate = Amount
+    // USER ENTERED RATE
     // ---------------------------------------------------------
     if (source === "rate") {
+        itemValueFirstMode = false;
+
         if (
-            quantityRaw !== "" &&
             quantity > 0 &&
             rateRaw !== "" &&
             Number.isFinite(rate)
@@ -231,78 +234,64 @@ export function syncItemRateAndValue(source) {
                 (quantity * rate).toFixed(2)
             );
         }
-        applyAutoFurtherTax();
-        return;
     }
-    // ---------------------------------------------------------
-    // USER ENTERED QUANTITY
-    //
-    // If item rate exists:
-    //      Quantity × Rate = Amount
-    //
-    // If item rate does NOT exist but amount exists:
-    //      Amount ÷ Quantity = Rate
-    // ---------------------------------------------------------
-    if (source === "quantity") {
-        if (
-            quantityRaw !== "" &&
-            quantity > 0 &&
-            rateRaw !== "" &&
-            Number.isFinite(rate)
-        ) {
-            // Rate exists → calculate amount
-            $("#valueSalesExcludingST").val(
-                (quantity * rate).toFixed(2)
-            );
-        }
-        else if (
-            quantityRaw !== "" &&
-            quantity > 0 &&
-            rateRaw === "" &&
-            valueRaw !== "" &&
-            Number.isFinite(value)
-        ) {
-            // Amount exists but rate does not
-            // → calculate rate from amount
-            $("#itemRate").val(
-                (value / quantity).toFixed(2)
-            );
-        }
-        applyAutoFurtherTax();
-        return;
-    }
+
     // ---------------------------------------------------------
     // USER ENTERED AMOUNT
-    //
-    // If quantity exists:
-    //      Amount ÷ Quantity = Rate
-    //
-    // If quantity does not exist:
-    //      Keep rate empty.
-    //      Amount remains the source value.
     // ---------------------------------------------------------
-    if (source === "value") {
+    else if (source === "value") {
+
+        // Amount is now the source of calculation.
+        itemValueFirstMode = true;
+
         if (
-            quantityRaw !== "" &&
             quantity > 0 &&
             valueRaw !== "" &&
             Number.isFinite(value)
         ) {
-            // Quantity exists → calculate rate
+            // Quantity exists:
+            // Amount -> Rate
             $("#itemRate").val(
                 (value / quantity).toFixed(2)
             );
         }
-        else if (
-            quantityRaw === ""
-        ) {
-            // Amount was entered first.
-            // Do NOT allow the amount to become the item rate.
-            $("#itemRate").val("");
-        }
-        applyAutoFurtherTax();
-        return;
     }
+
+    // ---------------------------------------------------------
+    // USER ENTERED QUANTITY
+    // ---------------------------------------------------------
+    else if (source === "quantity") {
+
+        // If amount was entered first, keep amount fixed
+        // and calculate the rate from amount / quantity.
+        if (
+            itemValueFirstMode &&
+            quantity > 0 &&
+            valueRaw !== "" &&
+            Number.isFinite(value)
+        ) {
+            $("#itemRate").val(
+                (value / quantity).toFixed(2)
+            );
+        }
+
+        // Otherwise quantity is being used with an existing
+        // manually-entered rate, so calculate the amount.
+        else if (
+            quantity > 0 &&
+            rateRaw !== "" &&
+            Number.isFinite(rate)
+        ) {
+            $("#valueSalesExcludingST").val(
+                (quantity * rate).toFixed(2)
+            );
+        }
+
+        // Quantity is being entered but neither rate nor
+        // amount is available yet.
+    }
+
+    // Recalculate taxes after either calculation.
     recalcItemTotals();
 }
 
