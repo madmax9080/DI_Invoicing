@@ -1,7 +1,7 @@
 import { apiFetch } from "../api.js";
-import { FYManager } from "../utils.js?v=5";
+import { FYManager } from "../utils.js?v=6";
 import { showToast} from "../toast.js"
-import { formatCompactPKR } from "../utils.js?v=5";
+import { formatCompactPKR } from "../utils.js?v=6";
 
 const state = {
     invoices: [],

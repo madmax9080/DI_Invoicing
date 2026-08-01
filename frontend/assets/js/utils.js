@@ -216,59 +216,125 @@ export function syncItemRateAndValue(source) {
     const quantity = Number(quantityRaw);
     const rate = Number(rateRaw);
     const value = Number(valueRaw);
+    // ---------------------------------------------------------
+    // USER ENTERED ITEM RATE
+    // Quantity × Item Rate = Amount
+    // ---------------------------------------------------------
     if (source === "rate") {
-        if (quantity > 0 && rateRaw !== "" && Number.isFinite(rate)) {
-            $("#valueSalesExcludingST").val(
-                (quantity * rate).toFixed(2)
-            );
-        }
-    }
-    else if (source === "quantity") {
         if (
+            quantityRaw !== "" &&
             quantity > 0 &&
             rateRaw !== "" &&
             Number.isFinite(rate)
         ) {
-            // Rate exists → calculate Value
+            $("#valueSalesExcludingST").val(
+                (quantity * rate).toFixed(2)
+            );
+        }
+        applyAutoFurtherTax();
+        return;
+    }
+    // ---------------------------------------------------------
+    // USER ENTERED QUANTITY
+    //
+    // If item rate exists:
+    //      Quantity × Rate = Amount
+    //
+    // If item rate does NOT exist but amount exists:
+    //      Amount ÷ Quantity = Rate
+    // ---------------------------------------------------------
+    if (source === "quantity") {
+        if (
+            quantityRaw !== "" &&
+            quantity > 0 &&
+            rateRaw !== "" &&
+            Number.isFinite(rate)
+        ) {
+            // Rate exists → calculate amount
             $("#valueSalesExcludingST").val(
                 (quantity * rate).toFixed(2)
             );
         }
         else if (
+            quantityRaw !== "" &&
             quantity > 0 &&
             rateRaw === "" &&
             valueRaw !== "" &&
             Number.isFinite(value)
         ) {
-            // Rate does not exist, but Value exists → calculate Rate
+            // Amount exists but rate does not
+            // → calculate rate from amount
             $("#itemRate").val(
                 (value / quantity).toFixed(2)
             );
         }
+        applyAutoFurtherTax();
+        return;
     }
-    else if (source === "value") {
+    // ---------------------------------------------------------
+    // USER ENTERED AMOUNT
+    //
+    // If quantity exists:
+    //      Amount ÷ Quantity = Rate
+    //
+    // If quantity does not exist:
+    //      Keep rate empty.
+    //      Amount remains the source value.
+    // ---------------------------------------------------------
+    if (source === "value") {
         if (
+            quantityRaw !== "" &&
             quantity > 0 &&
             valueRaw !== "" &&
             Number.isFinite(value)
         ) {
-            // Quantity exists → calculate Rate
+            // Quantity exists → calculate rate
             $("#itemRate").val(
                 (value / quantity).toFixed(2)
             );
         }
+        else if (
+            quantityRaw === ""
+        ) {
+            // Amount was entered first.
+            // Do NOT allow the amount to become the item rate.
+            $("#itemRate").val("");
+        }
+        applyAutoFurtherTax();
+        return;
     }
     recalcItemTotals();
 }
 
+// export function applyAutoFurtherTax() {
+//     if (!buyerTaxState.autoMode) return;
+//     const valueExcl = Number($("#valueSalesExcludingST").val()) || 0;
+//     let furtherTax = 0;
+//     if (buyerTaxState.applyFurtherTax && buyerTaxState.furtherTaxRate > 0) {
+//         furtherTax = (valueExcl * buyerTaxState.furtherTaxRate) / 100;
+//     }
+//     $("#furtherTax").val(furtherTax.toFixed(2));
+//     recalcItemTotals();
+// }
+
 export function applyAutoFurtherTax() {
-    if (!buyerTaxState.autoMode) return;
-    const valueExcl = Number($("#valueSalesExcludingST").val()) || 0;
-    let furtherTax = 0;
-    if (buyerTaxState.applyFurtherTax && buyerTaxState.furtherTaxRate > 0) {
-        furtherTax = (valueExcl * buyerTaxState.furtherTaxRate) / 100;
+    if (!buyerTaxState.autoMode) {
+        recalcItemTotals();
+        return;
     }
-    $("#furtherTax").val(furtherTax.toFixed(2));
+    const valueExcl =
+        Number($("#valueSalesExcludingST").val()) || 0;
+    let furtherTax = 0;
+    if (
+        buyerTaxState.applyFurtherTax &&
+        buyerTaxState.furtherTaxRate > 0
+    ) {
+        furtherTax =
+            (valueExcl * buyerTaxState.furtherTaxRate) / 100;
+    }
+    $("#furtherTax").val(
+        furtherTax.toFixed(2)
+    );
     recalcItemTotals();
 }
 
@@ -326,13 +392,6 @@ export function initDynamicBindings() {
      $(document)
         .off("change", "#tax236HRate", recalcItemTotals)
         .on("change", "#tax236HRate", recalcItemTotals);
-    $(document)
-    .off("input.autoFurtherTax", "#valueSalesExcludingST")
-    .on("input.autoFurtherTax", "#valueSalesExcludingST", function () {
-        if (buyerTaxState.autoMode) {
-            applyAutoFurtherTax();
-        }
-    });
     $(document)
     .off("input.manualFurtherTax", "#furtherTax")
     .on("input.manualFurtherTax", "#furtherTax", function () {
