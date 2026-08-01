@@ -65,6 +65,7 @@ async function submitDraft(invoiceId) {
                 hsCode: item.hsCode,
                 productDescription: item.productDescription,
                 rate: item.rate,
+                itemRate: Number(item.itemRate) || 0,
                 uoM: item.uom,
                 quantity: item.quantity,
                 valueSalesExcludingST: item.valueSalesExcludingST,

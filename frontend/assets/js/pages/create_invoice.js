@@ -339,6 +339,9 @@ function buildItemRow(item, index) {
             <td class="text-end">
                 ${formatRate(item.rateLabel, item.rateValue)}
             </td>
+            <td class="text-end">
+                ${formatAmount(item.itemRate)}
+            </td>
             <td class="text-end">${formatAmount(item.valueSalesExcludingST)}</td>
             <td class="text-end">${formatAmount(item.fixedNotifiedValueOrRetailPrice)}</td>
             <td class="text-end">${formatAmount(item.salesTaxApplicable)}</td>
@@ -505,7 +508,7 @@ function removeItem(index) {
     renderItemsTable();
 }
 
-function bindItemTableHandlers() {
+function bindItemTableHandlers() {  
     const $table = $("#itemsTable");
     $table.off(EVENTS_NS);
     $table.on(`click${EVENTS_NS}`, ".edit-item", function () {
@@ -692,6 +695,7 @@ function buildInvoicePayload() {
             hsCode: item.hsCode,
             productDescription: item.productDescription,
             rate: item.rateLabel,
+            itemRate: Number(item.itemRate) || 0,
             uoM: item.uomText,
             quantity: Number(item.quantity) || 0,
             valueSalesExcludingST: Number(item.valueSalesExcludingST) || 0,
@@ -800,6 +804,7 @@ function loadDraftForEditing() {
         productDescription: item.productDescription,
         quantity: Number(item.quantity),
         valueSalesExcludingST: Number(item.valueSalesExcludingST),
+        itemRate: Number(item.itemRate) || 0,
         salesTaxApplicable: Number(item.salesTaxApplicable),
         totalValues: Number(item.totalValues),
         fixedNotifiedValueOrRetailPrice:
