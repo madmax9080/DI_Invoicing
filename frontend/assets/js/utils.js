@@ -44,6 +44,7 @@ export function normalizeItem(raw) {
     return {
         ...raw,
         quantity: num(raw.quantity),
+        itemRate: num(raw.itemRate),
         valueSalesExcludingST: num(raw.valueSalesExcludingST),
         fixedNotifiedValueOrRetailPrice: num(raw.fixedNotifiedValueOrRetailPrice),
         rateValue: num(raw.rateValue),
@@ -63,8 +64,19 @@ export function validateItem(item) {
     if (!item.productDescription) return "Product Description is required";
     if (!item.rateId) return "Rate is required";
     if (!item.uomId) return "Unit of Measure is required";
-    if (!item.quantity) return "Quantity is required";
-    if(!item.valueSalesExcludingST) return "Value is required"
+    if (!item.quantity || item.quantity <= 0) {
+        return "Quantity is required";
+    }
+    if (!item.valueSalesExcludingST || item.valueSalesExcludingST <= 0) {
+        return "Value is required";
+    }
+    if (
+        item.itemRate === undefined ||
+        item.itemRate === null ||
+        !Number.isFinite(Number(item.itemRate))
+    ) {
+        return "Rate is required";
+    }
     if (
         item.saleTypeText.toLowerCase().includes("3rd schedule") &&
         item.fixedNotifiedValueOrRetailPrice <= 0
@@ -147,6 +159,7 @@ export function getItemInputValues() {
         rateId: selectedRate.val(),
         rateValue,
         rateLabel: selectedRate.text(), 
+        itemRate: parseFloat($("#itemRate").val()),
         saleTypeId: $("#saleType").val(),
         saleTypeLabel: ReferenceCache.saleTypes[$("#saleType").val()],
         saleTypeText,
@@ -196,6 +209,58 @@ export function recalcItemTotals() {
     computeItemTotals(item);
 }
 
+export function syncItemRateAndValue(source) {
+    const quantityRaw = $("#quantity").val().trim();
+    const rateRaw = $("#itemRate").val().trim();
+    const valueRaw = $("#valueSalesExcludingST").val().trim();
+    const quantity = Number(quantityRaw);
+    const rate = Number(rateRaw);
+    const value = Number(valueRaw);
+    if (source === "rate") {
+        if (quantity > 0 && rateRaw !== "" && Number.isFinite(rate)) {
+            $("#valueSalesExcludingST").val(
+                (quantity * rate).toFixed(2)
+            );
+        }
+    }
+    else if (source === "quantity") {
+        if (
+            quantity > 0 &&
+            rateRaw !== "" &&
+            Number.isFinite(rate)
+        ) {
+            // Rate exists → calculate Value
+            $("#valueSalesExcludingST").val(
+                (quantity * rate).toFixed(2)
+            );
+        }
+        else if (
+            quantity > 0 &&
+            rateRaw === "" &&
+            valueRaw !== "" &&
+            Number.isFinite(value)
+        ) {
+            // Rate does not exist, but Value exists → calculate Rate
+            $("#itemRate").val(
+                (value / quantity).toFixed(2)
+            );
+        }
+    }
+    else if (source === "value") {
+        if (
+            quantity > 0 &&
+            valueRaw !== "" &&
+            Number.isFinite(value)
+        ) {
+            // Quantity exists → calculate Rate
+            $("#itemRate").val(
+                (value / quantity).toFixed(2)
+            );
+        }
+    }
+    recalcItemTotals();
+}
+
 export function applyAutoFurtherTax() {
     if (!buyerTaxState.autoMode) return;
     const valueExcl = Number($("#valueSalesExcludingST").val()) || 0;
@@ -209,6 +274,8 @@ export function applyAutoFurtherTax() {
 
 export function loadItemIntoForm(item, index) {
     editingIndex = index;
+    $("#itemRate").val(item.itemRate);
+    $("#quantity").val(item.quantity);
     $("#valueSalesExcludingST").val(item.valueSalesExcludingST);
     $("#furtherTax").val(item.furtherTax);
     $("#extraTax").val(item.extraTax);
@@ -226,14 +293,12 @@ export function loadItemIntoForm(item, index) {
 
 export function initDynamicBindings() {
     const RECALC_FIELDS = [
-        "#valueSalesExcludingST",
         "#furtherTax",
         "#extraTax",
         "#fedPayable",
         "#discount",
         "#salesTaxWithheldAtSource",
         "#fixedNotifiedValueOrRetailPrice",
-        "#quantity"
     ];
     RECALC_FIELDS.forEach(selector => {
         $(document)
@@ -243,6 +308,21 @@ export function initDynamicBindings() {
     $(document)
         .off("change", "#rate", recalcItemTotals)
         .on("change", "#rate", recalcItemTotals);
+    $(document)
+    .off("input.itemRate", "#itemRate")
+    .on("input.itemRate", "#itemRate", function () {
+        syncItemRateAndValue("rate");
+    });
+    $(document)
+        .off("input.itemQuantity", "#quantity")
+        .on("input.itemQuantity", "#quantity", function () {
+            syncItemRateAndValue("quantity");
+        });
+    $(document)
+        .off("input.itemValue", "#valueSalesExcludingST")
+        .on("input.itemValue", "#valueSalesExcludingST", function () {
+            syncItemRateAndValue("value");
+        });
      $(document)
         .off("change", "#tax236HRate", recalcItemTotals)
         .on("change", "#tax236HRate", recalcItemTotals);
