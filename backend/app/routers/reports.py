@@ -404,6 +404,10 @@ async def generate_invoice_pdf(
         "qr": qr_buffer,
         "logo": str(BASE_DIR / "static/images/fbr_logo.png")
     }
+    print("PDF SELLER STRN:", invoice.sellerSTRN)
+    print("PDF BUYER STRN:", invoice.buyerSTRN)
+    print("PDF DATA SELLER STRN:", data.get("seller_strn"))
+    print("PDF DATA BUYER STRN:", data.get("buyer_strn"))
     pdf_bytes = generate_invoice_pdf_rl(data)
     return StreamingResponse(
         BytesIO(pdf_bytes),
