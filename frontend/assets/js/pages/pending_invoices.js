@@ -272,6 +272,9 @@ function renderTable() {
                     <td class="text-end">${Number(item.quantity || 0).toFixed(2)}</td>
                     <td>${item.uom || "-"}</td>
                     <td class="text-end">${item.rate || "-"}</td>
+                    <td class="text-end">
+                        ${Number(item.itemRate)}
+                    </td>
                     <td class="text-end">${Number(item.valueSalesExcludingST || 0).toFixed(2)}</td>
                     <td class="text-end">${Number(item.fixedNotifiedValueOrRetailPrice || 0).toFixed(2)}</td>
                     <td class="text-end">${Number(item.salesTaxApplicable || 0).toFixed(2)}</td>
