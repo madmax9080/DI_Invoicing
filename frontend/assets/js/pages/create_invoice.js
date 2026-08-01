@@ -468,9 +468,13 @@ function resetInvoiceForm() {
 
 async function editItem(index) {
     const item = currentItems[index];
+    if (!item) {
+        return;
+    }
     editingIndex = index;   
     $("#productDescription").val(item.productDescription);
     $("#quantity").val(item.quantity);
+    $("#itemRate").val(item.itemRate ?? "");
     $("#valueSalesExcludingST").val(item.valueSalesExcludingST);
     $("#discount").val(item.discount);
     $("#salesTaxWithheldAtSource").val(item.salesTaxWithheldAtSource);
