@@ -205,6 +205,8 @@ async def post_invoice_to_fbr(
 
     fbr_payload.pop("sellerSTRN", None)
     fbr_payload.pop("buyerSTRN", None)
+    for item in fbr_payload.get("items", []):
+        item.pop("itemRate", None)
 
     # ---------------------------------------------------------
     # Check whether this internal invoice already exists
@@ -304,6 +306,7 @@ async def post_invoice_to_fbr(
                 uom=item.get("uoM"),
                 quantity=item["quantity"],
                 rate=item["rate"],
+                itemRate=item["itemRate"],
                 valueSalesExcludingST=item[
                     "valueSalesExcludingST"
                 ],
@@ -546,8 +549,11 @@ async def validate_invoice_with_fbr(
     db: Session = Depends(get_db),
 ):
     payload = invoice.model_dump(mode="json")
+    fbr_payload = payload.copy()
+    for item in fbr_payload.get("items", []):
+        item.pop("itemRate", None)
     try:
-        fbr_response = await fbr_client.validate_invoice(payload)
+        fbr_response = await fbr_client.validate_invoice(fbr_payload)
         crud.create_invoice(
             db=db,
             payload=payload,

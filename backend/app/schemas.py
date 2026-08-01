@@ -78,6 +78,7 @@ class InvoiceItem(BaseModel):
     hsCode: str = Field(..., min_length=4)
     productDescription: str
     rate: str = Field(..., description="e.g. '18%'")
+    itemRate: Decimal = Field(..., ge=0, description="Invoice item unit rate")
     uoM: str = Field(..., description="UOM description")
     quantity: Union[int, Decimal]
     totalValues: Union[int, Decimal]
@@ -103,6 +104,7 @@ class InvoiceItemOut(BaseModel):
     hsCode: str
     productDescription: str
     rate: str
+    itemRate: Decimal
     uoM: str = Field(alias="uom")
     quantity: Decimal
     totalValues: Decimal

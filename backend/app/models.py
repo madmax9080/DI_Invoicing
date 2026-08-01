@@ -60,6 +60,7 @@ class InvoiceItem(Base):
     uom = Column(String(50), nullable=False)
     quantity = Column(Numeric(15, 4), nullable=False)
     rate = Column(String(10), nullable=False)
+    itemRate = Column(Numeric(18, 2), nullable=False, default=0)
     valueSalesExcludingST = Column(Numeric(18, 2), nullable=False) 
     salesTaxApplicable = Column(Numeric(18, 2), nullable=False) 
     totalValues = Column(Numeric(18, 2), nullable=False, default=0.0)
