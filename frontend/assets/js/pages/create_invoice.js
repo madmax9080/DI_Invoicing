@@ -411,6 +411,7 @@ function clearItemInputs() {
     const TEXT_FIELDS = [
         "#productDescription",
         "#quantity",
+        "#itemRate",
         "#valueSalesExcludingST",
         "#salesTaxApplicable",
         "#totalValues",
@@ -474,7 +475,11 @@ async function editItem(index) {
     editingIndex = index;   
     $("#productDescription").val(item.productDescription);
     $("#quantity").val(item.quantity);
-    $("#itemRate").val(item.itemRate ?? "");
+    $("#itemRate").val(
+        Number.isFinite(Number(item.itemRate))
+            ? Number(item.itemRate).toFixed(2)
+            : ""
+    );
     $("#valueSalesExcludingST").val(item.valueSalesExcludingST);
     $("#discount").val(item.discount);
     $("#salesTaxWithheldAtSource").val(item.salesTaxWithheldAtSource);
