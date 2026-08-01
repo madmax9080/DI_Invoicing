@@ -292,7 +292,11 @@ export function syncItemRateAndValue(source) {
     }
 
     // Recalculate taxes after either calculation.
-    recalcItemTotals();
+    if (buyerTaxState.autoMode) {
+        applyAutoFurtherTax();
+    } else {
+        recalcItemTotals();
+    }
 }
 
 // export function applyAutoFurtherTax() {

@@ -1,5 +1,5 @@
 import { apiFetch } from "./api.js";
-import { resetSelect } from "./utils.js?v=7";
+import { resetSelect } from "./utils.js?v=8";
 
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 function getCached(key) {
