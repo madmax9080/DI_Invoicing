@@ -273,7 +273,7 @@ function renderTable() {
     if (!state.invoices.length) {
         tbody.append(`
             <tr>
-                <td colspan="28"
+                <td colspan="31"
                     class="text-center text-muted py-4">
                     <<<<<< No invoices found >>>>>>
                 </td>
@@ -371,7 +371,8 @@ function renderRow(inv, item, index) {
             <td>${item?.saleType || "-"}</td>
             <td>${formatAmount(item?.valueSalesExcludingST)}</td>
             <td>${item?.fixedNotifiedValueOrRetailPrice || "-"}</td>
-            <td>${formatItemRate(item?.itemRate ?? item?.rate)}</td>
+            <td>${item?.rate || "-"}</td>
+            <td>${formatItemRate(item?.itemRate)}</td>
             <td>${formatAmount(item?.salesTaxApplicable)}</td>
             <td>${formatAmount(item?.salesTaxWithheldAtSource)}</td>
             <td>${formatAmount(item?.extraTax)}</td>
