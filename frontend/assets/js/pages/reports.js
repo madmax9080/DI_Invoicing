@@ -154,6 +154,13 @@ function formatAmount(val) {
     });
 }
 
+function formatItemRate(val) {
+    if (val === null || val === undefined || val === "") return "-";
+    const numericValue = Number(val);
+    if (!Number.isFinite(numericValue)) return val;
+    return formatAmount(numericValue);
+}
+
 function formatDate(date) {
     if (!date) return "-";
     return new Date(date).toLocaleDateString();
@@ -364,7 +371,7 @@ function renderRow(inv, item, index) {
             <td>${item?.saleType || "-"}</td>
             <td>${formatAmount(item?.valueSalesExcludingST)}</td>
             <td>${item?.fixedNotifiedValueOrRetailPrice || "-"}</td>
-            <td>${item?.rate || "-"}</td>
+            <td>${formatItemRate(item?.itemRate ?? item?.rate)}</td>
             <td>${formatAmount(item?.salesTaxApplicable)}</td>
             <td>${formatAmount(item?.salesTaxWithheldAtSource)}</td>
             <td>${formatAmount(item?.extraTax)}</td>

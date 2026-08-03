@@ -120,6 +120,7 @@ def reports_invoices(
             "uom": item.uom,
             "quantity": float(item.quantity or 0),
             "rate": item.rate,
+            "itemRate": float(item.itemRate or 0),
             "valueSalesExcludingST": float(item.valueSalesExcludingST or 0),
             "salesTaxApplicable": float(item.salesTaxApplicable or 0),
             "salesTaxWithheldAtSource": float(item.salesTaxWithheldAtSource or 0),
