@@ -140,7 +140,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         parent=styles["Normal"],
         fontName="Helvetica",
         fontSize=8.0,
-        leading=9.6,
+        leading=10.8,
         textColor=text,
         alignment=TA_LEFT,
         splitLongWords=True,
@@ -156,7 +156,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         "InvTextRight",
         parent=block_text_style,
         fontSize=7.8,
-        leading=9.3,
+        leading=10.2,
         alignment=TA_RIGHT,
     )
 
@@ -342,19 +342,19 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     # =========================================================
 
     buyer_text = (
-        f"<b>NAME:</b> {data['buyer_name']}<br/><br/>"
-        f"<b>ADDRESS:</b> {data['buyer_address']}<br/><br/>"
-        f"<b>NTN/CNIC:</b> {data['buyer_ntn']}<br/><br/>"
+        f"<b>NAME:</b> {data['buyer_name']}<br/>"
+        f"<b>ADDRESS:</b> {data['buyer_address']}<br/>"
+        f"<b>NTN/CNIC:</b> {data['buyer_ntn']}"
     )
 
     if data.get("buyer_strn"):
         buyer_text += (
-            f"<b>STRN:</b> {data['buyer_strn']}<br/><br/>"
+            f"<br/><b>STRN:</b> {data['buyer_strn']}"
         )
 
     inv_text = (
-        f"<b>Inv #:</b>&nbsp;{data['invoice_no']}<br/><br/>"
-        f"<b>Date:</b> {data['date']}<br/><br/>"
+        f"<b>Inv #:</b>&nbsp;{data['invoice_no']}<br/>"
+        f"<b>Date:</b> {data['date']}<br/>"
         f"<b>Sale Type:</b> {data['sale_type']}"
     )
 
