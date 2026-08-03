@@ -342,19 +342,19 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     # =========================================================
 
     buyer_text = (
-        f"<b>NAME:</b> {data['buyer_name']}<br/>"
-        f"<b>ADDRESS:</b> {data['buyer_address']}<br/>"
-        f"<b>NTN/CNIC:</b> {data['buyer_ntn']}<br/>"
+        f"<b>NAME:</b> {data['buyer_name']}<br/><br/>"
+        f"<b>ADDRESS:</b> {data['buyer_address']}<br/><br/>"
+        f"<b>NTN/CNIC:</b> {data['buyer_ntn']}<br/><br/>"
     )
 
     if data.get("buyer_strn"):
         buyer_text += (
-            f"<b>STRN:</b> {data['buyer_strn']}<br/>"
+            f"<b>STRN:</b> {data['buyer_strn']}<br/><br/>"
         )
 
     inv_text = (
-        f"<b>Inv #:</b>&nbsp;{data['invoice_no']}<br/>"
-        f"<b>Date:</b> {data['date']}<br/>"
+        f"<b>Inv #:</b>&nbsp;{data['invoice_no']}<br/><br/>"
+        f"<b>Date:</b> {data['date']}<br/><br/>"
         f"<b>Sale Type:</b> {data['sale_type']}"
     )
 
