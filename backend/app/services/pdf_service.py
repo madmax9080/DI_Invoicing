@@ -367,13 +367,16 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                 )
             ],
             [
+                Spacer(1, 3)
+            ],
+            [
                 Paragraph(
                     buyer_text,
                     block_text_style
                 )
             ],
         ],
-        colWidths=[w * 0.63],
+        colWidths=[w * 0.60],
     )
 
     buyer_block.setStyle(
@@ -397,13 +400,16 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                 )
             ],
             [
+                Spacer(1, 3)
+            ],
+            [
                 Paragraph(
                     inv_text,
                     inv_text_right_style
                 )
             ],
         ],
-        colWidths=[w * 0.37],
+        colWidths=[w * 0.34],
     )
 
     inv_block.setStyle(
@@ -422,12 +428,14 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         [
             [
                 buyer_block,
+                "",
                 inv_block,
             ]
         ],
         colWidths=[
-            w * 0.63,
-            w * 0.37,
+            w * 0.60,
+            6 * mm,
+            w * 0.34,
         ],
     )
 
@@ -436,7 +444,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
 
             ("ALIGN", (0, 0), (0, 0), "LEFT"),
-            ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+            ("ALIGN", (2, 0), (2, 0), "RIGHT"),
 
             ("LEFTPADDING", (0, 0), (-1, -1), 0),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),
