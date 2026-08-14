@@ -7,7 +7,10 @@ def build_invoice_payloads_from_excel(df):
         "salesTaxWithheldAtSource": 0,
         "discount": 0,
         "furtherTax": 0,
-        "fedPayable": 0
+        "fedPayable": 0,
+        "itemRate": 0,
+        "tax236HRate": 0,
+        "tax236H": 0,
     })
     grouped = df.groupby("excelInvoiceId")
     for excel_id, rows in grouped:
@@ -28,6 +31,7 @@ def build_invoice_payloads_from_excel(df):
                 "hsCode": safe_str(r.hsCode).split("-")[0].strip().replace("\xa0", ""),
                 "productDescription": safe_str(r.productDescription),
                 "rate": format_rate(r.rate),
+                "itemRate": safe_float(r.itemRate),
                 "uoM": safe_str(r.uoM),
                 "quantity": safe_float(r.quantity),
                 "valueSalesExcludingST": safe_float(r.valueSalesExcludingST),
@@ -39,6 +43,8 @@ def build_invoice_payloads_from_excel(df):
                 "extraTax": "" if pd.isna(r.extraTax) else float(r.extraTax),
                 "fedPayable": safe_float(r.fedPayable),
                 "discount": safe_float(r.discount),
+                "tax236HRate": safe_float(r.tax236HRate),
+                "tax236H": safe_float(r.tax236H),
                 "saleType": safe_str(r.saleType),
                 "sroScheduleNo": safe_str(r.sroScheduleNo),
                 "sroItemSerialNo": safe_str(r.sroItemSerialNo),
@@ -50,10 +56,12 @@ def build_invoice_payloads_from_excel(df):
             "invoiceDate": safe_str(first.invoiceDate).split(" ")[0],
             "invoiceRefNo": safe_str(first.invoiceRefNo),
             "sellerNTNCNIC": safe_str(first.sellerNTNCNIC),
+            "sellerSTRN": safe_str(first.sellerSTRN),
             "sellerBusinessName": safe_str(first.sellerBusinessName),
             "sellerProvince": safe_str(first.sellerProvince),
             "sellerAddress": safe_str(first.sellerAddress),
             "buyerNTNCNIC": safe_str(first.buyerNTNCNIC),
+            "buyerSTRN": safe_str(first.buyerSTRN),
             "buyerBusinessName": safe_str(first.buyerBusinessName),
             "buyerProvince": safe_str(first.buyerProvince),
             "buyerAddress": safe_str(first.buyerAddress),

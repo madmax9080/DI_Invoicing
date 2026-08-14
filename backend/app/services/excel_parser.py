@@ -3,7 +3,15 @@ from fastapi import HTTPException
 import pandas as pd
 
 def parse_excel(contents: bytes):
-    df = pd.read_excel(BytesIO(contents), dtype={"hsCode": str, "internalInvoiceNo": str})
+    df = pd.read_excel(
+        BytesIO(contents), 
+        dtype={
+            "hsCode": str, 
+            "internalInvoiceNo": str, 
+            "sellerNTNCNIC": str,
+            "sellerSTRN": str,
+            "buyerNTNCNIC": str,
+            "buyerSTRN": str,})
     required_columns = [
         "excelInvoiceId",
         "internalInvoiceNo",
@@ -22,6 +30,7 @@ def parse_excel(contents: bytes):
         "hsCode",
         "productDescription",
         "rate",
+        "itemRate",
         "uoM",
         "quantity",
         "valueSalesExcludingST",
@@ -33,6 +42,8 @@ def parse_excel(contents: bytes):
         "extraTax",
         "fedPayable",
         "discount",
+        "tax236HRate",
+        "tax236H",
         "saleType",
         "sroScheduleNo",
         "sroItemSerialNo",

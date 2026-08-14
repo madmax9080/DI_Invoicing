@@ -526,7 +526,9 @@ async def preview_excel(
             io.BytesIO(contents),
             dtype={
                 "sellerNTNCNIC": str,
+                "sellerSTRN": str,
                 "buyerNTNCNIC": str,
+                "buyerSTRN": str,
                 "hsCode": str,
                 "invoiceRefNo": str,
                 "excelInvoiceId": str,
