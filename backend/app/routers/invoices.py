@@ -223,12 +223,14 @@ async def post_invoice_to_fbr(
             payload["invoiceDate"]
         )
         existing.sellerNTNCNIC = payload["sellerNTNCNIC"]
-        existing.sellerSTRN = seller_strn
+        if seller_strn is not None:
+            existing.sellerSTRN = seller_strn
         existing.sellerBusinessName = payload["sellerBusinessName"]
         existing.sellerProvince = payload["sellerProvince"]
         existing.sellerAddress = payload.get("sellerAddress")
         existing.buyerNTNCNIC = payload.get("buyerNTNCNIC")
-        existing.buyerSTRN = buyer_strn
+        if buyer_strn is not None:
+            existing.buyerSTRN = buyer_strn
         existing.buyerBusinessName = payload.get("buyerBusinessName")
         existing.buyerProvince = payload.get("buyerProvince")
         existing.buyerAddress = payload.get("buyerAddress")
