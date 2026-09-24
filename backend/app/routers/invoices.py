@@ -428,6 +428,8 @@ def update_invoice_draft(
             client_id=client.id,
             user_id=current_user["id"],
         )
+        clear_cache(f"dashboard:{client.id}:")
+        clear_cache(f"reports:{client.id}:")
         return {
             "status": "updated"
         }
@@ -810,6 +812,8 @@ async def submit_excel(
                 )
                 db_invoice.error_message = None
                 db.commit()
+                clear_cache(f"dashboard:{client_id}:")
+                clear_cache(f"reports:{client_id}:")
                 return {
                     "excelInvoiceId": excel_id,
                     "status": "success",
@@ -881,6 +885,8 @@ def delete_invoice(
         )
     db.delete(invoice)
     db.commit()
+    clear_cache(f"dashboard:{invoice.client_id}:")
+    clear_cache(f"reports:{invoice.client_id}:")
     return {
         "success": True,
         "message": "Invoice deleted successfully"
