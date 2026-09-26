@@ -32,10 +32,10 @@ def sales_by_buyer(
     fbr = Depends(get_fbr_client_secure)
 ):
     client_id = fbr.client_id
-    cache_key = f"reports:{client_id}:sales_by_buyer:{fy or 'current'}"
-    cached = get_cache(cache_key)
-    if cached:
-        return cached
+    # cache_key = f"reports:{client_id}:sales_by_buyer:{fy or 'current'}"
+    # cached = get_cache(cache_key)
+    # if cached:
+    #     return cached
     fiscal_start, fiscal_end, fiscal_label = get_fiscal_range(fy)
     subq = (
         db.query(
@@ -66,7 +66,7 @@ def sales_by_buyer(
         "labels": [r.name or "Unknown" for r in results],
         "series": [float(r.total or 0) for r in results]
     }
-    set_cache(cache_key, output)
+    # set_cache(cache_key, output)
     return output
 
 @router.get("/invoices")
