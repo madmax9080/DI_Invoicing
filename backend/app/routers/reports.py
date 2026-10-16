@@ -316,7 +316,6 @@ async def generate_invoice_pdf(
     ).all()
     item_rows = []
     subtotal_excl_st = 0
-    retail_price = 0
     total_sales_tax = 0
     total_discount = 0
     total_further_tax = 0
@@ -328,7 +327,6 @@ async def generate_invoice_pdf(
     tax236h_rates = set()
     for item in items:
         subtotal_excl_st += float(item.valueSalesExcludingST)
-        retail_price += float(item.fixedNotifiedValueOrRetailPrice)
         total_sales_tax += float(item.salesTaxApplicable)
         total_discount += float(item.discount or 0)
         total_further_tax += float(item.furtherTax or 0)
@@ -345,6 +343,9 @@ async def generate_invoice_pdf(
             "sale_type": item.saleType,
             "quantity": float(item.quantity),
             "item_rate": float(item.itemRate),
+            "retail_price": float(
+                item.fixedNotifiedValueOrRetailPrice or 0
+            ),
             "sro_sched": item.sroScheduleNo,
             "sro_item_sr": item.sroItemSerialNo,
             "sale_type": item.saleType,
@@ -388,6 +389,7 @@ async def generate_invoice_pdf(
             "sale_type": i["sale_type"],
             "quantity": i["quantity"],
             "item_rate": i["item_rate"],
+            "retail_price": i["retail_price"],
             "uom": i["uom"],
             "rate": i["rate"],
             "sro": i["sro_sched"],
@@ -401,7 +403,6 @@ async def generate_invoice_pdf(
         "tax236H": total_236h,
         "tax236HRates": sorted(tax236h_rates),
         "discount": total_discount,
-        "retail_price": retail_price,
         "st_wh": st_wh,
         "grand_total": grand_total,
         "qr": qr_buffer,

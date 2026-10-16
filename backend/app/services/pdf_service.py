@@ -16,74 +16,53 @@ from reportlab.platypus import (
 )
 
 def generate_invoice_pdf_rl(data: dict) -> bytes:
-
     def fmt_money(value):
         try:
             return f"{float(value):,.2f}"
         except (TypeError, ValueError):
             return "0.00"
-
     def fmt_number(value):
         try:
             number = float(value)
-
             if number.is_integer():
                 return f"{int(number):,}"
-
             return f"{number:,.2f}"
-
         except (TypeError, ValueError):
             return "0"
-
     def has_value(value):
         """
         Determines whether a value is meaningful for deciding
         whether an entire table column should be displayed.
-
         0, 0.0, "0", "0.00", None and "" are treated as empty.
-
         Non-numeric text is considered meaningful.
         """
-
         if value is None:
             return False
-
         if isinstance(value, str):
             value = value.strip()
-
             if not value:
                 return False
-
             try:
                 number = float(value.replace(",", ""))
-
                 return number != 0
-
             except ValueError:
                 # Non-numeric text is meaningful.
                 return True
-
         try:
             return float(value) != 0
-
         except (TypeError, ValueError):
             return bool(value)
-
     def fit_size_keep_ratio(img_src, max_w, max_h):
         iw, ih = ImageReader(img_src).getSize()
-
         scale = min(
             max_w / float(iw),
             max_h / float(ih)
         )
-
         return (
             iw * scale,
             ih * scale
         )
-
     buffer = BytesIO()
-
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
@@ -92,9 +71,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         topMargin=12 * mm,
         bottomMargin=70 * mm,
     )
-
     w = doc.width
-
     brand = colors.HexColor("#009be5")
     brand_dark = colors.HexColor("#146e98")
     text = colors.HexColor("#2f3b48")
@@ -102,9 +79,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     border = colors.HexColor("#d8e0e8")
     header_bg = colors.HexColor("#eef7fc")
     summary_bg = colors.HexColor("#eef2f8")
-
     styles = getSampleStyleSheet()
-
     title_style = ParagraphStyle(
         "Title",
         parent=styles["Normal"],
@@ -116,7 +91,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         spaceBefore=0,
         spaceAfter=0,
     )
-
     meta_style = ParagraphStyle(
         "Meta",
         parent=styles["Normal"],
@@ -128,7 +102,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         spaceBefore=0,
         spaceAfter=0,
     )
-
     invoice_heading_style = ParagraphStyle(
         "InvoiceHeading",
         parent=styles["Normal"],
@@ -140,7 +113,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         spaceBefore=0,
         spaceAfter=0,
     )
-
     block_heading_style = ParagraphStyle(
         "BlockHeading",
         parent=styles["Normal"],
@@ -152,7 +124,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         spaceBefore=0,
         spaceAfter=4,
     )
-
     block_text_style = ParagraphStyle(
         "BlockText",
         parent=styles["Normal"],
@@ -163,13 +134,11 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         alignment=TA_LEFT,
         splitLongWords=True,
     )
-
     inv_heading_right_style = ParagraphStyle(
         "InvHeadingRight",
         parent=block_heading_style,
         alignment=TA_RIGHT,
     )
-
     inv_text_right_style = ParagraphStyle(
         "InvTextRight",
         parent=block_text_style,
@@ -177,7 +146,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         leading=10.2,
         alignment=TA_RIGHT,
     )
-
     cell_style = ParagraphStyle(
         "Cell",
         parent=styles["Normal"],
@@ -188,39 +156,31 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         alignment=TA_LEFT,
         splitLongWords=True,
     )
-
     cell_center_style = ParagraphStyle(
         "CellCenter",
         parent=cell_style,
         alignment=TA_CENTER,
     )
-
     cell_right_style = ParagraphStyle(
         "CellRight",
         parent=cell_style,
         alignment=TA_RIGHT,
     )
-
     elements = []
-
     # =========================================================
     # SELLER HEADER
     # =========================================================
-
     seller_meta = (
         f"{data['seller_address']}<br/>"
         f"<b>NTN/CNIC: {data['seller_ntn']}</b>"
     )
-
     if data.get("seller_strn"):
         seller_meta += (
             f"<br/><b>STRN: {data['seller_strn']}</b>"
         )
-
     seller_meta += (
         f"<br/><b>Province: {data['province']}</b>"
     )
-
     left_header = Table(
         [
             [
@@ -238,37 +198,30 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ],
         colWidths=[w * 0.78],
     )
-
     left_header.setStyle(
         TableStyle([
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-
             ("LEFTPADDING", (0, 0), (-1, -1), 0),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),
             ("TOPPADDING", (0, 0), (-1, -1), 0),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-
             ("BOTTOMPADDING", (0, 0), (0, 0), 2.5),
         ])
     )
-
     # =========================================================
     # QR CODE
     # =========================================================
-
     qr_w, qr_h = fit_size_keep_ratio(
         data["qr"],
         max_w=58,
         max_h=58,
     )
-
     qr_img = Image(
         data["qr"],
         width=qr_w,
         height=qr_h,
     )
-
     header = Table(
         [
             [
@@ -281,32 +234,24 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             w * 0.22,
         ],
     )
-
     header.setStyle(
         TableStyle([
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
-
             # Seller side
             ("ALIGN", (0, 0), (0, 0), "LEFT"),
-
             # QR side
             ("ALIGN", (1, 0), (1, 0), "RIGHT"),
-
             ("LEFTPADDING", (0, 0), (-1, -1), 0),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),
             ("TOPPADDING", (0, 0), (-1, -1), 0),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ])
     )
-
     elements.append(header)
-
     elements.append(Spacer(1, 10))
-
     # =========================================================
     # INVOICE HEADING
     # =========================================================
-
     heading_tbl = Table(
         [
             [
@@ -318,64 +263,50 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ],
         colWidths=[w],
     )
-
     heading_tbl.setStyle(
         TableStyle([
             ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-
             ("LEFTPADDING", (0, 0), (-1, -1), 0),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),
             ("TOPPADDING", (0, 0), (-1, -1), 0),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ])
     )
-
     elements.append(heading_tbl)
-
     elements.append(Spacer(1, 5))
-
     line_tbl = Table(
         [[""]],
         colWidths=[w],
         rowHeights=[1.6],
     )
-
     line_tbl.setStyle(
         TableStyle([
             ("BACKGROUND", (0, 0), (-1, -1), brand),
-
             ("LEFTPADDING", (0, 0), (-1, -1), 0),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),
             ("TOPPADDING", (0, 0), (-1, -1), 0),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ])
     )
-
     elements.append(line_tbl)
-
     elements.append(Spacer(1, 14))
-
     # =========================================================
     # BUYER / INVOICE INFORMATION
     # =========================================================
-
     buyer_text = (
         f"<b>NAME:</b> {data['buyer_name']}<br/>"
         f"<b>ADDRESS:</b> {data['buyer_address']}<br/>"
         f"<b>NTN/CNIC:</b> {data['buyer_ntn']}"
     )
-
     if data.get("buyer_strn"):
         buyer_text += (
             f"<br/><b>STRN:</b> {data['buyer_strn']}"
         )
-
     inv_text = (
         f"<b>Inv #:</b>&nbsp;{data['invoice_no']}<br/>"
         f"<b>Date:</b> {data['date']}<br/>"
         f"<b>Sale Type:</b> {data['sale_type']}"
     )
-
     buyer_block = Table(
         [
             [
@@ -396,19 +327,16 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ],
         colWidths=[w * 0.60],
     )
-
     buyer_block.setStyle(
         TableStyle([
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-
             ("LEFTPADDING", (0, 0), (-1, -1), 0),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),
             ("TOPPADDING", (0, 0), (-1, -1), 0),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ])
     )
-
     inv_block = Table(
         [
             [
@@ -429,19 +357,16 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ],
         colWidths=[w * 0.34],
     )
-
     inv_block.setStyle(
         TableStyle([
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
-
             ("LEFTPADDING", (0, 0), (-1, -1), 0),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),
             ("TOPPADDING", (0, 0), (-1, -1), 0),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ])
     )
-
     info = Table(
         [
             [
@@ -456,29 +381,22 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             w * 0.34,
         ],
     )
-
     info.setStyle(
         TableStyle([
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
-
             ("ALIGN", (0, 0), (0, 0), "LEFT"),
             ("ALIGN", (2, 0), (2, 0), "RIGHT"),
-
             ("LEFTPADDING", (0, 0), (-1, -1), 0),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),
             ("TOPPADDING", (0, 0), (-1, -1), 0),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ])
     )
-
     elements.append(info)
-
     elements.append(Spacer(1, 24))
-
     # =========================================================
     # DYNAMIC ITEM TABLE
     # =========================================================
-
     columns = [
         {
             "key": "hs_code",
@@ -535,6 +453,17 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "width": 0.08,
         },
         {
+            "key": "retail_price",
+            "header": "Retail Price",
+            "formatter": lambda item: (
+                fmt_money(item.get("retail_price"))
+                if has_value(item.get("retail_price"))
+                else ""
+            ),
+            "style": cell_right_style,
+            "width": 0.09,
+        },
+        {
             "key": "rate",
             "header": "S.T Rate",
             "formatter": lambda item: str(
@@ -571,37 +500,26 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "width": 0.14,
         },
     ]
-
     # ---------------------------------------------------------
     # Determine visible columns.
-    #
     # A column remains visible if AT LEAST ONE item has
     # a meaningful value in that field.
     # ---------------------------------------------------------
-
     visible_columns = []
-
     for column in columns:
-
         key = column["key"]
-
         column_has_value = any(
             has_value(item.get(key))
             for item in data["items"]
         )
-
         if column_has_value:
             visible_columns.append(column)
-
     # ---------------------------------------------------------
     # Safety fallback.
-    #
     # This should practically never happen because Sales Value
     # should exist, but it prevents creation of an empty table.
     # ---------------------------------------------------------
-
     if not visible_columns:
-
         visible_columns = [
             next(
                 column
@@ -609,72 +527,55 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                 if column["key"] == "value_excl"
             )
         ]
-
     # ---------------------------------------------------------
     # Table header
     # ---------------------------------------------------------
-
     table_data = [
         [
             column["header"]
             for column in visible_columns
         ]
     ]
-
     # ---------------------------------------------------------
     # Table rows
     # ---------------------------------------------------------
-
     for item in data["items"]:
-
         row = []
-
         for column in visible_columns:
-
             value = column["formatter"](item)
-
             row.append(
                 Paragraph(
                     value,
                     column["style"]
                 )
             )
-
         table_data.append(row)
-
     # ---------------------------------------------------------
     # Dynamic column widths.
-    #
     # Original widths are used as relative weights.
     # Remaining columns are automatically expanded to fill
     # the complete available table width.
     # ---------------------------------------------------------
-
     total_width_weight = sum(
         column["width"]
         for column in visible_columns
     )
-
     col_widths = [
         w * column["width"] / total_width_weight
         for column in visible_columns
     ]
-
     # ---------------------------------------------------------
     # Create item table
     # ---------------------------------------------------------
-
     items = Table(
         table_data,
         repeatRows=1,
         colWidths=col_widths,
         hAlign="LEFT",
     )
-
     # ---------------------------------------------------------
     # Base table styling
     # ---------------------------------------------------------
-
     table_style = [
         (
             "BACKGROUND",
@@ -682,42 +583,36 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             (-1, 0),
             colors.HexColor("#eef7fc")
         ),
-
         (
             "TEXTCOLOR",
             (0, 0),
             (-1, 0),
             brand_dark
         ),
-
         (
             "FONTNAME",
             (0, 0),
             (-1, 0),
             "Helvetica-Bold"
         ),
-
         (
             "FONTSIZE",
             (0, 0),
             (-1, 0),
             8.0
         ),
-
         (
             "FONTNAME",
             (0, 1),
             (-1, -1),
             "Helvetica"
         ),
-
         (
             "FONTSIZE",
             (0, 1),
             (-1, -1),
             7.8
         ),
-
         (
             "BOX",
             (0, 0),
@@ -725,7 +620,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             0.7,
             colors.HexColor("#aeb8c2")
         ),
-
         (
             "INNERGRID",
             (0, 0),
@@ -733,7 +627,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             0.35,
             colors.HexColor("#c8d0d8")
         ),
-
         (
             "LINEBELOW",
             (0, 0),
@@ -741,35 +634,30 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             1.2,
             brand
         ),
-
         (
             "VALIGN",
             (0, 0),
             (-1, -1),
             "MIDDLE"
         ),
-
         (
             "LEFTPADDING",
             (0, 0),
             (-1, -1),
             4
         ),
-
         (
             "RIGHTPADDING",
             (0, 0),
             (-1, -1),
             4
         ),
-
         (
             "TOPPADDING",
             (0, 0),
             (-1, -1),
             4
         ),
-
         (
             "BOTTOMPADDING",
             (0, 0),
@@ -777,23 +665,17 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             4
         ),
     ]
-
     # ---------------------------------------------------------
     # Dynamic alignment.
-    #
     # Since columns can disappear, we cannot use fixed indexes
     # like (5, 1), (6, 1), etc.
     # ---------------------------------------------------------
-
     for index, column in enumerate(visible_columns):
-
         key = column["key"]
-
         if key in (
             "hs_code",
             "uom",
         ):
-
             table_style.append(
                 (
                     "ALIGN",
@@ -802,14 +684,13 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                     "CENTER"
                 )
             )
-
         elif key in (
             "quantity",
             "item_rate",
+            "retail_price",
             "rate",
             "value_excl",
         ):
-
             table_style.append(
                 (
                     "ALIGN",
@@ -818,9 +699,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                     "RIGHT"
                 )
             )
-
         else:
-
             table_style.append(
                 (
                     "ALIGN",
@@ -829,99 +708,64 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                     "LEFT"
                 )
             )
-
     items.setStyle(
         TableStyle(table_style)
     )
-
     elements.append(items)
-
     elements.append(Spacer(1, 10))
-
     # =========================================================
     # SUMMARY
     # =========================================================
-
     summary_rows = []
-
     if float(data.get("sales_tax", 0)) > 0:
-
         summary_rows.append([
             "Sales Tax",
             fmt_money(data["sales_tax"]),
         ])
-
     if float(data.get("further_tax", 0)) > 0:
-
         summary_rows.append([
             "Further Tax",
             fmt_money(data["further_tax"]),
         ])
-
     if float(data.get("extra_tax", 0)) > 0:
-
         summary_rows.append([
             "Extra Tax",
             fmt_money(data["extra_tax"]),
         ])
-
     if float(data.get("fed", 0)) > 0:
-
         summary_rows.append([
             "FED",
             fmt_money(data["fed"]),
         ])
-
     if float(data.get("tax236H", 0)) > 0:
-
         rates = data.get("tax236HRates", [])
-
         if rates:
-
             rate_text = ", ".join(
                 f"{r:g}%"
                 for r in rates
             )
-
             label = f"236H Tax ({rate_text})"
-
         else:
-
             label = "236H Tax"
-
         summary_rows.append([
             label,
             fmt_money(data["tax236H"]),
         ])
-
     if float(data.get("discount", 0)) > 0:
-
         summary_rows.append([
             "Discount",
             f"-{fmt_money(data['discount'])}",
         ])
-
-    if float(data.get("retail_price", 0)) > 0:
-
-        summary_rows.append([
-            "Retail Price",
-            fmt_money(data["retail_price"]),
-        ])
-
     if float(data.get("st_wh", 0)) > 0:
-
         summary_rows.append([
             "Sales Tax WH",
             f"-{fmt_money(data['st_wh'])}",
         ])
-
     # Grand total is always displayed.
-
     summary_rows.append([
         "Grand Total",
         f"Rs. {fmt_money(data['grand_total'])}",
     ])
-
     summary_tbl = Table(
         summary_rows,
         colWidths=[
@@ -930,7 +774,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ],
         hAlign="RIGHT",
     )
-
     summary_style = [
         (
             "BACKGROUND",
@@ -938,49 +781,42 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             (-1, -1),
             summary_bg
         ),
-
         (
             "ALIGN",
             (0, 0),
             (0, -1),
             "LEFT"
         ),
-
         (
             "ALIGN",
             (1, 0),
             (1, -1),
             "RIGHT"
         ),
-
         (
             "FONTSIZE",
             (0, 0),
             (-1, -2),
             8.2
         ),
-
         (
             "FONTSIZE",
             (0, -1),
             (-1, -1),
             10.0
         ),
-
         (
             "TEXTCOLOR",
             (0, -1),
             (-1, -1),
             brand_dark
         ),
-
         (
             "FONTNAME",
             (0, -1),
             (-1, -1),
             "Helvetica-Bold"
         ),
-
         (
             "LINEABOVE",
             (0, -1),
@@ -988,35 +824,30 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             1.2,
             brand
         ),
-
         (
             "LEFTPADDING",
             (0, 0),
             (-1, -1),
             10
         ),
-
         (
             "RIGHTPADDING",
             (0, 0),
             (-1, -1),
             10
         ),
-
         (
             "TOPPADDING",
             (0, 0),
             (-1, -1),
             5
         ),
-
         (
             "BOTTOMPADDING",
             (0, 0),
             (-1, -1),
             5
         ),
-
         (
             "VALIGN",
             (0, 0),
@@ -1024,9 +855,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "MIDDLE"
         ),
     ]
-
     try:
-
         summary_tbl.setStyle(
             TableStyle(
                 summary_style + [
@@ -1039,13 +868,10 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                 ]
             )
         )
-
     except Exception:
-
         summary_tbl.setStyle(
             TableStyle(summary_style)
         )
-
     summary_wrap = Table(
         [
             [
@@ -1058,7 +884,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             w * 0.40,
         ],
     )
-
     summary_wrap.setStyle(
         TableStyle([
             (
@@ -1067,42 +892,36 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                 (-1, -1),
                 "TOP"
             ),
-
             (
                 "ALIGN",
                 (0, 0),
                 (0, 0),
                 "LEFT"
             ),
-
             (
                 "ALIGN",
                 (1, 0),
                 (1, 0),
                 "RIGHT"
             ),
-
             (
                 "LEFTPADDING",
                 (0, 0),
                 (-1, -1),
                 0
             ),
-
             (
                 "RIGHTPADDING",
                 (0, 0),
                 (-1, -1),
                 0
             ),
-
             (
                 "TOPPADDING",
                 (0, 0),
                 (-1, -1),
                 0
             ),
-
             (
                 "BOTTOMPADDING",
                 (0, 0),
@@ -1111,33 +930,24 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             ),
         ])
     )
-
     elements.append(
         KeepTogether(summary_wrap)
     )
-
     # =========================================================
     # FOOTER
     # =========================================================
-
     def draw_footer(canvas, _doc):
-
         canvas.saveState()
-
         page_w, _ = A4
-
         logo_w, logo_h = fit_size_keep_ratio(
             data["logo"],
             max_w=56 * mm,
             max_h=15 * mm,
         )
-
         logo_x = (
             page_w - logo_w
         ) / 2
-
         logo_y = 55 * mm
-
         canvas.drawImage(
             ImageReader(data["logo"]),
             logo_x,
@@ -1146,38 +956,28 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             height=logo_h,
             mask="auto",
         )
-
         canvas.setFont(
             "Helvetica",
             8.2
         )
-
         canvas.setFillColor(
             colors.HexColor("#6b7280")
         )
-
         canvas.drawCentredString(
             page_w / 2,
             50 * mm,
             "System Generated - FBR Digital Invoicing Compliant",
         )
-
         canvas.restoreState()
-
     # =========================================================
     # BUILD PDF
     # =========================================================
-
     doc.build(
         elements,
         onFirstPage=draw_footer,
         onLaterPages=draw_footer,
     )
-
     buffer.seek(0)
-
     pdf = buffer.getvalue()
-
     buffer.close()
-
     return pdf
