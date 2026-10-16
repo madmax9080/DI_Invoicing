@@ -666,6 +666,20 @@ function buildInvoicePayload() {
         err.isValidation = true;
         throw err;
     }
+    //new lines
+    const buyerNTNCNIC = $("#buyerNTNCNIC").val().trim();
+    if (
+        buyerNTNCNIC &&
+        buyerNTNCNIC.length !== 7 &&
+        buyerNTNCNIC.length !== 13
+    ) {
+        const err = new Error(
+            "Enter a valid registration number with 7 or 13 characters"
+        );
+        err.isValidation = true;
+        throw err;
+    }
+    //upto here
     const buyerBusinessName = $("#buyerBusinessName").val().trim();
     if (!buyerBusinessName) {
         const err = new Error("Buyer Business Name is required");
@@ -694,7 +708,7 @@ function buildInvoicePayload() {
         sellerBusinessName: client.sellerBusinessName,
         sellerProvince: getProvinceTextById(client.sellerProvince),
         sellerAddress: client.sellerAddress,
-        buyerNTNCNIC: $("#buyerNTNCNIC").val(),
+        buyerNTNCNIC,
         buyerSTRN: $("#buyerSTRN").val().trim(),
         buyerBusinessName,
         buyerProvince: $("#buyerProvince option:selected").text(),

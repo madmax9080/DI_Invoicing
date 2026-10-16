@@ -137,15 +137,12 @@ function updatePagination() {
 }
 
 function renderBuyersTable() {
-
     const tbody = document.getElementById(
         "buyersTableBody"
     );
-
     if (!tbody) {
         return;
     }
-
     if (!buyers.length) {
 
         tbody.innerHTML = `
@@ -158,19 +155,14 @@ function renderBuyersTable() {
 
         return;
     }
-
     tbody.innerHTML = buyers.map(
         (buyer, index) => `
-
             <tr>
-
                 <td>
                     ${skip + index + 1}
                 </td>
-
                 <td>
                     <div class="d-flex gap-2">
-
                         <button
                             class="
                                 btn
@@ -184,7 +176,6 @@ function renderBuyersTable() {
                         >
                             <i class="bi bi-pencil-square text-primary"></i>
                         </button>
-
                         <button
                             class="
                                 btn
@@ -198,32 +189,24 @@ function renderBuyersTable() {
                         >
                             <i class="bi bi-trash text-danger"></i>
                         </button>
-
                     </div>
                 </td>
-
                 <td>
                     ${buyer.ntn_cnic || ""}
                 </td>
-
                 <td>
                     ${buyer.name || ""}
                 </td>
-
                 <td>
                     ${buyer.province || ""}
                 </td>
-
                 <td>
                     ${buyer.address || ""}
                 </td>
-
                 <td>
                     ${buyer.buyer_registration_type || ""}
                 </td>
-
             </tr>
-
         `
     ).join("");
 }
@@ -262,16 +245,6 @@ async function saveBuyer() {
                 $("#buyerRegistrationType")
                     .val()
         };
-        // for (const [key, value] of Object.entries(payload)) {
-        //     if (!value) {
-        //         showToast(
-        //             `${key} is required`,
-        //             "warning"
-        //         );
-        //         resetBtn();
-        //         return;
-        //     }
-        // }
         const ntn = payload.ntn_cnic;
         if (
             ntn.length !== 7 &&
