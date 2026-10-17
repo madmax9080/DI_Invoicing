@@ -611,20 +611,8 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             )
         else:
             totals_row.append("")
-    total_label_index = min(
-        (
-            index
-            for index, value in enumerate(totals_row)
-            if value == ""
-        ),
-        key=lambda index: (
-            abs(index - (len(totals_row) - 1) / 2),
-            -index,
-        ),
-        default=None,
-    )
-    if total_label_index is not None:
-        totals_row[total_label_index] = Paragraph(
+    if quantity_index is not None and quantity_index > 0:
+        totals_row[quantity_index - 1] = Paragraph(
             "Total:",
             ParagraphStyle(
                 "ItemTotalLabel",
