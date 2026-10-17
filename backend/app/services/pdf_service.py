@@ -473,6 +473,15 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "width": 0.08,
         },
         {
+            "key": "sales_tax",
+            "header": "Sales Tax",
+            "formatter": lambda item: fmt_money(
+                item.get("sales_tax", 0)
+            ),
+            "style": cell_right_style,
+            "width": 0.11,
+        },
+        {
             "key": "sro",
             "header": "SRO",
             "formatter": lambda item: str(
@@ -512,7 +521,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             has_value(item.get(key))
             for item in data["items"]
         )
-        if column_has_value:
+        if column_has_value or key == "sales_tax":
             visible_columns.append(column)
     # ---------------------------------------------------------
     # Safety fallback.
@@ -572,9 +581,17 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ),
         None,
     )
+    sales_tax_index = next(
+        (
+            index
+            for index, column in enumerate(visible_columns)
+            if column["key"] == "sales_tax"
+        ),
+        None,
+    )
     for column in visible_columns:
         key = column["key"]
-        if key in ("quantity", "value_excl"):
+        if key in ("quantity", "value_excl", "sales_tax"):
             total = sum(
                 float(
                     str(item.get(key, 0) or 0).replace(",", "")
@@ -743,6 +760,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "item_rate",
             "retail_price",
             "rate",
+            "sales_tax",
             "value_excl",
         ):
             table_style.append(
@@ -778,9 +796,20 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             ("RIGHTPADDING", (0, 0), (-1, -1), 4),
             ("TOPPADDING", (0, 0), (-1, -1), 6),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            (
+                "BOX",
+                (0, 0),
+                (-1, -1),
+                0.7,
+                colors.HexColor("#aeb8c2"),
+            ),
         ])
     )
-    for total_index in (quantity_index, value_excl_index):
+    for total_index in (
+        quantity_index,
+        sales_tax_index,
+        value_excl_index,
+    ):
         if total_index is not None:
             totals.setStyle(
                 TableStyle([
@@ -791,11 +820,18 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                         "RIGHT",
                     ),
                     (
-                        "LINEBELOW",
+                        "LINEBEFORE",
                         (total_index, 0),
                         (total_index, 0),
-                        1.2,
-                        brand_dark,
+                        0.7,
+                        colors.HexColor("#aeb8c2"),
+                    ),
+                    (
+                        "LINEAFTER",
+                        (total_index, 0),
+                        (total_index, 0),
+                        0.7,
+                        colors.HexColor("#aeb8c2"),
                     ),
                 ])
             )

@@ -392,6 +392,7 @@ async def generate_invoice_pdf(
             "retail_price": i["retail_price"],
             "uom": i["uom"],
             "rate": i["rate"],
+            "sales_tax": i["sales_tax"],
             "sro": i["sro_sched"],
             "sro_item": i["sro_item_sr"],
             "value_excl": i["value_excl"],
