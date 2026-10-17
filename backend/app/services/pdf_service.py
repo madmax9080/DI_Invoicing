@@ -559,21 +559,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             parent=cell_style,
             fontName="Helvetica-Bold",
         )
-        quantity_index = next(
-            (
-                index
-                for index, column in enumerate(visible_columns)
-                if column["key"] == "quantity"
-            ),
-            None,
-        )
-        label_index = (
-            quantity_index - 1
-            if quantity_index is not None and quantity_index > 0
-            else 0
-        )
-        quantity_total = None
-        value_total = None
         for column in visible_columns:
             key = column["key"]
             if key in ("quantity", "value_excl"):
@@ -588,10 +573,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                     if key == "quantity"
                     else fmt_money(total)
                 )
-                if key == "quantity":
-                    quantity_total = value
-                else:
-                    value_total = value
                 totals_row.append(
                     Paragraph(
                         value,
@@ -600,31 +581,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                 )
             else:
                 totals_row.append("")
-        if quantity_index is None:
-            value_index = next(
-                (
-                    index
-                    for index, column in enumerate(visible_columns)
-                    if column["key"] == "value_excl"
-                ),
-                0,
-            )
-            label_index = max(value_index - 1, 0)
-        if quantity_index == 0 and quantity_total is not None:
-            totals_row[0] = Paragraph(
-                f"Totals {quantity_total}",
-                total_style,
-            )
-        elif quantity_index is None and label_index == 0 and value_total is not None:
-            totals_row[0] = Paragraph(
-                f"Totals {value_total}",
-                total_style,
-            )
-        else:
-            totals_row[label_index] = Paragraph(
-                "Totals",
-                total_style,
-            )
     # ---------------------------------------------------------
     # Dynamic column widths.
     # Original widths are used as relative weights.
