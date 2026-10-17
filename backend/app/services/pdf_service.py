@@ -623,7 +623,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                 "ItemTotalLabel",
                 parent=cell_style,
                 fontName="Helvetica-Bold",
-                alignment=TA_CENTER,
+                alignment=TA_LEFT,
             ),
         )
     # ---------------------------------------------------------
@@ -817,7 +817,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                     "ALIGN",
                     (total_label_index, 0),
                     (total_label_index, 0),
-                    "CENTER",
+                    "LEFT",
                 ),
             ])
         )
