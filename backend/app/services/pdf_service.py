@@ -611,8 +611,13 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             )
         else:
             totals_row.append("")
-    if quantity_index is not None and quantity_index > 0:
-        totals_row[quantity_index - 1] = Paragraph(
+    total_label_index = (
+        quantity_index - 1
+        if quantity_index is not None and quantity_index > 0
+        else None
+    )
+    if total_label_index is not None:
+        totals_row[total_label_index] = Paragraph(
             "Total:",
             ParagraphStyle(
                 "ItemTotalLabel",
@@ -805,6 +810,17 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             ),
         ])
     )
+    if total_label_index is not None:
+        totals.setStyle(
+            TableStyle([
+                (
+                    "ALIGN",
+                    (total_label_index, 0),
+                    (total_label_index, 0),
+                    "CENTER",
+                ),
+            ])
+        )
     for total_index in (
         quantity_index,
         sales_tax_index,
