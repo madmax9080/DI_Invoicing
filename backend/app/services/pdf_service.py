@@ -556,26 +556,21 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         totals_row = []
         total_style = ParagraphStyle(
             "ItemTotal",
-            parent=cell_style,
+            parent=cell_right_style,
             fontName="Helvetica-Bold",
         )
         for column in visible_columns:
             key = column["key"]
-            if key in ("quantity", "value_excl"):
+            if key == "quantity":
                 total = sum(
                     float(
                         str(item.get(key, 0) or 0).replace(",", "")
                     )
                     for item in data["items"]
                 )
-                value = (
-                    fmt_number(total)
-                    if key == "quantity"
-                    else fmt_money(total)
-                )
                 totals_row.append(
                     Paragraph(
-                        value,
+                        fmt_number(total),
                         total_style,
                     )
                 )
@@ -771,6 +766,14 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     # SUMMARY
     # =========================================================
     summary_rows = []
+    value_excl_total = sum(
+        float(str(item.get("value_excl", 0) or 0).replace(",", ""))
+        for item in data["items"]
+    )
+    summary_rows.append([
+        "Value Excl. S.Tax",
+        fmt_money(value_excl_total),
+    ])
     if float(data.get("sales_tax", 0)) > 0:
         summary_rows.append([
             "Sales Tax Payable",
