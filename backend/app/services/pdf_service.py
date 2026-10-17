@@ -550,32 +550,60 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                 )
             )
         table_data.append(row)
-    show_item_totals = len(data["items"]) > 2
-    totals_row = None
-    if show_item_totals:
-        totals_row = []
-        total_style = ParagraphStyle(
-            "ItemTotal",
-            parent=cell_right_style,
-            fontName="Helvetica-Bold",
+    totals_row = []
+    total_style = ParagraphStyle(
+        "ItemTotal",
+        parent=cell_right_style,
+        fontName="Helvetica-Bold",
+    )
+    quantity_index = next(
+        (
+            index
+            for index, column in enumerate(visible_columns)
+            if column["key"] == "quantity"
+        ),
+        None,
+    )
+    value_excl_index = next(
+        (
+            index
+            for index, column in enumerate(visible_columns)
+            if column["key"] == "value_excl"
+        ),
+        None,
+    )
+    for column in visible_columns:
+        key = column["key"]
+        if key in ("quantity", "value_excl"):
+            total = sum(
+                float(
+                    str(item.get(key, 0) or 0).replace(",", "")
+                )
+                for item in data["items"]
+            )
+            formatted_total = (
+                fmt_number(total)
+                if key == "quantity"
+                else fmt_money(total)
+            )
+            totals_row.append(
+                Paragraph(
+                    formatted_total,
+                    total_style,
+                )
+            )
+        else:
+            totals_row.append("")
+    if quantity_index is not None and quantity_index > 0:
+        totals_row[quantity_index - 1] = Paragraph(
+            "Total:",
+            ParagraphStyle(
+                "ItemTotalLabel",
+                parent=cell_style,
+                fontName="Helvetica-Bold",
+                alignment=TA_RIGHT,
+            ),
         )
-        for column in visible_columns:
-            key = column["key"]
-            if key == "quantity":
-                total = sum(
-                    float(
-                        str(item.get(key, 0) or 0).replace(",", "")
-                    )
-                    for item in data["items"]
-                )
-                totals_row.append(
-                    Paragraph(
-                        fmt_number(total),
-                        total_style,
-                    )
-                )
-            else:
-                totals_row.append("")
     # ---------------------------------------------------------
     # Dynamic column widths.
     # Original widths are used as relative weights.
@@ -738,29 +766,40 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         TableStyle(table_style)
     )
     elements.append(items)
-    if totals_row is not None:
-        totals = Table(
-            [totals_row],
-            colWidths=col_widths,
-            hAlign="LEFT",
-        )
-        totals.setStyle(
-            TableStyle([
-                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 4),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-            ])
-        )
-        for index, column in enumerate(visible_columns):
-            if column["key"] in ("quantity", "value_excl"):
-                totals.setStyle(
-                    TableStyle([
-                        ("ALIGN", (index, 0), (index, 0), "RIGHT"),
-                    ])
-                )
-        elements.append(totals)
+    totals = Table(
+        [totals_row],
+        colWidths=col_widths,
+        hAlign="LEFT",
+    )
+    totals.setStyle(
+        TableStyle([
+            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 4),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+            ("TOPPADDING", (0, 0), (-1, -1), 6),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ])
+    )
+    for total_index in (quantity_index, value_excl_index):
+        if total_index is not None:
+            totals.setStyle(
+                TableStyle([
+                    (
+                        "ALIGN",
+                        (total_index, 0),
+                        (total_index, 0),
+                        "RIGHT",
+                    ),
+                    (
+                        "LINEBELOW",
+                        (total_index, 0),
+                        (total_index, 0),
+                        1.2,
+                        brand_dark,
+                    ),
+                ])
+            )
+    elements.append(totals)
     elements.append(Spacer(1, 10))
     # =========================================================
     # SUMMARY
