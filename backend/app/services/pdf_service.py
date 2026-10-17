@@ -492,7 +492,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         },
         {
             "key": "value_excl",
-            "header": "value Exc. S.Tax",
+            "header": "Value Exc. S.Tax",
             "formatter": lambda item: fmt_money(
                 item.get("value_excl", 0)
             ),
@@ -550,6 +550,36 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                 )
             )
         table_data.append(row)
+    show_item_totals = len(data["items"]) > 2
+    if show_item_totals:
+        total_row = []
+        for column in visible_columns:
+            key = column["key"]
+            if key in ("quantity", "value_excl"):
+                total = sum(
+                    float(
+                        str(item.get(key, 0) or 0).replace(",", "")
+                    )
+                    for item in data["items"]
+                )
+                value = (
+                    fmt_number(total)
+                    if key == "quantity"
+                    else fmt_money(total)
+                )
+                total_row.append(
+                    Paragraph(
+                        value,
+                        ParagraphStyle(
+                            "ItemTotal",
+                            parent=column["style"],
+                            fontName="Helvetica-Bold",
+                        ),
+                    )
+                )
+            else:
+                total_row.append("")
+        table_data.append(total_row)
     # ---------------------------------------------------------
     # Dynamic column widths.
     # Original widths are used as relative weights.
@@ -708,6 +738,23 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                     "LEFT"
                 )
             )
+    if show_item_totals:
+        total_row_index = len(table_data) - 1
+        table_style.extend([
+            (
+                "LINEABOVE",
+                (0, total_row_index),
+                (-1, total_row_index),
+                0.8,
+                colors.HexColor("#aeb8c2"),
+            ),
+            (
+                "TOPPADDING",
+                (0, total_row_index),
+                (-1, total_row_index),
+                6,
+            ),
+        ])
     items.setStyle(
         TableStyle(table_style)
     )
@@ -763,14 +810,14 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ])
     # Grand total is always displayed.
     summary_rows.append([
-        "value incl. of S.Tax",
+        "Value Incl. of S.Tax",
         f"Rs. {fmt_money(data['grand_total'])}",
     ])
     summary_tbl = Table(
         summary_rows,
         colWidths=[
-            w * 0.22,
-            w * 0.16,
+            w * 0.26,
+            w * 0.19,
         ],
         hAlign="RIGHT",
     )
@@ -803,7 +850,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "FONTSIZE",
             (0, -1),
             (-1, -1),
-            10.0
+            8.5
         ),
         (
             "TEXTCOLOR",
@@ -880,8 +927,8 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             ]
         ],
         colWidths=[
-            w * 0.60,
-            w * 0.40,
+            w * 0.55,
+            w * 0.45,
         ],
     )
     summary_wrap.setStyle(
