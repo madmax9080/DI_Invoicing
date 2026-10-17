@@ -427,7 +427,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         },
         {
             "key": "uom",
-            "header": "UOM",
+            "header": "Unit",
             "formatter": lambda item: str(
                 item.get("uom", "")
             ),
@@ -492,7 +492,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         },
         {
             "key": "value_excl",
-            "header": "Sales Value",
+            "header": "value Exc. S.Tax",
             "formatter": lambda item: fmt_money(
                 item.get("value_excl", 0)
             ),
@@ -719,7 +719,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     summary_rows = []
     if float(data.get("sales_tax", 0)) > 0:
         summary_rows.append([
-            "Sales Tax",
+            "Sales Tax Payable",
             fmt_money(data["sales_tax"]),
         ])
     if float(data.get("further_tax", 0)) > 0:
@@ -763,7 +763,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ])
     # Grand total is always displayed.
     summary_rows.append([
-        "Grand Total",
+        "value incl. of S.Tax",
         f"Rs. {fmt_money(data['grand_total'])}",
     ])
     summary_tbl = Table(
