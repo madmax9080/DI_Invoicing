@@ -1031,6 +1031,16 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "MIDDLE"
         ),
     ]
+    if is_third_schedule_invoice:
+        summary_style.append(
+            (
+                "LINEABOVE",
+                (0, 2),
+                (-1, 2),
+                0.8,
+                colors.HexColor("#aeb8c2"),
+            )
+        )
     try:
         summary_tbl.setStyle(
             TableStyle(
