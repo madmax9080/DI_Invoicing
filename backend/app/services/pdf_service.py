@@ -901,7 +901,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ])
     if float(data.get("discount", 0)) > 0:
         summary_rows.append([
-            "Discount",
+            "Less Discount 10%",
             f"-{fmt_money(data['discount'])}",
         ])
     if float(data.get("st_wh", 0)) > 0:

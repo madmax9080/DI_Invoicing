@@ -1,13 +1,13 @@
 const n = v => Number(v) || 0;
 
-function baseTotal(item, salesTaxApplicable) {
+function baseTotal(item, salesTaxApplicable, subtractDiscount = true) {
     return (
         n(item.valueSalesExcludingST)
         + salesTaxApplicable
         + n(item.furtherTax)
         + n(item.extraTax)
         + n(item.fedPayable)
-        - n(item.discount)
+        - (subtractDiscount ? n(item.discount) : 0)
         - n(item.salesTaxWithheldAtSource)
     );
 }
@@ -56,13 +56,13 @@ function percentOnRetail(item) {
     if (retail <= 0) {
         return {
             salesTaxApplicable: 0,
-            totalValues: baseTotal(item, 0)
+            totalValues: baseTotal(item, 0, false)
         };
     }
     const tax = (retail * n(item.rateValue)) / 100;
     return {
         salesTaxApplicable: tax,
-        totalValues: baseTotal(item, tax)
+        totalValues: baseTotal(item, tax, false)
     };
 }
 
