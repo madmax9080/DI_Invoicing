@@ -857,19 +857,47 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     # SUMMARY
     # =========================================================
     summary_rows = []
+    is_third_schedule_invoice = bool(data["items"]) and all(
+        "3rd schedule" in str(item.get("sale_type", "")).lower()
+        for item in data["items"]
+    )
     value_excl_total = sum(
         float(str(item.get("value_excl", 0) or 0).replace(",", ""))
         for item in data["items"]
     )
-    summary_rows.append([
-        "Value Excl. S.Tax",
-        fmt_money(value_excl_total),
-    ])
-    if float(data.get("sales_tax", 0)) > 0:
-        summary_rows.append([
-            "Sales Tax Payable",
-            fmt_money(data["sales_tax"]),
+    if is_third_schedule_invoice:
+        retail_price_total = sum(
+            float(str(item.get("retail_price", 0) or 0).replace(",", ""))
+            for item in data["items"]
+        )
+        summary_rows.extend([
+            [
+                "Retail Price",
+                fmt_money(retail_price_total),
+            ],
+            [
+                "S.Tax Payable",
+                fmt_money(data.get("sales_tax", 0)),
+            ],
+            [
+                "Total Value Incl. of S.Tax",
+                fmt_money(retail_price_total + float(data.get("sales_tax", 0))),
+            ],
+            [
+                "Less Discount 10%",
+                f"-{fmt_money(data.get('discount', 0))}",
+            ],
         ])
+    else:
+        summary_rows.append([
+            "Value Excl. S.Tax",
+            fmt_money(value_excl_total),
+        ])
+        if float(data.get("sales_tax", 0)) > 0:
+            summary_rows.append([
+                "Sales Tax Payable",
+                fmt_money(data["sales_tax"]),
+            ])
     if float(data.get("further_tax", 0)) > 0:
         summary_rows.append([
             "Further Tax",
@@ -899,7 +927,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             label,
             fmt_money(data["tax236H"]),
         ])
-    if float(data.get("discount", 0)) > 0:
+    if not is_third_schedule_invoice and float(data.get("discount", 0)) > 0:
         summary_rows.append([
             "Less Discount 10%",
             f"-{fmt_money(data['discount'])}",
@@ -911,7 +939,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ])
     # Grand total is always displayed.
     summary_rows.append([
-        "Value Incl. of S.Tax",
+        "Net Amount" if is_third_schedule_invoice else "Value Incl. of S.Tax",
         f"Rs. {fmt_money(data['grand_total'])}",
     ])
     summary_tbl = Table(
