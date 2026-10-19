@@ -453,15 +453,13 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "width": 0.08,
         },
         {
-            "key": "retail_price",
-            "header": "Retail Price",
-            "formatter": lambda item: (
-                fmt_money(item.get("retail_price"))
-                if has_value(item.get("retail_price"))
-                else ""
+            "key": "value_excl",
+            "header": "Value Exc. S.Tax",
+            "formatter": lambda item: fmt_money(
+                item.get("value_excl", 0)
             ),
             "style": cell_right_style,
-            "width": 0.09,
+            "width": 0.14,
         },
         {
             "key": "rate",
@@ -500,13 +498,15 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "width": 0.08,
         },
         {
-            "key": "value_excl",
-            "header": "Value Exc. S.Tax",
-            "formatter": lambda item: fmt_money(
-                item.get("value_excl", 0)
+            "key": "retail_price",
+            "header": "Retail Price",
+            "formatter": lambda item: (
+                fmt_money(item.get("retail_price"))
+                if has_value(item.get("retail_price"))
+                else ""
             ),
             "style": cell_right_style,
-            "width": 0.14,
+            "width": 0.09,
         },
     ]
     # ---------------------------------------------------------
@@ -675,7 +675,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "FONTSIZE",
             (0, 0),
             (-1, 0),
-            8.0
+            6.5
         ),
         (
             "FONTNAME",
