@@ -995,8 +995,8 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         ),
         (
             "LINEABOVE",
-            (0, -1),
-            (-1, -1),
+            (1, -1),
+            (1, -1),
             1.2,
             brand
         ),
@@ -1035,8 +1035,8 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         summary_style.append(
             (
                 "LINEABOVE",
-                (0, 2),
-                (-1, 2),
+                (1, 2),
+                (1, 2),
                 0.8,
                 colors.HexColor("#aeb8c2"),
             )
