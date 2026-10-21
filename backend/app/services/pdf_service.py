@@ -69,7 +69,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         leftMargin=14 * mm,
         rightMargin=14 * mm,
         topMargin=12 * mm,
-        bottomMargin=70 * mm,
+        bottomMargin=14 * mm,
     )
     w = doc.width
     brand = colors.HexColor("#009be5")
@@ -222,11 +222,38 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         width=qr_w,
         height=qr_h,
     )
+    logo_w, logo_h = fit_size_keep_ratio(
+        data["logo"],
+        max_w=16 * mm,
+        max_h=15 * mm,
+    )
+    logo_img = Image(
+        data["logo"],
+        width=logo_w,
+        height=logo_h,
+    )
+    qr_and_logo = Table(
+        [[logo_img, qr_img]],
+        colWidths=[
+            logo_w + 2 * mm,
+            qr_w,
+        ],
+    )
+    qr_and_logo.setStyle(
+        TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ])
+    )
     header = Table(
         [
             [
                 left_header,
-                qr_img,
+                qr_and_logo,
             ]
         ],
         colWidths=[
@@ -1120,49 +1147,9 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         KeepTogether(summary_wrap)
     )
     # =========================================================
-    # FOOTER
-    # =========================================================
-    def draw_footer(canvas, _doc):
-        canvas.saveState()
-        page_w, _ = A4
-        logo_w, logo_h = fit_size_keep_ratio(
-            data["logo"],
-            max_w=56 * mm,
-            max_h=15 * mm,
-        )
-        logo_x = (
-            page_w - logo_w
-        ) / 2
-        logo_y = 55 * mm
-        canvas.drawImage(
-            ImageReader(data["logo"]),
-            logo_x,
-            logo_y,
-            width=logo_w,
-            height=logo_h,
-            mask="auto",
-        )
-        canvas.setFont(
-            "Helvetica",
-            8.2
-        )
-        canvas.setFillColor(
-            colors.HexColor("#6b7280")
-        )
-        canvas.drawCentredString(
-            page_w / 2,
-            50 * mm,
-            "System Generated - FBR Digital Invoicing Compliant",
-        )
-        canvas.restoreState()
-    # =========================================================
     # BUILD PDF
     # =========================================================
-    doc.build(
-        elements,
-        onFirstPage=draw_footer,
-        onLaterPages=draw_footer,
-    )
+    doc.build(elements)
     buffer.seek(0)
     pdf = buffer.getvalue()
     buffer.close()
