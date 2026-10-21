@@ -885,7 +885,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             ],
             [
                 "Less Discount 10%",
-                f"-{fmt_money(data.get('discount', 0))}",
+                f"{fmt_money(data.get('discount', 0))}",
             ],
         ])
     else:
@@ -930,12 +930,12 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     if not is_third_schedule_invoice and float(data.get("discount", 0)) > 0:
         summary_rows.append([
             "Less Discount 10%",
-            f"-{fmt_money(data['discount'])}",
+            f"{fmt_money(data['discount'])}",
         ])
     if float(data.get("st_wh", 0)) > 0:
         summary_rows.append([
             "Sales Tax WH",
-            f"-{fmt_money(data['st_wh'])}",
+            f"{fmt_money(data['st_wh'])}",
         ])
     # Grand total is always displayed.
     summary_rows.append([
