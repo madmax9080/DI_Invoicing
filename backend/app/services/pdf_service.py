@@ -29,6 +29,11 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             return f"{number:,.2f}"
         except (TypeError, ValueError):
             return "0"
+    def fmt_uom(value):
+        uom = str(value)
+        if uom.strip().casefold() in {"numbers", "pieces", "units"}:
+            return "No."
+        return uom
     def has_value(value):
         """
         Determines whether a value is meaningful for deciding
@@ -455,7 +460,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         {
             "key": "uom",
             "header": "Unit",
-            "formatter": lambda item: str(
+            "formatter": lambda item: fmt_uom(
                 item.get("uom", "")
             ),
             "style": cell_center_style,
