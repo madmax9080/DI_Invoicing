@@ -1,5 +1,5 @@
 import { ReferenceCache } from "./reference.js";
-import { calculateTaxes } from "./tax_strategies.js?v=10.23";
+import { calculateTaxes } from "./tax_strategies.js?v=10.24";
 
 export let buyerTaxState = {
     isActive: true,
