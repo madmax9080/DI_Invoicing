@@ -315,7 +315,7 @@ async def generate_invoice_pdf(
         InvoiceItem.invoice_id == invoice.id
     ).all()
     item_rows = []
-    subtotal_excl_st = 0
+    subtotal_for_grand_total = 0
     total_sales_tax = 0
     total_discount = 0
     total_further_tax = 0
@@ -326,7 +326,17 @@ async def generate_invoice_pdf(
     sale_type = ""
     tax236h_rates = set()
     for item in items:
-        subtotal_excl_st += float(item.valueSalesExcludingST)
+        is_third_schedule_item = (
+            "3rd schedule" in str(item.saleType or "").lower()
+        )
+        if is_third_schedule_item:
+            subtotal_for_grand_total += float(
+                item.fixedNotifiedValueOrRetailPrice or 0
+            )
+        else:
+            subtotal_for_grand_total += float(
+                item.valueSalesExcludingST
+            )
         total_sales_tax += float(item.salesTaxApplicable)
         total_discount += float(item.discount or 0)
         total_further_tax += float(item.furtherTax or 0)
@@ -355,19 +365,14 @@ async def generate_invoice_pdf(
             "sales_tax": float(item.salesTaxApplicable),
             "total": float(item.totalValues)
         })
-    discount_to_subtract = sum(
-        float(item.discount or 0)
-        for item in items
-        if "3rd schedule" not in str(item.saleType or "").lower()
-    )
     grand_total = (
-        subtotal_excl_st
+            subtotal_for_grand_total
         + total_sales_tax
         + total_further_tax
         + total_extra_tax
         + total_fed
         + total_236h
-        - discount_to_subtract
+        - total_discount
         - st_wh
     )
     qr_text = invoice.fbrInvoiceNo or invoice.internal_invoice_no or ""

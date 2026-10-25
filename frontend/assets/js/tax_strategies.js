@@ -62,7 +62,14 @@ function percentOnRetail(item) {
     const tax = (retail * n(item.rateValue)) / 100;
     return {
         salesTaxApplicable: tax,
-        totalValues: baseTotal(item, tax, false)
+        totalValues:
+            retail
+            + tax
+            + n(item.furtherTax)
+            + n(item.extraTax)
+            + n(item.fedPayable)
+            - n(item.discount)
+            - n(item.salesTaxWithheldAtSource)
     };
 }
 
