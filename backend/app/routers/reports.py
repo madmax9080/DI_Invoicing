@@ -40,7 +40,7 @@ def sales_by_buyer(
     subq = (
         db.query(
             Invoice.buyer_id.label("buyer_id"),
-            func.sum(InvoiceItem.valueSalesExcludingST).label("total")
+            func.sum(InvoiceItem.totalValues).label("total")
         )
         .join(InvoiceItem, Invoice.id == InvoiceItem.invoice_id)
         .filter(

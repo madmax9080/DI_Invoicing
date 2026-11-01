@@ -110,6 +110,7 @@ async function loadSalesByBuyerChart() {
             axisBorder: { show: false },
             axisTicks: { show: false },
             labels: {
+                show: false,
                 style: {
                     colors: "#64748b",
                     fontSize: "12px"

@@ -48,7 +48,7 @@ async function loadKPIs() {
         // );
         const kpis = [
             {
-                title: "Total Revenue",
+                title: "Total Net Revenue",
                 value: formatCurrency(data.total_sales),
                 subtitle: "Total sales amount of invoices",
                 iconText: "PKR",
