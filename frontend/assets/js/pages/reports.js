@@ -355,7 +355,7 @@ function renderRow(inv, item, index) {
             <td>${deleteBtn}</td>
             <td>${downloadBtn}</td>
             <td>${formatDate(inv.invoiceDate)}</td>
-            <td>${formatDate(inv.created_at)}</td>
+            <td>${inv.status === "posted" ? formatDate(inv.updated_at) : "-"}</td>
             <td>${inv.fbrInvoiceNo || "-"}</td>
             <td>${inv.internal_invoice_no || "-"}</td>
             <td>${inv.invoiceRefNo || "-"}</td>
