@@ -214,6 +214,7 @@ def export_excel(
     headers = [
         "Date",
         "FBR Invoice No",
+        "System Inv. No",
         "Inv. Ref No.(for Debit Inv)",
         "Buyer Business Name",
         "Buyer NTN/CNIC",
@@ -224,6 +225,7 @@ def export_excel(
         "UOM",
         "Sale Type",
         "Value Excl ST",
+        "Fixed Retail Price",
         "Rate",
         "Sales Tax",
         "STWH",
@@ -240,12 +242,14 @@ def export_excel(
         cell = ws.cell(row=1, column=col)
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center")
-    row_num = 2
+    total_columns = (10, 13, 14, 16, 17, 18, 19, 20, 21, 24)
+    totals = {column: 0 for column in total_columns}
     for inv in invoices:
         for item in inv.items:
-            ws.append([
+            row = [
                 inv.invoiceDate.strftime("%d-%m-%Y"),
                 inv.fbrInvoiceNo,
+                inv.internal_invoice_no,
                 inv.invoiceRefNo,
                 inv.buyerBusinessName,
                 inv.buyerNTNCNIC,
@@ -256,6 +260,7 @@ def export_excel(
                 item.uom,
                 item.saleType,
                 float(item.valueSalesExcludingST or 0),
+                float(item.fixedNotifiedValueOrRetailPrice or 0),
                 item.rate,
                 float(item.salesTaxApplicable or 0),
                 float(item.salesTaxWithheldAtSource or 0),
@@ -266,8 +271,16 @@ def export_excel(
                 item.sroScheduleNo,
                 item.sroItemSerialNo,
                 float(item.totalValues or 0)
-            ])
-            row_num += 1
+            ]
+            ws.append(row)
+            for column in total_columns:
+                totals[column] += float(row[column - 1] or 0)
+    total_row = ["TOTAL"] + [None] * (len(headers) - 1)
+    for column, total in totals.items():
+        total_row[column - 1] = total
+    ws.append(total_row)
+    for cell in ws[ws.max_row]:
+        cell.font = Font(bold=True)
     for col in ws.columns:
         max_length = 0
         col_letter = get_column_letter(col[0].column)
