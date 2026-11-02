@@ -237,6 +237,8 @@ def update_invoice_draft(
         raise ValueError("Draft invoice not found")
     if invoice.status == "posted":
         raise ValueError("Cannot edit a posted invoice")
+    if invoice.status == "cancelled":
+        raise ValueError("Cannot edit a cancelled invoice")
     if invoice.status == "posting":
         raise ValueError("Invoice is currently being processed")
     buyer = get_or_create_buyer(db, payload, client_id, user_id)

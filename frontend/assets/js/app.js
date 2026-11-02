@@ -1,5 +1,5 @@
 import { apiFetch } from "./api.js";
-const ASSET_VERSION = "10.26";
+const ASSET_VERSION = "10.27";
 let allClients = [];
 
 const routes = {

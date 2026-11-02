@@ -300,6 +300,8 @@ function renderTable() {
 function renderStatusBadge(status) {
     if (status === "posted")
         return `<span class="badge bg-success">Posted</span>`;
+    if (status === "cancelled")
+        return `<span class="badge bg-secondary">Cancelled</span>`;
     if (status === "failed"
         || status === "invalid")
         return `<span class="badge bg-danger">Failed</span>`;
@@ -332,15 +334,46 @@ async function deleteInvoice(id) {
     }
 }
 
+async function cancelInvoice(id) {
+    if (!confirm(
+        "Cancel this posted invoice? It will no longer be included in sales."
+    )) return;
+    try {
+        await apiFetch(
+            `/invoices/${id}/cancel`,
+            { method: "POST" }
+        );
+        showToast(
+            "Invoice cancelled successfully",
+            "success"
+        );
+        await reload();
+    }
+    catch (err) {
+        showToast(
+            err.response?.detail || "Cancel failed",
+            "error"
+        );
+    }
+}
+
 function renderRow(inv, item, index) {
     const canDelete =
-        ["failed", "invalid", "validation_failed", "pending"]
+        ["failed", "invalid", "validation_failed", "pending", "cancelled"]
         .includes(inv.status);
-    const deleteBtn =
-        canDelete
+    const actionBtn = inv.status === "posted"
+        ? `<button class="btn btn-outline-warning btn-sm cancel-btn"
+                data-id="${inv.id}"
+                title="Cancel invoice"
+                aria-label="Cancel invoice">
+                <i class="bi bi-x-circle"></i>
+           </button>`
+        : canDelete
         ? `<button class="btn btn-outline-danger btn-sm delete-btn"
-                data-id="${inv.id}">
-                <i class="bi bi-trash"></i>
+                data-id="${inv.id}"
+                title="Delete invoice"
+                aria-label="Delete invoice">
+                <i class="bi bi-trash3-fill"></i>
            </button>`
         : "-";
     const downloadBtn = 
@@ -352,7 +385,7 @@ function renderRow(inv, item, index) {
     $("#reportsTableBody").append(`
         <tr>
             <td>${index}</td>
-            <td>${deleteBtn}</td>
+            <td>${actionBtn}</td>
             <td>${downloadBtn}</td>
             <td>${formatDate(inv.invoiceDate)}</td>
             <td>${inv.status === "posted" ? formatDate(inv.updated_at) : "-"}</td>
@@ -483,6 +516,12 @@ export async function initReports() {
         .on("click", ".delete-btn", function () {
             const id = $(this).data("id");
             deleteInvoice(id);
+        });
+    $(document)
+        .off("click", ".cancel-btn")
+        .on("click", ".cancel-btn", function () {
+            const id = $(this).data("id");
+            cancelInvoice(id);
         });
     $(document)
         .off("click", ".download-pdf")

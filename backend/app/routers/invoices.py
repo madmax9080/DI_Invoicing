@@ -206,6 +206,11 @@ async def post_invoice_to_fbr(
                 "invoiceId": existing.id,
                 "fbrInvoiceNumber": existing.fbrInvoiceNo,
             }
+        if existing.status == "cancelled":
+            raise HTTPException(
+                status_code=409,
+                detail="Cancelled invoices cannot be reposted",
+            )
         if existing.status == "posting":
             raise HTTPException(
                 status_code=409,
@@ -863,6 +868,32 @@ def get_invoice_detail(
         raise HTTPException(status_code=404, detail="Invoice not found")
     return invoice
 
+@router.post("/{invoice_id}/cancel", status_code=status.HTTP_200_OK)
+def cancel_invoice(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    invoice = db.query(models.Invoice).join(models.Client).filter(
+        models.Invoice.id == invoice_id,
+        models.Client.user_id == current_user["id"]
+    ).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    if invoice.status != "posted":
+        raise HTTPException(
+            status_code=400,
+            detail="Only posted invoices can be cancelled"
+        )
+    invoice.status = "cancelled"
+    db.commit()
+    clear_cache(f"dashboard:{invoice.client_id}:")
+    clear_cache(f"reports:{invoice.client_id}:")
+    return {
+        "success": True,
+        "message": "Invoice cancelled successfully"
+    }
+
 @router.delete("/{invoice_id}", status_code=status.HTTP_200_OK)
 def delete_invoice(
     invoice_id: int,
@@ -877,7 +908,14 @@ def delete_invoice(
         raise HTTPException(status_code=404, detail="Invoice not found")
     if invoice.status == "posted":
         raise HTTPException(status_code=400, detail="Posted invoices cannot be deleted")
-    allowed_status = ["failed", "invalid", "validation_failed", "pending", "draft"]
+    allowed_status = [
+        "failed",
+        "invalid",
+        "validation_failed",
+        "pending",
+        "draft",
+        "cancelled",
+    ]
     if invoice.status not in allowed_status:
         raise HTTPException(
             status_code=400,

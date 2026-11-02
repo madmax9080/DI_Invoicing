@@ -273,8 +273,9 @@ def export_excel(
                 float(item.totalValues or 0)
             ]
             ws.append(row)
-            for column in total_columns:
-                totals[column] += float(row[column - 1] or 0)
+            if inv.status != "cancelled":
+                for column in total_columns:
+                    totals[column] += float(row[column - 1] or 0)
     total_row = ["TOTAL"] + [None] * (len(headers) - 1)
     for column, total in totals.items():
         total_row[column - 1] = total
