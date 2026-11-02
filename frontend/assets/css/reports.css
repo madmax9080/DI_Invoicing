@@ -203,6 +203,11 @@
     background: #f8fbff;
 }
 
+.report-action-btn {
+    border-radius: 10px;
+    font-size: 12px;
+}
+
 .donezo-pagination {
     display: flex;
     justify-content: space-between;

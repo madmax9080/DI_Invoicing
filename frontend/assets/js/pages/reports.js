@@ -362,14 +362,14 @@ function renderRow(inv, item, index) {
         ["failed", "invalid", "validation_failed", "pending", "cancelled"]
         .includes(inv.status);
     const actionBtn = inv.status === "posted"
-        ? `<button class="btn btn-outline-warning btn-sm cancel-btn"
+        ? `<button class="btn btn-outline-warning btn-sm cancel-btn report-action-btn"
                 data-id="${inv.id}"
                 title="Cancel invoice"
                 aria-label="Cancel invoice">
                 <i class="bi bi-x-circle"></i>
            </button>`
         : canDelete
-        ? `<button class="btn btn-outline-danger btn-sm delete-btn"
+        ? `<button class="btn btn-outline-danger btn-sm delete-btn report-action-btn"
                 data-id="${inv.id}"
                 title="Delete invoice"
                 aria-label="Delete invoice">
@@ -377,7 +377,7 @@ function renderRow(inv, item, index) {
            </button>`
         : "-";
     const downloadBtn = 
-        `<button class="btn btn-outline-danger btn-sm download-pdf" style=border-radius:10px;font-size:12px
+        `<button class="btn btn-outline-danger btn-sm download-pdf report-action-btn"
             data-id="${inv.id}"
             data-name="${inv.buyerBusinessName}">
             <i class="bi bi-file-pdf"></i>
