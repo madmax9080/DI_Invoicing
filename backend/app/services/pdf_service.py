@@ -330,7 +330,8 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             f"<br/><b>STRN:</b> {data['buyer_strn']}"
         )
     inv_text = (
-        f"<b>Inv #:</b>&nbsp;{data['invoice_no']}<br/>"
+        f"<b>FBR Inv No.:</b>&nbsp;{data.get('fbr_invoice_no') or '-'}<br/>"
+        f"<b>Inv. No.:</b>&nbsp;{data.get('internal_invoice_no') or '-'}<br/>"
         f"<b>Date:</b> {data['date']}<br/>"
         f"<b>Sale Type:</b> {data['sale_type']}"
     )
@@ -1149,7 +1150,23 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     # =========================================================
     # BUILD PDF
     # =========================================================
-    doc.build(elements)
+    if data.get("is_draft"):
+        def draw_draft_watermark(canvas, _doc):
+            canvas.saveState()
+            canvas.setFillColor(colors.HexColor("#e2e8f0"))
+            canvas.setFont("Helvetica-Bold", 48)
+            canvas.translate(A4[0] / 2, A4[1] / 2)
+            canvas.rotate(35)
+            canvas.drawCentredString(0, 0, "DRAFT")
+            canvas.restoreState()
+
+        doc.build(
+            elements,
+            onFirstPage=draw_draft_watermark,
+            onLaterPages=draw_draft_watermark,
+        )
+    else:
+        doc.build(elements)
     buffer.seek(0)
     pdf = buffer.getvalue()
     buffer.close()

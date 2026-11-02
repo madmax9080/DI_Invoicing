@@ -405,6 +405,9 @@ async def generate_invoice_pdf(
         "buyer_ntn": invoice.buyerNTNCNIC,
         "buyer_strn": invoice.buyerSTRN,
         "invoice_no": invoice.fbrInvoiceNo or invoice.internal_invoice_no,
+        "fbr_invoice_no": invoice.fbrInvoiceNo,
+        "internal_invoice_no": invoice.internal_invoice_no,
+        "is_draft": invoice.status in ("pending", "draft"),
         "date": invoice.invoiceDate.strftime('%d-%m-%Y'),
         "sale_type": invoice.invoiceType,
         "items": [{
