@@ -75,12 +75,13 @@ class ChangePasswordSchema(BaseModel):
     new_password: str
 
 class InvoiceItem(BaseModel):
+    productId: Optional[int] = Field(default=None, ge=1)
     hsCode: str = Field(..., min_length=4)
     productDescription: str
     rate: str = Field(..., description="e.g. '18%'")
     itemRate: Decimal = Field(..., ge=0, description="Invoice item unit rate")
     uoM: str = Field(..., description="UOM description")
-    quantity: Union[int, Decimal]
+    quantity: Union[int, Decimal] = Field(..., gt=0)
     totalValues: Union[int, Decimal]
     valueSalesExcludingST: Union[int, Decimal]
     fixedNotifiedValueOrRetailPrice: Union[int, Decimal]
@@ -101,6 +102,7 @@ class InvoiceItem(BaseModel):
 
 class InvoiceItemOut(BaseModel):
     id: int
+    product_id: Optional[int] = None
     hsCode: str
     productDescription: str
     rate: str
@@ -214,6 +216,33 @@ class ClientUpdate(ClientBase):
 class ClientOut(ClientBase):
     id: int
     created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class ProductCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=150)
+    description: str = Field(..., min_length=1)
+    hs_code: Optional[str] = Field(default=None, max_length=20)
+    uom_code: Optional[str] = Field(default=None, max_length=50)
+    uom_description: Optional[str] = Field(default=None, max_length=100)
+    item_rate: Decimal = Field(default=Decimal("0"), ge=0)
+    stock_quantity: Decimal = Field(default=Decimal("0"), ge=0)
+
+class ProductUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=150)
+    description: Optional[str] = Field(default=None, min_length=1)
+    hs_code: Optional[str] = Field(default=None, max_length=20)
+    uom_code: Optional[str] = Field(default=None, max_length=50)
+    uom_description: Optional[str] = Field(default=None, max_length=100)
+    item_rate: Optional[Decimal] = Field(default=None, ge=0)
+    stock_quantity: Optional[Decimal] = Field(default=None, ge=0)
+
+class ProductOut(ProductCreate):
+    id: int
+    client_id: int
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
     class Config:

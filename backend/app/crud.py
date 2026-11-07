@@ -71,6 +71,7 @@ def create_invoice(
         for item in payload["items"]:
             db_item = models.InvoiceItem(
                 invoice_id=db_invoice.id,
+                product_id=item.get("productId"),
                 hsCode=item["hsCode"],
                 productDescription=item["productDescription"],
                 uom=item.get("uoM"), 
@@ -273,6 +274,7 @@ def update_invoice_draft(
     for item in payload["items"]:
         db_item = models.InvoiceItem(
             invoice_id=invoice.id,
+            product_id=item.get("productId"),
             hsCode=item["hsCode"],
             productDescription=item["productDescription"],
             uom=item.get("uoM"),

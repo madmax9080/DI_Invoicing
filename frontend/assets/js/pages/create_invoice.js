@@ -17,6 +17,8 @@ import { BuyerService } from "../services/buyer_service.js";
 let currentItems = [];
 let editingIndex = null;
 let currentClient = null;
+let productCatalog = [];
+let selectedProductId = null;
 let initialized = false;
 const EVENTS_NS = ".createInvoice";
 let editingInvoiceId = null;
@@ -25,6 +27,64 @@ function getClientId() {
     const id = localStorage.getItem("client_id");
     if (!id || id === "null" || id === "undefined") return null;
     return id;
+}
+
+async function loadProductCatalog() {
+    try {
+        productCatalog = await apiFetch("/products/");
+        $("#savedProductOptions").empty();
+        productCatalog.forEach(product => {
+            $("#savedProductOptions").append(
+                new Option(product.name)
+            );
+        });
+    } catch (error) {
+        console.error("Product catalog load failed:", error);
+    }
+}
+
+async function handleProductNameInput() {
+    const name = $(this).val().trim();
+    const selectedProduct = productCatalog.find(
+        product => product.name.toLowerCase() === name.toLowerCase()
+    );
+    if (!selectedProduct) {
+        selectedProductId = null;
+        $("#productStockHint").text("");
+        return;
+    }
+    if (selectedProductId === selectedProduct.id) {
+        return;
+    }
+    selectedProductId = selectedProduct.id;
+    $("#productDescription").val(selectedProduct.description);
+    $("#itemRate").val(selectedProduct.item_rate);
+    $("#productStockHint").text(
+        `Available stock: ${selectedProduct.stock_quantity} ${selectedProduct.uom_description || ""}`
+    );
+    if (selectedProduct.hs_code) {
+        const hsOption = $("#hsCode option").filter(function () {
+            return String(this.value) === String(selectedProduct.hs_code);
+        }).first();
+        if (hsOption.length) {
+            $("#hsCode")
+                .val(hsOption.val())
+                .trigger("change.select2");
+            await handleHSCodeChange.call($("#hsCode")[0]);
+            const uomOption = $("#uoM option").filter(function () {
+                return (
+                    String(this.value) === String(selectedProduct.uom_code) ||
+                    this.text.trim().toLowerCase() ===
+                        String(selectedProduct.uom_description || "")
+                            .trim()
+                            .toLowerCase()
+                );
+            }).first();
+            if (uomOption.length) {
+                $("#uoM").val(uomOption.val()).trigger("change");
+            }
+        }
+    }
 }
 
 async function loadClientDetails(forceReload = false) {
@@ -233,7 +293,11 @@ async function handleSROScheduleChange() {
 // Add item to table
 async function handleAddItem() {
     const raw = getItemInputValues();
-    const normalized = normalizeItem(raw);
+    const normalized = normalizeItem({
+        ...raw,
+        productId: selectedProductId,
+        productName: $("#productName").val().trim()
+    });
     const error = validateItem(normalized);
     if (error) {
         showToast(error, "warning");
@@ -409,6 +473,7 @@ function escapeHtml(text) {
 
 function clearItemInputs() {
     const TEXT_FIELDS = [
+        "#productName",
         "#productDescription",
         "#quantity",
         "#itemRate",
@@ -435,6 +500,8 @@ function clearItemInputs() {
     TEXT_FIELDS.forEach(sel => {
         $(sel).val("");
     });
+    selectedProductId = null;
+    $("#productStockHint").text("");
     SELECT_FIELDS.forEach(sel => {
         $(sel).val("").trigger("change");
     });
@@ -450,6 +517,7 @@ function resetInvoiceForm() {
     editingInvoiceId = null;
     editingIndex = null;
     currentItems = [];
+    selectedProductId = null;
     $("#internalInvoiceNo").val("");
     $("#invoiceRefNo").val("");
     $("#buyerNTNCNIC").val("");
@@ -473,6 +541,18 @@ async function editItem(index) {
         return;
     }
     editingIndex = index;   
+    selectedProductId = item.productId || null;
+    const savedProduct = productCatalog.find(
+        product => product.id === selectedProductId
+    );
+    $("#productName").val(
+        savedProduct?.name || item.productName || ""
+    );
+    $("#productStockHint").text(
+        savedProduct
+            ? `Available stock: ${savedProduct.stock_quantity} ${savedProduct.uom_description || ""}`
+            : ""
+    );
     $("#productDescription").val(item.productDescription);
     $("#quantity").val(item.quantity);
     $("#itemRate").val(
@@ -715,6 +795,7 @@ function buildInvoicePayload() {
         buyerAddress: $("#buyerAddress").val(),
         buyerRegistrationType: $("#buyerRegistrationType").val(),
         items: currentItems.map(item => ({
+            productId: item.productId || null,
             hsCode: item.hsCode,
             productDescription: item.productDescription,
             rate: item.rateLabel,
@@ -823,6 +904,10 @@ function loadDraftForEditing() {
         }
     });
     currentItems = (invoice.items || []).map(item => ({
+        productId: item.product_id || null,
+        productName: productCatalog.find(
+            product => product.id === item.product_id
+        )?.name || "",
         hsCode: item.hsCode,
         productDescription: item.productDescription,
         quantity: Number(item.quantity),
@@ -862,6 +947,7 @@ export async function initCreateInvoice() {
         return;
     }
     await loadReferences();
+    await loadProductCatalog();
     initDynamicBindings();
     bindItemTableHandlers();
     bindStaticEvents();
@@ -900,6 +986,9 @@ function bindStaticEvents() {
     $("#hsCode")
         .off(`change${EVENTS_NS}`)
         .on(`change${EVENTS_NS}`, handleHSCodeChange);
+    $("#productName")
+        .off(EVENTS_NS)
+        .on(`input${EVENTS_NS} change${EVENTS_NS}`, handleProductNameInput);
     $("#saleType")
         .off(`change${EVENTS_NS}`)
         .on(`change${EVENTS_NS}`, handleSaleTypeChange);
@@ -953,6 +1042,7 @@ export function destroyCreateInvoice() {
     $("#itemsTable").off(EVENTS_NS);
     [
         "#buyerNTNCNIC",
+        "#productName",
         "#hsCode",
         "#saleType",
         "#rate",
@@ -980,4 +1070,6 @@ export function destroyCreateInvoice() {
         }
     });
     initialized = false;
+    productCatalog = [];
+    selectedProductId = null;
 }

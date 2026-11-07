@@ -1,4 +1,4 @@
-from sqlalchemy import TIMESTAMP, Column, Integer, String, DateTime, JSON, ForeignKey, Numeric, Text, func
+from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String, DateTime, JSON, ForeignKey, Numeric, Text, func
 from sqlalchemy.orm import relationship
 from .database import Base
 from sqlalchemy import UniqueConstraint
@@ -40,6 +40,7 @@ class Invoice(Base):
     updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
     printed_count = Column(Integer, default=0)
     last_printed_at = Column(DateTime(timezone=True), nullable=True)
+    stock_deducted = Column(Boolean, nullable=False, default=False, server_default="false")
     __table_args__ = (
         UniqueConstraint(
             "client_id",
@@ -55,6 +56,7 @@ class InvoiceItem(Base):
     __tablename__ = "invoice_items"
     id = Column(Integer, primary_key=True, index=True)
     invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id", ondelete="SET NULL"), nullable=True)
     hsCode = Column(String(20), nullable=False) 
     productDescription = Column(Text, nullable=False)
     uom = Column(String(50), nullable=False)
@@ -76,6 +78,25 @@ class InvoiceItem(Base):
     sroItemSerialNo = Column(String(50), nullable=True)
     saleType = Column(String(100), nullable=False) 
     invoice = relationship("Invoice", back_populates="items")
+    product = relationship("Product")
+
+class Product(Base):
+    __tablename__ = "products"
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(150), nullable=False)
+    description = Column(Text, nullable=False)
+    hs_code = Column(String(20), nullable=True)
+    uom_code = Column(String(50), nullable=True)
+    uom_description = Column(String(100), nullable=True)
+    item_rate = Column(Numeric(18, 2), nullable=False, default=0)
+    stock_quantity = Column(Numeric(15, 4), nullable=False, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    client = relationship("Client")
+    __table_args__ = (
+        UniqueConstraint("client_id", "name", name="uq_product_name_per_client"),
+    )
     
 class Client(Base):
     __tablename__ = "clients"

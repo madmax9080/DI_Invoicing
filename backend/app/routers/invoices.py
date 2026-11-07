@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Session
 from typing import Dict, List, Optional
 import logging
+from decimal import Decimal
 from app.services.excel_parser import parse_excel
 from app.services.invoice_builder import build_invoice_payloads_from_excel
 from app.dependencies.auth_dependency import get_current_user
@@ -26,6 +27,86 @@ from app.config import TEST_MODE
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 logger = logging.getLogger(__name__)   
 SEM_LIMIT = 2
+
+
+def _validate_invoice_products(
+    db: Session,
+    client_id: int,
+    invoice: InvoiceCreate,
+) -> None:
+    product_ids = {
+        item.productId
+        for item in invoice.items
+        if item.productId is not None
+    }
+    if not product_ids:
+        return
+    owned_ids = {
+        product_id
+        for (product_id,) in db.query(models.Product.id).filter(
+            models.Product.client_id == client_id,
+            models.Product.id.in_(product_ids),
+        ).all()
+    }
+    if owned_ids != product_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="An invoice product is not available for this business",
+        )
+
+
+def _lock_invoice_products(
+    db: Session,
+    client_id: int,
+    invoice: InvoiceCreate,
+) -> tuple[dict[int, models.Product], dict[int, Decimal]]:
+    quantities: dict[int, Decimal] = {}
+    for item in invoice.items:
+        if item.productId is None:
+            continue
+        quantities[item.productId] = quantities.get(
+            item.productId, Decimal("0")
+        ) + Decimal(str(item.quantity))
+    if not quantities:
+        return {}, {}
+    products = (
+        db.query(models.Product)
+        .filter(
+            models.Product.client_id == client_id,
+            models.Product.id.in_(quantities),
+        )
+        .order_by(models.Product.id)
+        .with_for_update()
+        .all()
+    )
+    products_by_id = {product.id: product for product in products}
+    if products_by_id.keys() != quantities.keys():
+        raise ValueError("An invoice product is no longer available")
+    return products_by_id, quantities
+
+
+def _lock_invoice_products_for_existing(
+    db: Session,
+    invoice: models.Invoice,
+) -> dict[int, models.Product]:
+    product_ids = {
+        item.product_id
+        for item in invoice.items
+        if item.product_id is not None
+    }
+    if not product_ids:
+        return {}
+    products = (
+        db.query(models.Product)
+        .filter(
+            models.Product.client_id == invoice.client_id,
+            models.Product.id.in_(product_ids),
+        )
+        .order_by(models.Product.id)
+        .with_for_update()
+        .all()
+    )
+    return {product.id: product for product in products}
 
 # @router.post("/post", status_code=status.HTTP_201_CREATED)
 # async def post_invoice_to_fbr(
@@ -181,6 +262,7 @@ async def post_invoice_to_fbr(
             status_code=400,
             detail="Internal invoice number is required"
         )
+    _validate_invoice_products(db, client_id, invoice)
     raw_payload = invoice.model_dump(mode="json")
     seller_strn = raw_payload.get("sellerSTRN")
     buyer_strn = raw_payload.get("buyerSTRN")
@@ -191,6 +273,7 @@ async def post_invoice_to_fbr(
     fbr_payload.pop("buyerSTRN", None)
     for item in fbr_payload.get("items", []):
         item.pop("itemRate", None)
+        item.pop("productId", None)
     existing = (
         db.query(models.Invoice)
         .filter(
@@ -259,6 +342,7 @@ async def post_invoice_to_fbr(
         for item in payload["items"]:
             db_item = models.InvoiceItem(
                 invoice_id=existing.id,
+                product_id=item.get("productId"),
                 hsCode=item["hsCode"],
                 productDescription=item["productDescription"],
                 uom=item.get("uoM"),
@@ -310,6 +394,38 @@ async def post_invoice_to_fbr(
             internal_invoice_no=internal_invoice_no,
             user_id=current_user["id"],
         )
+    is_sale_invoice = invoice.invoiceType.value == "Sale Invoice"
+    if is_sale_invoice:
+        try:
+            locked_products, product_quantities = _lock_invoice_products(
+                db, client_id, invoice
+            )
+        except ValueError as exc:
+            db.rollback()
+            db_invoice.status = "pending"
+            db_invoice.error_message = str(exc)
+            db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=str(exc),
+            )
+    else:
+        locked_products, product_quantities = {}, {}
+    if is_sale_invoice:
+        for product_id, requested_quantity in product_quantities.items():
+            product = locked_products[product_id]
+            if product.stock_quantity < requested_quantity:
+                available = product.stock_quantity
+                db_invoice.status = "pending"
+                db_invoice.error_message = (
+                    f"Insufficient stock for {product.name}: "
+                    f"{available} available, {requested_quantity} requested"
+                )
+                db.commit()
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=db_invoice.error_message,
+                )
     try:
         fbr_response = await fbr_client.post_invoice(
             fbr_payload
@@ -339,6 +455,14 @@ async def post_invoice_to_fbr(
             "invoiceNumber"
         ]
         db_invoice.error_message = None
+        if (
+            is_sale_invoice
+            and product_quantities
+            and not db_invoice.stock_deducted
+        ):
+            for product_id, quantity in product_quantities.items():
+                locked_products[product_id].stock_quantity -= quantity
+            db_invoice.stock_deducted = True
         db.commit()
         clear_cache(
             f"dashboard:{client_id}:"
@@ -383,6 +507,7 @@ def save_invoice_draft(
             status_code=404,
             detail="Client not found"
         )
+    _validate_invoice_products(db, client.id, invoice)
     internal_invoice_no = invoice.internalInvoiceNo
     if not internal_invoice_no:
         raise HTTPException(
@@ -424,6 +549,7 @@ def update_invoice_draft(
     ).first()
     if not client:
         raise HTTPException(404, "Client not found")
+    _validate_invoice_products(db, client.id, invoice)
     payload = invoice.model_dump(mode="json")
     try:
         crud.update_invoice_draft(
@@ -450,10 +576,12 @@ async def validate_invoice_with_fbr(
     fbr_client: FBRClient = Depends(get_fbr_client_secure),
     db: Session = Depends(get_db),
 ):
+    _validate_invoice_products(db, fbr_client.client_id, invoice)
     payload = invoice.model_dump(mode="json")
     fbr_payload = payload.copy()
     for item in fbr_payload.get("items", []):
         item.pop("itemRate", None)
+        item.pop("productId", None)
     try:
         fbr_response = await fbr_client.validate_invoice(fbr_payload)
         crud.create_invoice(
@@ -885,6 +1013,23 @@ def cancel_invoice(
             status_code=400,
             detail="Only posted invoices can be cancelled"
         )
+    if invoice.stock_deducted and invoice.invoiceType == "Sale Invoice":
+        products_by_id, _ = _lock_invoice_products_for_existing(
+            db, invoice
+        )
+        if any(
+            item.product_id is not None
+            and item.product_id not in products_by_id
+            for item in invoice.items
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Product stock could not be restored for this invoice",
+            )
+        for item in invoice.items:
+            if item.product_id is not None:
+                products_by_id[item.product_id].stock_quantity += item.quantity
+        invoice.stock_deducted = False
     invoice.status = "cancelled"
     db.commit()
     clear_cache(f"dashboard:{invoice.client_id}:")
