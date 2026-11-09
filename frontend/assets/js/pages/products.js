@@ -74,8 +74,8 @@ async function saveProduct(event) {
         return;
     }
     const payload = {
-        name: $("#productNameInput").val().trim(),
-        hs_code: $("#productHsCodeInput").val().trim() || null,
+        name: getInputValue("#productNameInput").trim(),
+        hs_code: getInputValue("#productHsCodeInput").trim() || null,
         stock_quantity: Number($("#productStockInput").val())
     };
     const $button = $("#saveProductBtn");
@@ -127,7 +127,7 @@ function resetProductForm() {
 }
 
 function renderProducts() {
-    const search = $("#productSearchInput").val().trim().toLowerCase();
+    const search = getInputValue("#productSearchInput").trim().toLowerCase();
     const filtered = products.filter(product =>
         `${product.name} ${product.hs_code || ""}`
             .toLowerCase()
@@ -156,6 +156,11 @@ function renderProducts() {
             </td>
         </tr>
     `).join(""));
+}
+
+function getInputValue(selector) {
+    const value = $(selector).val();
+    return typeof value === "string" ? value : "";
 }
 
 function escapeHtml(value) {
