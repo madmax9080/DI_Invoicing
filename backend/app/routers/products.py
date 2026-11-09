@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, or_
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -62,12 +62,7 @@ def list_products(
     )
     if search and search.strip():
         term = f"%{search.strip()}%"
-        query = query.filter(
-            or_(
-                models.Product.name.ilike(term),
-                models.Product.description.ilike(term),
-            )
-        )
+        query = query.filter(models.Product.name.ilike(term))
     return query.order_by(func.lower(models.Product.name)).all()
 
 
@@ -84,11 +79,10 @@ def create_product(
 ):
     get_owned_client(db, client_id, current_user["id"])
     name = payload.name.strip()
-    description = payload.description.strip()
-    if not name or not description:
+    if not name:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Product name and invoice description are required",
+            detail="Product name is required",
         )
     duplicate = db.query(models.Product.id).filter(
         models.Product.client_id == client_id,
@@ -102,15 +96,7 @@ def create_product(
     product = models.Product(
         client_id=client_id,
         name=name,
-        description=description,
         hs_code=payload.hs_code.strip() if payload.hs_code else None,
-        uom_code=payload.uom_code.strip() if payload.uom_code else None,
-        uom_description=(
-            payload.uom_description.strip()
-            if payload.uom_description
-            else None
-        ),
-        item_rate=payload.item_rate,
         stock_quantity=payload.stock_quantity,
     )
     db.add(product)
@@ -138,11 +124,11 @@ def update_product(
         db, product_id, client_id, current_user["id"]
     )
     updates = payload.model_dump(exclude_unset=True)
-    required_values = ("name", "description", "item_rate", "stock_quantity")
+    required_values = ("name", "stock_quantity")
     if any(field in updates and updates[field] is None for field in required_values):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Name, description, unit rate, and stock cannot be null",
+            detail="Name and stock cannot be null",
         )
     if "name" in updates:
         updates["name"] = updates["name"].strip()
@@ -161,16 +147,8 @@ def update_product(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="A product with this name already exists",
             )
-    if "description" in updates:
-        updates["description"] = updates["description"].strip()
-        if not updates["description"]:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Invoice description cannot be empty",
-            )
-    for field in ("hs_code", "uom_code", "uom_description"):
-        if updates.get(field) is not None:
-            updates[field] = updates[field].strip() or None
+    if updates.get("hs_code") is not None:
+        updates["hs_code"] = updates["hs_code"].strip() or None
     for field, value in updates.items():
         setattr(product, field, value)
     try:

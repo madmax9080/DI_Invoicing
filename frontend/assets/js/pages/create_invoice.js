@@ -43,7 +43,7 @@ async function loadProductCatalog() {
     }
 }
 
-async function handleProductNameInput() {
+async function handleProductDescriptionInput() {
     const name = $(this).val().trim();
     const selectedProduct = productCatalog.find(
         product => product.name.toLowerCase() === name.toLowerCase()
@@ -57,10 +57,8 @@ async function handleProductNameInput() {
         return;
     }
     selectedProductId = selectedProduct.id;
-    $("#productDescription").val(selectedProduct.description);
-    $("#itemRate").val(selectedProduct.item_rate);
     $("#productStockHint").text(
-        `Available stock: ${selectedProduct.stock_quantity} ${selectedProduct.uom_description || ""}`
+        `Available stock: ${selectedProduct.stock_quantity}`
     );
     if (selectedProduct.hs_code) {
         const hsOption = $("#hsCode option").filter(function () {
@@ -71,18 +69,6 @@ async function handleProductNameInput() {
                 .val(hsOption.val())
                 .trigger("change.select2");
             await handleHSCodeChange.call($("#hsCode")[0]);
-            const uomOption = $("#uoM option").filter(function () {
-                return (
-                    String(this.value) === String(selectedProduct.uom_code) ||
-                    this.text.trim().toLowerCase() ===
-                        String(selectedProduct.uom_description || "")
-                            .trim()
-                            .toLowerCase()
-                );
-            }).first();
-            if (uomOption.length) {
-                $("#uoM").val(uomOption.val()).trigger("change");
-            }
         }
     }
 }
@@ -295,8 +281,7 @@ async function handleAddItem() {
     const raw = getItemInputValues();
     const normalized = normalizeItem({
         ...raw,
-        productId: selectedProductId,
-        productName: $("#productName").val().trim()
+        productId: selectedProductId
     });
     const error = validateItem(normalized);
     if (error) {
@@ -473,7 +458,6 @@ function escapeHtml(text) {
 
 function clearItemInputs() {
     const TEXT_FIELDS = [
-        "#productName",
         "#productDescription",
         "#quantity",
         "#itemRate",
@@ -545,12 +529,9 @@ async function editItem(index) {
     const savedProduct = productCatalog.find(
         product => product.id === selectedProductId
     );
-    $("#productName").val(
-        savedProduct?.name || item.productName || ""
-    );
     $("#productStockHint").text(
         savedProduct
-            ? `Available stock: ${savedProduct.stock_quantity} ${savedProduct.uom_description || ""}`
+            ? `Available stock: ${savedProduct.stock_quantity}`
             : ""
     );
     $("#productDescription").val(item.productDescription);
@@ -905,9 +886,6 @@ function loadDraftForEditing() {
     });
     currentItems = (invoice.items || []).map(item => ({
         productId: item.product_id || null,
-        productName: productCatalog.find(
-            product => product.id === item.product_id
-        )?.name || "",
         hsCode: item.hsCode,
         productDescription: item.productDescription,
         quantity: Number(item.quantity),
@@ -986,9 +964,9 @@ function bindStaticEvents() {
     $("#hsCode")
         .off(`change${EVENTS_NS}`)
         .on(`change${EVENTS_NS}`, handleHSCodeChange);
-    $("#productName")
+    $("#productDescription")
         .off(EVENTS_NS)
-        .on(`input${EVENTS_NS} change${EVENTS_NS}`, handleProductNameInput);
+        .on(`input${EVENTS_NS} change${EVENTS_NS}`, handleProductDescriptionInput);
     $("#saleType")
         .off(`change${EVENTS_NS}`)
         .on(`change${EVENTS_NS}`, handleSaleTypeChange);
@@ -1042,7 +1020,7 @@ export function destroyCreateInvoice() {
     $("#itemsTable").off(EVENTS_NS);
     [
         "#buyerNTNCNIC",
-        "#productName",
+        "#productDescription",
         "#hsCode",
         "#saleType",
         "#rate",

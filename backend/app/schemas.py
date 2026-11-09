@@ -223,20 +223,12 @@ class ClientOut(ClientBase):
 
 class ProductCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=150)
-    description: str = Field(..., min_length=1)
     hs_code: Optional[str] = Field(default=None, max_length=20)
-    uom_code: Optional[str] = Field(default=None, max_length=50)
-    uom_description: Optional[str] = Field(default=None, max_length=100)
-    item_rate: Decimal = Field(default=Decimal("0"), ge=0)
     stock_quantity: Decimal = Field(default=Decimal("0"), ge=0)
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = Field(default=None, min_length=1, max_length=150)
-    description: Optional[str] = Field(default=None, min_length=1)
     hs_code: Optional[str] = Field(default=None, max_length=20)
-    uom_code: Optional[str] = Field(default=None, max_length=50)
-    uom_description: Optional[str] = Field(default=None, max_length=100)
-    item_rate: Optional[Decimal] = Field(default=None, ge=0)
     stock_quantity: Optional[Decimal] = Field(default=None, ge=0)
 
 class ProductOut(ProductCreate):

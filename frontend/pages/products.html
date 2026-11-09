@@ -1,41 +1,25 @@
 <div class="container-fluid py-3">
   <div class="mb-4">
     <h2 class="h4 mb-1">Products & Stock</h2>
-    <p class="text-muted mb-0">Manage saved products and their on-hand quantities for this business.</p>
+    <p class="text-muted mb-0">Manage saved product descriptions and on-hand quantities for this business.</p>
   </div>
 
   <section class="panel-card mb-4">
     <div class="panel-header">
       <div>
         <div class="panel-title" id="productFormTitle">Add product</div>
-        <div class="panel-subtitle">Saved products will be suggested when creating an invoice.</div>
+        <div class="panel-subtitle">Saved product names will be suggested in invoice descriptions.</div>
       </div>
     </div>
     <form id="productForm">
       <div class="row g-3">
         <div class="col-md-6">
-          <label for="productNameInput" class="form-label">Product name</label>
+          <label for="productNameInput" class="form-label">Product / invoice description</label>
           <input id="productNameInput" class="form-control" maxlength="150" required>
-        </div>
-        <div class="col-md-6">
-          <label for="productDescriptionInput" class="form-label">Invoice description</label>
-          <input id="productDescriptionInput" class="form-control" required>
         </div>
         <div class="col-md-3">
           <label for="productHsCodeInput" class="form-label">HS Code</label>
           <input id="productHsCodeInput" class="form-control" maxlength="20">
-        </div>
-        <div class="col-md-3">
-          <label for="productUomCodeInput" class="form-label">UOM code</label>
-          <input id="productUomCodeInput" class="form-control" maxlength="50">
-        </div>
-        <div class="col-md-3">
-          <label for="productUomDescriptionInput" class="form-label">UOM description</label>
-          <input id="productUomDescriptionInput" class="form-control" maxlength="100">
-        </div>
-        <div class="col-md-3">
-          <label for="productItemRateInput" class="form-label">Unit rate</label>
-          <input id="productItemRateInput" type="number" min="0" step="0.01" value="0" class="form-control" required>
         </div>
         <div class="col-md-3">
           <label for="productStockInput" class="form-label">Opening / current stock</label>
@@ -61,17 +45,14 @@
       <table class="table table-sm table-bordered align-middle">
         <thead>
           <tr>
-            <th>Product</th>
-            <th>Description</th>
+            <th>Product / invoice description</th>
             <th>HS Code</th>
-            <th>Unit</th>
-            <th class="text-end">Unit rate</th>
             <th class="text-end">Stock</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody id="productsTableBody">
-          <tr><td colspan="7" class="text-center text-muted">Loading products...</td></tr>
+          <tr><td colspan="4" class="text-center text-muted">Loading products...</td></tr>
         </tbody>
       </table>
     </div>

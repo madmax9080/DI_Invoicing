@@ -62,7 +62,7 @@ async function loadProducts() {
     } catch (error) {
         console.error("Failed to load products:", error);
         $("#productsTableBody").html(
-            '<tr><td colspan="7" class="text-center text-danger">Unable to load products.</td></tr>'
+            '<tr><td colspan="4" class="text-center text-danger">Unable to load products.</td></tr>'
         );
     }
 }
@@ -75,12 +75,7 @@ async function saveProduct(event) {
     }
     const payload = {
         name: $("#productNameInput").val().trim(),
-        description: $("#productDescriptionInput").val().trim(),
         hs_code: $("#productHsCodeInput").val().trim() || null,
-        uom_code: $("#productUomCodeInput").val().trim() || null,
-        uom_description:
-            $("#productUomDescriptionInput").val().trim() || null,
-        item_rate: Number($("#productItemRateInput").val()),
         stock_quantity: Number($("#productStockInput").val())
     };
     const $button = $("#saveProductBtn");
@@ -116,11 +111,7 @@ function editProduct(productId) {
     editingProductId = product.id;
     $("#productFormTitle").text("Edit product");
     $("#productNameInput").val(product.name);
-    $("#productDescriptionInput").val(product.description);
     $("#productHsCodeInput").val(product.hs_code || "");
-    $("#productUomCodeInput").val(product.uom_code || "");
-    $("#productUomDescriptionInput").val(product.uom_description || "");
-    $("#productItemRateInput").val(product.item_rate);
     $("#productStockInput").val(product.stock_quantity);
     $("#saveProductBtn").text("Update product");
     $("#cancelProductEditBtn").removeClass("d-none");
@@ -138,23 +129,20 @@ function resetProductForm() {
 function renderProducts() {
     const search = $("#productSearchInput").val().trim().toLowerCase();
     const filtered = products.filter(product =>
-        `${product.name} ${product.description} ${product.hs_code || ""}`
+        `${product.name} ${product.hs_code || ""}`
             .toLowerCase()
             .includes(search)
     );
     if (!filtered.length) {
         $("#productsTableBody").html(
-            '<tr><td colspan="7" class="text-center text-muted">No products found.</td></tr>'
+            '<tr><td colspan="4" class="text-center text-muted">No products found.</td></tr>'
         );
         return;
     }
     $("#productsTableBody").html(filtered.map(product => `
         <tr>
             <td class="fw-semibold">${escapeHtml(product.name)}</td>
-            <td>${escapeHtml(product.description)}</td>
             <td>${escapeHtml(product.hs_code || "-")}</td>
-            <td>${escapeHtml(product.uom_description || "-")}</td>
-            <td class="text-end">${formatNumber(product.item_rate)}</td>
             <td class="text-end">${formatNumber(product.stock_quantity)}</td>
             <td>
                 <div class="d-flex gap-1">
