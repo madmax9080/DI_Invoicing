@@ -1,10 +1,13 @@
-<div class="container-fluid py-3">
-  <div class="mb-4">
-    <h2 class="h4 mb-1">Products & Stock</h2>
-    <p class="text-muted mb-0">Manage saved product descriptions and on-hand quantities for this business.</p>
-  </div>
+<div class="reports-container buyer-page-shell products-page-shell">
+  <section class="reports-hero buyer-hero">
+    <div>
+      <div class="hero-chip">Product catalog</div>
+      <h2>Manage saved products and stock.</h2>
+      <p>Save product descriptions for invoice suggestions and keep track of on-hand quantities.</p>
+    </div>
+  </section>
 
-  <section class="panel-card mb-4">
+  <section class="panel-card">
     <div class="panel-header">
       <div>
         <div class="panel-title" id="productFormTitle">Add product</div>
@@ -14,35 +17,46 @@
     <form id="productForm">
       <div class="row g-3">
         <div class="col-md-6">
-          <label for="productNameInput" class="form-label">Product / invoice description</label>
-          <input id="productNameInput" class="form-control" maxlength="150" required>
+          <div class="donezo-form-group">
+            <label for="productNameInput">Product / invoice description</label>
+            <input id="productNameInput" class="form-control donezo-input" maxlength="150" required>
+          </div>
         </div>
         <div class="col-md-3">
-          <label for="productHsCodeInput" class="form-label">HS Code</label>
-          <input id="productHsCodeInput" class="form-control" maxlength="20">
+          <div class="donezo-form-group">
+            <label for="productHsCodeInput">HS Code</label>
+            <input id="productHsCodeInput" class="form-control donezo-input" maxlength="20">
+          </div>
         </div>
         <div class="col-md-3">
-          <label for="productStockInput" class="form-label">Opening / current stock</label>
-          <input id="productStockInput" type="number" min="0" step="0.0001" value="0" class="form-control" required>
+          <div class="donezo-form-group">
+            <label for="productStockInput">Opening / current stock</label>
+            <input id="productStockInput" type="number" min="0" step="0.0001" value="0" class="form-control donezo-input" required>
+          </div>
         </div>
       </div>
-      <div class="d-flex gap-2 mt-3">
-        <button id="saveProductBtn" type="submit" class="btn-donezo-primary">Save product</button>
-        <button id="cancelProductEditBtn" type="button" class="btn btn-outline-secondary d-none">Cancel edit</button>
+      <div class="donezo-form-footer">
+        <div class="d-flex gap-2">
+          <button id="saveProductBtn" type="submit" class="btn btn-donezo-primary">Save product</button>
+          <button id="cancelProductEditBtn" type="button" class="btn btn-donezo-secondary d-none">Cancel edit</button>
+        </div>
       </div>
     </form>
   </section>
 
-  <section class="panel-card">
-    <div class="panel-header d-flex justify-content-between align-items-center gap-3 flex-wrap">
+  <section class="panel-card table-panel">
+    <div class="panel-header flex-wrap gap-3">
       <div>
         <div class="panel-title">Product list</div>
         <div class="panel-subtitle">Stock decreases after a Sale Invoice is accepted by FBR.</div>
       </div>
-      <input id="productSearchInput" type="search" class="form-control" placeholder="Search products" style="max-width: 280px;">
+      <div class="col-lg-4 col-md-6">
+        <label for="productSearchInput" class="donezo-label">Search products</label>
+        <input id="productSearchInput" type="search" class="form-control donezo-input" placeholder="Search by name or HS code">
+      </div>
     </div>
-    <div class="table-responsive">
-      <table class="table table-sm table-bordered align-middle">
+    <div class="buyer-table-shell">
+      <table class="donezo-table buyer-table table table-hover align-middle">
         <thead>
           <tr>
             <th>Product / invoice description</th>
