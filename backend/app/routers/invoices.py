@@ -1014,7 +1014,7 @@ def cancel_invoice(
             detail="Only posted invoices can be cancelled"
         )
     if invoice.stock_deducted and invoice.invoiceType == "Sale Invoice":
-        products_by_id, _ = _lock_invoice_products_for_existing(
+        products_by_id = _lock_invoice_products_for_existing(
             db, invoice
         )
         if any(
