@@ -170,37 +170,15 @@
 }
 
 .table-wrapper {
-    overflow-x: auto;
+    max-height: min(68vh, 720px);
+    overflow: auto;
     border-radius: 16px;
     border: 1px solid var(--border);
 }
 
 .donezo-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
     min-width: 1500px;
-}
-
-.donezo-table thead th {
-    background: #f8fbff;
-    color: #334155;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 12px;
-    text-align: left;
-    white-space: nowrap;
-}
-
-.donezo-table td {
-    padding: 10px 12px;
-    font-size: 13px;
-    color: #334155;
-    white-space: nowrap;
-}
-
-.donezo-table tbody tr:hover {
-    background: #f8fbff;
 }
 
 .donezo-pagination {
@@ -275,38 +253,15 @@
 }
 
 .buyer-table-shell {
-    overflow-x: auto;
+    max-height: min(62vh, 560px);
+    overflow: auto;
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding-bottom: 4px;
 }
 
 .buyer-table {
     width: 100%;
-    min-width: 900px;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.buyer-table thead th {
-    background: #f8fbff;
-    color: #334155;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 12px;
-    text-align: left;
-    white-space: nowrap;
-}
-
-.buyer-table td {
-    padding: 10px 12px;
-    font-size: 13px;
-    color: #334155;
-    white-space: nowrap;
-}
-
-.buyer-table tbody tr:hover {
-    background: #f8fbff;
+    min-width: 760px;
 }
 
 @media (max-width: 768px) {
@@ -318,5 +273,173 @@
     .donezo-pagination {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+.table-wrapper,
+.buyer-table-shell,
+.invoice-table-shell,
+.preview-table-wrapper {
+    scrollbar-color: #b8cfe0 #f1f6fa;
+    scrollbar-width: thin;
+}
+
+.table-wrapper::-webkit-scrollbar,
+.buyer-table-shell::-webkit-scrollbar,
+.invoice-table-shell::-webkit-scrollbar,
+.preview-table-wrapper::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb,
+.buyer-table-shell::-webkit-scrollbar-thumb,
+.invoice-table-shell::-webkit-scrollbar-thumb,
+.preview-table-wrapper::-webkit-scrollbar-thumb {
+    background: #b8cfe0;
+    border: 2px solid #f1f6fa;
+    border-radius: 999px;
+}
+
+.table-wrapper::-webkit-scrollbar-track,
+.buyer-table-shell::-webkit-scrollbar-track,
+.invoice-table-shell::-webkit-scrollbar-track,
+.preview-table-wrapper::-webkit-scrollbar-track {
+    background: #f1f6fa;
+}
+
+.donezo-table,
+.erp-table,
+.modern-invoice-table {
+    color: #334155;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.donezo-table thead th,
+.erp-table thead th,
+.modern-invoice-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 12px 14px;
+    color: #26445c;
+    background: #edf5fb;
+    border: 0;
+    border-bottom: 1px solid #d6e4ef;
+    box-shadow: 0 2px 0 rgba(36, 71, 96, 0.04);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.donezo-table tbody td,
+.erp-table tbody td,
+.modern-invoice-table tbody td {
+    padding: 11px 14px;
+    color: #334155;
+    background-color: #fff;
+    border: 0;
+    border-bottom: 1px solid #edf1f5;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    vertical-align: middle;
+}
+
+.donezo-table tbody tr:nth-child(even) td,
+.erp-table tbody tr:nth-child(even) td,
+.modern-invoice-table tbody tr:nth-child(even) td {
+    background-color: #fbfdff;
+}
+
+.donezo-table tbody tr:hover td,
+.erp-table tbody tr:hover td,
+.modern-invoice-table tbody tr:hover td {
+    background-color: #f0f8ff;
+}
+
+.donezo-table tbody tr:last-child td,
+.erp-table tbody tr:last-child td,
+.modern-invoice-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.erp-table.table-bordered > :not(caption) > * > *,
+.modern-invoice-table.table-bordered > :not(caption) > * > * {
+    border-right: 0;
+    border-left: 0;
+}
+
+.donezo-table .text-end,
+.erp-table .text-end,
+.modern-invoice-table .text-end {
+    font-variant-numeric: tabular-nums;
+}
+
+.donezo-table tbody td[colspan],
+.erp-table tbody td[colspan],
+.modern-invoice-table tbody td[colspan] {
+    padding: 28px 16px;
+    color: #64748b;
+    text-align: center;
+}
+
+.buyer-table-shell .buyer-table {
+    min-width: 760px;
+}
+
+.invoice-table-shell .erp-table {
+    min-width: 1600px;
+}
+
+.preview-table-wrapper .modern-invoice-table {
+    min-width: 1500px;
+}
+
+.invoice-items-table {
+    min-width: 1400px;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.invoice-items-table thead th {
+    position: static;
+    padding: 9px 11px;
+    color: #3d566d;
+    background: #f4f8fb;
+    border: 0;
+    border-bottom: 1px solid #dfe8ef;
+    box-shadow: none;
+    font-size: 0.68rem;
+    letter-spacing: 0.035em;
+}
+
+.invoice-items-table tbody td {
+    padding: 8px 11px;
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+.invoice-items-table.table-bordered > :not(caption) > * > * {
+    border-right: 0;
+    border-left: 0;
+}
+
+@media (max-width: 576px) {
+    .donezo-table thead th,
+    .erp-table thead th,
+    .modern-invoice-table thead th {
+        padding: 10px 11px;
+    }
+
+    .donezo-table tbody td,
+    .erp-table tbody td,
+    .modern-invoice-table tbody td {
+        padding: 9px 11px;
     }
 }

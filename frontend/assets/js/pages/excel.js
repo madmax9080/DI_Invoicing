@@ -762,7 +762,7 @@ function resetValidationState() {
 
 function renderItemsTable(items) {
     return `
-        <table class="table table-sm table-bordered">
+        <table class="table table-sm table-bordered invoice-items-table">
             <thead>
                 <tr>
                     <th>HS Code</th>

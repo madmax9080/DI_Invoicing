@@ -202,34 +202,6 @@
     border: 1px solid #e2e8f0;
 }
 
-.modern-invoice-table {
-    min-width: 1500px;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.modern-invoice-table thead th {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.2px;
-    white-space: nowrap;
-    background: #f8fbff;
-    color: #334155;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.modern-invoice-table td {
-    font-size: 13px;
-    vertical-align: middle;
-    color: #334155;
-}
-
-.modern-invoice-table tbody tr:hover {
-    background: #f8fbff;
-}
-
 .modern-invoice-table .badge {
     font-size: 11px;
     padding: 4px 8px;
