@@ -23,34 +23,49 @@
         </div>
     </section>
 
-    <section class="panel-card filter-panel">
+    <section class="panel-card filter-panel reports-filter-panel">
+        <div class="reports-filter-heading">
+            <div class="reports-filter-title">
+                <span class="reports-filter-icon"><i class="bi bi-funnel"></i></span>
+                <div>
+                    <h3>Filter invoices</h3>
+                    <p>Refine the report by status, buyer, or invoice date.</p>
+                </div>
+            </div>
+        </div>
         <div class="row g-3 align-items-end">
-            <div class="col-lg-2 col-md-6">
-                <label class="donezo-label">Status</label>
-                <select id="filterStatus" class="form-select donezo-input">
-                    <option value="">All</option>
+            <div class="col-xl-2 col-md-6">
+                <label for="filterStatus" class="donezo-label">Status</label>
+                <select id="filterStatus" class="form-select donezo-input reports-filter-control">
+                    <option value="">All statuses</option>
                     <option value="posted">Posted</option>
                     <option value="cancelled">Cancelled</option>
                     <option value="failed">Failed</option>
                 </select>
             </div>
-            <div class="col-lg-2 col-md-6">
-                <label class="donezo-label">From Date</label>
-                <input type="date" id="filterDateFrom" class="form-control donezo-input">
+            <div class="col-xl-2 col-md-6">
+                <label for="filterBuyerName" class="donezo-label">Buyer name</label>
+                <input type="search" id="filterBuyerName" maxlength="100" class="form-control donezo-input reports-filter-control" placeholder="Search buyer">
             </div>
-            <div class="col-lg-2 col-md-6">
-                <label class="donezo-label">To Date</label>
-                <input type="date" id="filterDateTo" class="form-control donezo-input">
+            <div class="col-xl-2 col-md-6">
+                <label for="filterDateFrom" class="donezo-label">From date</label>
+                <input type="date" id="filterDateFrom" class="form-control donezo-input reports-filter-control">
             </div>
-            <div class="col-lg-2 col-md-6">
-                <label class="donezo-label">Month</label>
-                <input type="month" id="filterMonth" class="form-control donezo-input">
+            <div class="col-xl-2 col-md-6">
+                <label for="filterDateTo" class="donezo-label">To date</label>
+                <input type="date" id="filterDateTo" class="form-control donezo-input reports-filter-control">
             </div>
-            <div class="col-lg-4 col-md-12 d-flex gap-2">
+            <div class="col-xl-2 col-md-6">
+                <label for="filterMonth" class="donezo-label">Month</label>
+                <input type="month" id="filterMonth" class="form-control donezo-input reports-filter-control">
+            </div>
+            <div class="col-xl-2 col-md-12 d-flex gap-2 reports-filter-actions">
                 <button id="applyFiltersBtn" class="btn btn-donezo-primary flex-fill">
+                    <i class="bi bi-search"></i>
                     Apply
                 </button>
                 <button id="resetFiltersBtn" class="btn btn-donezo-secondary flex-fill">
+                    <i class="bi bi-arrow-counterclockwise"></i>
                     Reset
                 </button>
             </div>

@@ -169,6 +169,76 @@
     box-shadow: 0 0 0 3px rgba(0, 155, 229, 0.14);
 }
 
+.reports-filter-panel {
+    padding: 16px 18px 18px;
+    border-color: rgba(20, 110, 152, 0.12);
+    background:
+        radial-gradient(ellipse at top right, rgba(0, 155, 229, 0.07), transparent 42%),
+        rgba(255, 255, 255, 0.98);
+}
+
+.reports-filter-heading {
+    margin-bottom: 14px;
+}
+
+.reports-filter-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.reports-filter-icon {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    place-items: center;
+    border-radius: 11px;
+    background: rgba(0, 155, 229, 0.1);
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.reports-filter-title h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.96rem;
+    font-weight: 700;
+}
+
+.reports-filter-title p {
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.reports-filter-panel .donezo-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.72rem;
+}
+
+.reports-filter-control {
+    min-height: 40px;
+    border-radius: 10px;
+    padding: 7px 10px;
+    font-size: 0.82rem;
+}
+
+.reports-filter-actions .btn {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+}
+
+.reports-filter-actions .btn-donezo-primary {
+    box-shadow: 0 5px 12px rgba(0, 115, 173, 0.18);
+}
+
 .table-wrapper {
     max-height: min(68vh, 720px);
     overflow: auto;
@@ -199,8 +269,47 @@
 }
 
 .reports-page-numbers .page-link {
-    min-width: 2rem;
+    display: grid;
+    min-width: 2.2rem;
+    min-height: 2.2rem;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: #52677b;
+    font-size: 0.8rem;
+    font-weight: 600;
     text-align: center;
+    transition: color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.reports-page-numbers .page-item + .page-item {
+    margin-left: 4px;
+}
+
+.reports-page-numbers .page-link:hover {
+    border-color: rgba(20, 110, 152, 0.14);
+    background: rgba(0, 155, 229, 0.08);
+    color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.reports-page-numbers .page-item.active .page-link {
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    box-shadow: 0 5px 12px rgba(0, 115, 173, 0.2);
+}
+
+.reports-page-numbers .page-item.disabled .page-link {
+    background: transparent;
+    color: #94a3b8;
+    box-shadow: none;
+}
+
+.reports-page-numbers .page-link:focus-visible {
+    outline: 3px solid rgba(0, 155, 229, 0.25);
+    outline-offset: 2px;
 }
 
 .donezo-chart {

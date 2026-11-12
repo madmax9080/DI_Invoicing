@@ -7,6 +7,7 @@ const state = {
     invoices: [],
     filters: {
         status: "",
+        buyer_name: "",
         date_from: "",
         date_to: "",
         month: ""
@@ -187,6 +188,8 @@ async function exportExcel() {
         params.append("fy", fy);
         if (state.filters.status)
             params.append("status", state.filters.status);
+        if (state.filters.buyer_name)
+            params.append("buyer_name", state.filters.buyer_name);
         if (state.filters.date_from)
             params.append("date_from", state.filters.date_from);
         if (state.filters.date_to)
@@ -236,6 +239,7 @@ $("#exportExcelBtn").click(() => {
 
 function readFilters() {
     state.filters.status = $("#filterStatus").val();
+    state.filters.buyer_name = $("#filterBuyerName").val().trim();
     state.filters.date_from = $("#filterDateFrom").val();
     state.filters.date_to = $("#filterDateTo").val();
     state.filters.month = $("#filterMonth").val();
@@ -250,6 +254,8 @@ async function fetchReports() {
         params.append("per_page", state.pagination.perPage);
         if (state.filters.status)
             params.append("status", state.filters.status);
+        if (state.filters.buyer_name)
+            params.append("buyer_name", state.filters.buyer_name);
         if (state.filters.date_from)
             params.append("date_from", state.filters.date_from);
         if (state.filters.date_to)
@@ -474,11 +480,13 @@ function renderPagination() {
 
 function resetFiltersUI() {
     $("#filterStatus").val("");
+    $("#filterBuyerName").val("");
     $("#filterDateFrom").val("");
     $("#filterDateTo").val("");
     $("#filterMonth").val("");
     state.filters = {
         status: "",
+        buyer_name: "",
         date_from: "",
         date_to: "",
         month: ""

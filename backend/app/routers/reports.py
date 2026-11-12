@@ -73,8 +73,9 @@ def sales_by_buyer(
 def reports_invoices(
     fy: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
-    per_page: int = Query(25, ge=1, le=200),
+    per_page: int = Query(10, ge=1, le=200),
     status: Optional[str] = Query(None),
+    buyer_name: Optional[str] = Query(None, max_length=100),
     date_from: Optional[date] = Query(None),
     date_to: Optional[date] = Query(None),
     month: Optional[str] = Query(None),
@@ -89,6 +90,12 @@ def reports_invoices(
     ]
     if status:
         base_filter.append(Invoice.status == status)
+    if buyer_name and buyer_name.strip():
+        base_filter.append(
+            Invoice.buyerBusinessName.ilike(
+                f"%{buyer_name.strip()}%"
+            )
+        )
     if month:
         year, month_num = map(int, month.split("-"))
         start = date(year, month_num, 1)
@@ -180,6 +187,7 @@ def reports_invoices(
 def export_excel(
     fy: str,
     status: Optional[str] = None,
+    buyer_name: Optional[str] = None,
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
     month: Optional[int] = None,
@@ -191,6 +199,12 @@ def export_excel(
     )
     if status:
         query = query.filter(Invoice.status == status)
+    if buyer_name and buyer_name.strip():
+        query = query.filter(
+            Invoice.buyerBusinessName.ilike(
+                f"%{buyer_name.strip()}%"
+            )
+        )
     if date_from:
         query = query.filter(Invoice.invoiceDate >= date_from)
     if date_to:
