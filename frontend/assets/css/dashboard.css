@@ -612,6 +612,37 @@ body {
 }
 
 @media (max-width: 768px) {
+    .dashboard-toolbar {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 4px;
+        padding: 8px;
+    }
+    .toolbar-actions {
+        flex-wrap: nowrap;
+        gap: 3px;
+    }
+    .toolbar-right {
+        flex-wrap: nowrap;
+        gap: 4px;
+    }
+    .toolbar-btn,
+    .create-invoice-btn {
+        padding: 0 4px;
+        gap: 3px;
+        font-size: 10px;
+    }
+    .tax-year-label {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .dashboard-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
     .toolbar-actions {
         flex-wrap: wrap;
     }
