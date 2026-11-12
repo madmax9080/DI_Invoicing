@@ -13,7 +13,7 @@ const state = {
     },
     pagination: {
         page: 1,
-        perPage: 25,
+        perPage: 10,
         total: 0,
         pages: 0
     }
@@ -426,20 +426,50 @@ function renderRow(inv, item, index) {
 }
 
 function renderPagination() {
+    const { page, pages, perPage, total } = state.pagination;
     $("#paginationStart").text(
-        (state.pagination.page - 1)
-        * state.pagination.perPage + 1
+        total ? (page - 1) * perPage + 1 : 0
     );
     $("#paginationEnd").text(
-        Math.min(
-            state.pagination.page
-            * state.pagination.perPage,
-            state.pagination.total
-        )
+        Math.min(page * perPage, total)
     );
-    $("#paginationTotal").text(
-        state.pagination.total
-    );
+    $("#paginationTotal").text(total);
+
+    const visiblePages = new Set(pages ? [1, pages] : []);
+    for (
+        let visiblePage = Math.max(1, page - 2);
+        visiblePage <= Math.min(pages, page + 2);
+        visiblePage++
+    ) {
+        visiblePages.add(visiblePage);
+    }
+
+    let previousPage = 0;
+    const pageButtons = [...visiblePages]
+        .filter(visiblePage => visiblePage > 0)
+        .sort((left, right) => left - right)
+        .map(visiblePage => {
+            const gap = visiblePage - previousPage;
+            previousPage = visiblePage;
+            const ellipsis = gap > 1
+                ? '<li class="page-item disabled"><span class="page-link" aria-hidden="true">&hellip;</span></li>'
+                : "";
+            const active = visiblePage === page;
+            return `${ellipsis}
+                <li class="page-item${active ? " active" : ""}">
+                    <button
+                        class="page-link reports-page-btn"
+                        type="button"
+                        data-page="${visiblePage}"
+                        ${active ? 'aria-current="page"' : ""}
+                        aria-label="Page ${visiblePage}">
+                        ${visiblePage}
+                    </button>
+                </li>
+            `;
+        })
+        .join("");
+    $("#reportsPageNumbers").html(pageButtons);
 }
 
 function resetFiltersUI() {
@@ -456,19 +486,17 @@ function resetFiltersUI() {
 }
 
 function binding() {
-    $("#prevPageBtn")
-        .off("click")
-        .on("click", async () => {
-            if (state.pagination.page > 1) {
-                state.pagination.page--;
-                await reload();
-            }
-        });
-    $("#nextPageBtn")
-        .off("click")
-        .on("click", async () => {
-            if (state.pagination.page < state.pagination.pages) {
-                state.pagination.page++;
+    $("#reportsPageNumbers")
+        .off("click.reports")
+        .on("click.reports", ".reports-page-btn", async function () {
+            const page = Number($(this).data("page"));
+            if (
+                Number.isInteger(page)
+                && page >= 1
+                && page <= state.pagination.pages
+                && page !== state.pagination.page
+            ) {
+                state.pagination.page = page;
                 await reload();
             }
         });
@@ -537,4 +565,5 @@ export async function initReports() {
 
 export function destroyReports() {
     $(document).off(".reports");
+    $("#reportsPageNumbers").off(".reports");
 }

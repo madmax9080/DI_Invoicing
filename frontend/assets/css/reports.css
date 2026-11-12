@@ -194,9 +194,13 @@
     color: var(--muted);
 }
 
-.pagination-buttons {
-    display: flex;
-    gap: 8px;
+.reports-page-numbers {
+    flex-wrap: wrap;
+}
+
+.reports-page-numbers .page-link {
+    min-width: 2rem;
+    text-align: center;
 }
 
 .donezo-chart {
