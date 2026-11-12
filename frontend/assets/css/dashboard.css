@@ -690,11 +690,25 @@ body {
     margin: 6px -4px 0;
     padding: 2px 4px 12px;
     overflow-y: auto;
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 181, 194, 0.65) transparent;
 }
 
 .sidebar .menu-links::-webkit-scrollbar {
-    display: none;
+    width: 6px;
+}
+
+.sidebar .menu-links::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar .menu-links::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(148, 181, 194, 0.55);
+}
+
+.sidebar .menu-links::-webkit-scrollbar-thumb:hover {
+    background: rgba(183, 223, 240, 0.85);
 }
 
 .sidebar .menu-group {
