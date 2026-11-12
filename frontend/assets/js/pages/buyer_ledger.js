@@ -5,13 +5,6 @@ let currentLedger = null;
 const LEDGER_START_DATE = "2026-07-01";
 
 export async function initBuyerLedger() {
-    $("#ledgerBuyerSearchBtn").on("click", searchLedgerBuyers);
-    $("#ledgerBuyerSearch").on("keydown", event => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            searchLedgerBuyers();
-        }
-    });
     $("#ledgerApplyBtn").on("click", loadBuyerLedger);
     $("#ledgerExportBtn").on("click", exportBuyerLedger);
     $("#ledgerReceiptBtn").on("click", openReceiptForm);
@@ -23,15 +16,13 @@ export async function initBuyerLedger() {
     $("#ledgerReceiptDate")
         .attr("min", LEDGER_START_DATE)
         .val(localDateString(new Date()));
-    await searchLedgerBuyers();
+    await loadLedgerBuyers();
 }
 
 export function destroyBuyerLedger() {
     const receiptModal = document.getElementById("ledgerReceiptModal");
     const modalInstance = bootstrap.Modal.getInstance(receiptModal);
     if (modalInstance) modalInstance.hide();
-    $("#ledgerBuyerSearchBtn").off("click");
-    $("#ledgerBuyerSearch").off("keydown");
     $("#ledgerApplyBtn").off("click");
     $("#ledgerExportBtn").off("click");
     $("#ledgerReceiptBtn").off("click");
@@ -45,16 +36,21 @@ function invalidateLedger() {
     $("#ledgerReceiptBtn").prop("disabled", !$("#ledgerBuyerSelect").val());
 }
 
-async function searchLedgerBuyers() {
+async function loadLedgerBuyers() {
     invalidateLedger();
-    const search = $("#ledgerBuyerSearch").val().trim();
-    const params = new URLSearchParams({ limit: "100" });
-    if (search) params.set("search", search);
     const select = $("#ledgerBuyerSelect");
     const selectedId = select.val();
+    const params = new URLSearchParams({ limit: "100" });
     const result = await apiFetch(`/buyer-ledger/buyers?${params}`);
+    const buyers = [...result.items];
+    while (buyers.length < result.total) {
+        params.set("skip", String(buyers.length));
+        const page = await apiFetch(`/buyer-ledger/buyers?${params}`);
+        if (!page.items.length) break;
+        buyers.push(...page.items);
+    }
     select.empty().append('<option value="">Select a buyer</option>');
-    result.items.forEach(buyer => {
+    buyers.forEach(buyer => {
         const label = buyer.ntn_cnic
             ? `${buyer.name} (${buyer.ntn_cnic})`
             : buyer.name;
@@ -66,11 +62,7 @@ async function searchLedgerBuyers() {
         select.val(selectedId);
     }
     invalidateLedger();
-    $("#ledgerStatus").text(
-        result.total > result.items.length
-            ? `${result.items.length} buyers shown. Search by name or NTN/CNIC to find others.`
-            : `${result.total} buyer${result.total === 1 ? "" : "s"} found.`
-    );
+    $("#ledgerStatus").text(`${buyers.length} buyer${buyers.length === 1 ? "" : "s"} found.`);
 }
 
 async function loadBuyerLedger() {
