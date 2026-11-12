@@ -472,6 +472,100 @@ def create_buyer_receipt(
     }
 
 
+@router.put("/{buyer_id}/receipts/{receipt_id}")
+def update_buyer_receipt(
+    buyer_id: int,
+    receipt_id: int,
+    payload: ReceiptCreate,
+    client_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    if payload.received_date < LEDGER_START_DATE:
+        raise HTTPException(
+            status_code=422,
+            detail="Buyer receipts can be recorded from 2026-07-01 (FY 2026-2027)",
+        )
+    _owned_buyer(db, buyer_id, client_id, current_user["id"])
+    buyer = (
+        db.query(models.Buyer)
+        .filter(
+            models.Buyer.id == buyer_id,
+            models.Buyer.client_id == client_id,
+        )
+        .with_for_update()
+        .first()
+    )
+    receipt = (
+        db.query(models.BuyerReceipt)
+        .filter(
+            models.BuyerReceipt.id == receipt_id,
+            models.BuyerReceipt.client_id == client_id,
+            models.BuyerReceipt.buyer_id == buyer_id,
+        )
+        .with_for_update()
+        .first()
+    )
+    if not buyer or not receipt:
+        raise HTTPException(status_code=404, detail="Buyer receipt not found")
+
+    receipt.received_date = payload.received_date
+    receipt.amount = payload.amount
+    receipt.payment_method = payload.payment_method.strip() if payload.payment_method else None
+    receipt.reference_number = (
+        payload.reference_number.strip()
+        if payload.reference_number
+        else None
+    )
+    receipt.notes = payload.notes.strip() if payload.notes else None
+    _rebuild_receipt_allocations(db, client_id, buyer_id)
+    db.commit()
+    return {
+        "id": receipt.id,
+        "buyer_id": buyer_id,
+        "received_date": receipt.received_date.isoformat(),
+        "amount": float(receipt.amount),
+    }
+
+
+@router.delete("/{buyer_id}/receipts/{receipt_id}")
+def delete_buyer_receipt(
+    buyer_id: int,
+    receipt_id: int,
+    client_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    _owned_buyer(db, buyer_id, client_id, current_user["id"])
+    buyer = (
+        db.query(models.Buyer)
+        .filter(
+            models.Buyer.id == buyer_id,
+            models.Buyer.client_id == client_id,
+        )
+        .with_for_update()
+        .first()
+    )
+    receipt = (
+        db.query(models.BuyerReceipt)
+        .filter(
+            models.BuyerReceipt.id == receipt_id,
+            models.BuyerReceipt.client_id == client_id,
+            models.BuyerReceipt.buyer_id == buyer_id,
+        )
+        .with_for_update()
+        .first()
+    )
+    if not buyer or not receipt:
+        raise HTTPException(status_code=404, detail="Buyer receipt not found")
+
+    db.delete(receipt)
+    db.flush()
+    _rebuild_receipt_allocations(db, client_id, buyer_id)
+    db.commit()
+    return {"deleted": True, "receipt_id": receipt_id}
+
+
 @router.get("/{buyer_id}")
 def get_buyer_ledger(
     buyer_id: int,

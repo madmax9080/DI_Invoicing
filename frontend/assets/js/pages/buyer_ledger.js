@@ -2,6 +2,7 @@ import { apiFetch } from "../api.js";
 import { showToast } from "../toast.js";
 
 let currentLedger = null;
+let editingReceiptId = null;
 const LEDGER_START_DATE = "2026-07-01";
 
 export async function initBuyerLedger() {
@@ -11,6 +12,9 @@ export async function initBuyerLedger() {
     $("#ledgerOpeningBalanceForm").on("submit", saveOpeningBalance);
     $("#ledgerReceiptBtn").on("click", openReceiptForm);
     $("#ledgerReceiptForm").on("submit", saveBuyerReceipt);
+    $("#buyerLedgerTableBody")
+        .on("click.buyerLedger", ".ledger-receipt-edit", openReceiptEdit)
+        .on("click.buyerLedger", ".ledger-receipt-delete", deleteBuyerReceipt);
     $("#ledgerBuyerSelect, #ledgerDateFrom, #ledgerDateTo").on(
         "change",
         invalidateLedger
@@ -34,6 +38,7 @@ export function destroyBuyerLedger() {
     $("#ledgerOpeningBalanceForm").off("submit");
     $("#ledgerReceiptBtn").off("click");
     $("#ledgerReceiptForm").off("submit");
+    $("#buyerLedgerTableBody").off(".buyerLedger");
     $("#ledgerBuyerSelect, #ledgerDateFrom, #ledgerDateTo").off("change");
 }
 
@@ -169,7 +174,7 @@ function renderLedgerRows(transactions) {
     if (!transactions.length) {
         body.append(`
             <tr>
-                <td colspan="9" class="text-center text-muted py-4">
+                <td colspan="10" class="text-center text-muted py-4">
                     No posted transactions found for this buyer and date range.
                 </td>
             </tr>
@@ -198,6 +203,24 @@ function renderLedgerRows(transactions) {
         row.append($("<td>", { class: "text-end fw-semibold" }).text(
             formatNumber(transaction.balance)
         ));
+        const actions = $("<td>", { class: "text-end text-nowrap" });
+        if (transaction.receipt_id) {
+            actions.append(
+                $("<button>", {
+                    type: "button",
+                    class: "btn btn-sm btn-donezo-secondary me-1 ledger-receipt-edit",
+                    title: "Edit receipt",
+                    "aria-label": "Edit receipt"
+                }).append($("<i>", { class: "bi bi-pencil" })).data("receipt", transaction),
+                $("<button>", {
+                    type: "button",
+                    class: "btn btn-sm btn-outline-danger ledger-receipt-delete",
+                    title: "Delete receipt",
+                    "aria-label": "Delete receipt"
+                }).append($("<i>", { class: "bi bi-trash" })).data("receiptId", transaction.receipt_id)
+            );
+        }
+        row.append(actions);
         body.append(row);
     });
 }
@@ -221,6 +244,10 @@ function openReceiptForm() {
         $("#ledgerStatus").text("Select a buyer before recording a receipt.");
         return;
     }
+    editingReceiptId = null;
+    $("#ledgerReceiptForm")[0].reset();
+    $("#ledgerReceiptTitle").text("Record buyer receipt");
+    $("#ledgerReceiptSaveBtn").html('<i class="bi bi-check2"></i> Save Receipt');
     $("#ledgerReceiptBuyer").text(
         $("#ledgerBuyerSelect option:selected").text()
     );
@@ -230,6 +257,43 @@ function openReceiptForm() {
     bootstrap.Modal.getOrCreateInstance(
         document.getElementById("ledgerReceiptModal")
     ).show();
+}
+
+function openReceiptEdit(event) {
+    const receipt = $(event.currentTarget).data("receipt");
+    editingReceiptId = receipt.receipt_id;
+    $("#ledgerReceiptTitle").text("Edit buyer receipt");
+    $("#ledgerReceiptBuyer").text(
+        $("#ledgerBuyerSelect option:selected").text()
+    );
+    $("#ledgerReceiptDate").val(receipt.date);
+    $("#ledgerReceiptAmount").val(receipt.credit);
+    $("#ledgerReceiptMethod").val(receipt.payment_method || "");
+    $("#ledgerReceiptReference").val(receipt.reference_number || "");
+    $("#ledgerReceiptNotes").val(receipt.notes || "");
+    $("#ledgerReceiptSaveBtn").html('<i class="bi bi-check2"></i> Update Receipt');
+    bootstrap.Modal.getOrCreateInstance(
+        document.getElementById("ledgerReceiptModal")
+    ).show();
+}
+
+async function deleteBuyerReceipt(event) {
+    const receiptId = $(event.currentTarget).data("receiptId");
+    const buyerId = $("#ledgerBuyerSelect").val();
+    if (!buyerId || !window.confirm("Delete this receipt? This will update its invoice allocations and the buyer balance.")) {
+        return;
+    }
+    const deleteButton = $(event.currentTarget).prop("disabled", true);
+    try {
+        await apiFetch(`/buyer-ledger/${buyerId}/receipts/${receiptId}`, {
+            method: "DELETE"
+        });
+        await loadBuyerLedger();
+        showToast("Receipt deleted.", "success");
+    } catch (error) {
+        $("#ledgerStatus").text(error.message || "Could not delete the receipt.");
+        deleteButton.prop("disabled", false);
+    }
 }
 
 async function saveBuyerReceipt(event) {
@@ -250,8 +314,12 @@ async function saveBuyerReceipt(event) {
 
     const saveButton = $("#ledgerReceiptSaveBtn").prop("disabled", true);
     try {
-        const receipt = await apiFetch(`/buyer-ledger/${buyerId}/receipts`, {
-            method: "POST",
+        const receipt = await apiFetch(
+            editingReceiptId
+                ? `/buyer-ledger/${buyerId}/receipts/${editingReceiptId}`
+                : `/buyer-ledger/${buyerId}/receipts`,
+            {
+            method: editingReceiptId ? "PUT" : "POST",
             body: {
                 received_date: receiptDate,
                 amount,
@@ -260,14 +328,17 @@ async function saveBuyerReceipt(event) {
                 notes: $("#ledgerReceiptNotes").val().trim() || null
             }
         });
-        showToast(
-            `Receipt recorded. Rs. ${formatNumber(receipt.allocated_amount)} allocated to invoices; Rs. ${formatNumber(receipt.unapplied_amount)} remains as buyer credit.`,
-            "success"
-        );
+        showToast(editingReceiptId
+            ? "Receipt updated and invoice allocations recalculated."
+            : `Receipt recorded. Rs. ${formatNumber(receipt.allocated_amount)} allocated to invoices; Rs. ${formatNumber(receipt.unapplied_amount)} remains as buyer credit.`,
+        "success");
         bootstrap.Modal.getOrCreateInstance(
             document.getElementById("ledgerReceiptModal")
         ).hide();
         $("#ledgerReceiptForm")[0].reset();
+        editingReceiptId = null;
+        $("#ledgerReceiptTitle").text("Record buyer receipt");
+        $("#ledgerReceiptSaveBtn").html('<i class="bi bi-check2"></i> Save Receipt');
         $("#ledgerReceiptDate")
             .attr("min", LEDGER_START_DATE)
             .val(localDateString(new Date()));
