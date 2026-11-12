@@ -644,9 +644,13 @@ function bindEvents() {
         .off("click.dashboard")
         .on("click.dashboard", forceLogout);
 
-    $("#importExcelBtn")
+    $("#addProductBtn")
         .off("click.dashboard")
-        .on("click.dashboard", () => navigateToRoute("import_excel"));
+        .on("click.dashboard", () => navigateToRoute("products"));
+
+    $("#buyerLedgerBtn")
+        .off("click.dashboard")
+        .on("click.dashboard", () => navigateToRoute("buyer_ledger"));
 
     $("#addBuyerBtn")
         .off("click.dashboard")
@@ -666,7 +670,8 @@ function navigateToRoute(route) {
         window.loadRoute(route);
     } else {
         const hash = {
-            import_excel: "#import",
+            products: "#products",
+            buyer_ledger: "#buyer-ledger",
             buyers: "#buyers",
             reports: "#reports",
             create_invoice: "#create-invoice"
