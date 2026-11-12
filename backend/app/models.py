@@ -162,6 +162,12 @@ class User(Base):
 class Buyer(Base):
     __tablename__ = "buyers"
     id = Column(Integer, primary_key=True, index=True)
+    opening_balance = Column(
+        Numeric(18, 2),
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
     ntn_cnic = Column(String, index=True, nullable=False)
     strn = Column(String(30), nullable=True)
     name = Column(String)

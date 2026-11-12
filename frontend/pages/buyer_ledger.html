@@ -55,9 +55,15 @@
 
     <section class="buyer-ledger-summary" aria-label="Ledger balance summary">
         <article class="panel-card ledger-summary-card">
-            <span class="ledger-summary-label">Opening balance</span>
+            <div class="d-flex align-items-center justify-content-between gap-2">
+                <span class="ledger-summary-label">Opening balance</span>
+                <button type="button" class="btn btn-sm btn-donezo-secondary" id="editOpeningBalanceBtn" title="Edit opening balance" aria-label="Edit opening balance">
+                    <i class="bi bi-pencil"></i>
+                    Edit
+                </button>
+            </div>
             <strong id="ledgerOpeningBalance">Rs. 0.00</strong>
-            <small>Balance before the selected period</small>
+            <small>Balance before the selected period. Base date: July 1, 2026.</small>
         </article>
         <article class="panel-card ledger-summary-card">
             <span class="ledger-summary-label">Closing balance</span>
@@ -133,6 +139,33 @@
                         <button type="submit" id="ledgerReceiptSaveBtn" class="btn btn-donezo-primary">
                             <i class="bi bi-check2"></i>
                             Save Receipt
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ledgerOpeningBalanceModal" tabindex="-1" aria-labelledby="ledgerOpeningBalanceTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="ledgerOpeningBalanceForm">
+                    <div class="modal-header">
+                        <div>
+                            <h5 class="modal-title" id="ledgerOpeningBalanceTitle">Edit opening balance</h5>
+                            <div id="ledgerOpeningBalanceBuyer" class="small text-muted"></div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="ledgerOpeningBalanceInput" class="donezo-label">Opening balance as of July 1, 2026 (Rs.)</label>
+                        <input type="number" id="ledgerOpeningBalanceInput" class="form-control donezo-input" step="0.01" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-donezo-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="ledgerOpeningBalanceSaveBtn" class="btn btn-donezo-primary">
+                            <i class="bi bi-check2"></i>
+                            Save Balance
                         </button>
                     </div>
                 </form>

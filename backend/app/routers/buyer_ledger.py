@@ -32,6 +32,10 @@ class ReceiptCreate(BaseModel):
     notes: Optional[str] = Field(default=None, max_length=2000)
 
 
+class OpeningBalanceUpdate(BaseModel):
+    opening_balance: Decimal = Field(max_digits=18, decimal_places=2)
+
+
 def _validate_ledger_dates(
     from_date: Optional[date],
     to_date: Optional[date],
@@ -177,8 +181,9 @@ def _ledger_data(
     buyer_id: int,
     from_date: Optional[date],
     to_date: Optional[date],
+    base_opening_balance: Decimal,
 ) -> dict:
-    opening_balance = 0.0
+    opening_balance = Decimal(str(base_opening_balance or 0))
     if from_date and from_date > LEDGER_START_DATE:
         opening_rows = _invoice_rows(
             db,
@@ -186,7 +191,7 @@ def _ledger_data(
             buyer_id,
             before=datetime.combine(from_date, time.min),
         )
-        opening_balance = sum(
+        opening_balance += sum(
             _signed_amount(invoice, amount)[2]
             for invoice, amount in opening_rows
         ) - sum(
@@ -238,7 +243,7 @@ def _ledger_data(
             )
     events.sort(key=lambda event: event[:3])
 
-    balance = Decimal(str(opening_balance))
+    balance = opening_balance
     rows = []
     for _, _, _, event_type, record, amount in events:
         if event_type == "invoice":
@@ -389,7 +394,12 @@ def list_ledger_buyers(
     buyers = query.order_by(models.Buyer.name.asc()).offset(skip).limit(limit).all()
     return {
         "items": [
-            {"id": buyer.id, "name": buyer.name, "ntn_cnic": buyer.ntn_cnic}
+            {
+                "id": buyer.id,
+                "name": buyer.name,
+                "ntn_cnic": buyer.ntn_cnic,
+                "opening_balance": float(buyer.opening_balance),
+            }
             for buyer in buyers
         ],
         "total": total,
@@ -478,8 +488,34 @@ def get_buyer_ledger(
             "id": buyer.id,
             "name": buyer.name,
             "ntn_cnic": buyer.ntn_cnic,
+            "opening_balance": float(buyer.opening_balance),
         },
-        **_ledger_data(db, client_id, buyer_id, from_date, to_date),
+        **_ledger_data(
+            db,
+            client_id,
+            buyer_id,
+            from_date,
+            to_date,
+            Decimal(str(buyer.opening_balance or 0)),
+        ),
+    }
+
+
+@router.put("/{buyer_id}/opening-balance")
+def update_buyer_opening_balance(
+    buyer_id: int,
+    payload: OpeningBalanceUpdate,
+    client_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    buyer = _owned_buyer(db, buyer_id, client_id, current_user["id"])
+    buyer.opening_balance = payload.opening_balance
+    db.commit()
+    db.refresh(buyer)
+    return {
+        "buyer_id": buyer.id,
+        "opening_balance": float(buyer.opening_balance),
     }
 
 
@@ -494,7 +530,14 @@ def export_buyer_ledger(
 ):
     _validate_ledger_dates(from_date, to_date)
     buyer = _owned_buyer(db, buyer_id, client_id, current_user["id"])
-    ledger = _ledger_data(db, client_id, buyer_id, from_date, to_date)
+    ledger = _ledger_data(
+        db,
+        client_id,
+        buyer_id,
+        from_date,
+        to_date,
+        Decimal(str(buyer.opening_balance or 0)),
+    )
 
     workbook = openpyxl.Workbook()
     sheet = workbook.active

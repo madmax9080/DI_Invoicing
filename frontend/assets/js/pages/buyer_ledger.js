@@ -7,6 +7,8 @@ const LEDGER_START_DATE = "2026-07-01";
 export async function initBuyerLedger() {
     $("#ledgerApplyBtn").on("click", loadBuyerLedger);
     $("#ledgerExportBtn").on("click", exportBuyerLedger);
+    $("#editOpeningBalanceBtn").on("click", openOpeningBalanceForm);
+    $("#ledgerOpeningBalanceForm").on("submit", saveOpeningBalance);
     $("#ledgerReceiptBtn").on("click", openReceiptForm);
     $("#ledgerReceiptForm").on("submit", saveBuyerReceipt);
     $("#ledgerBuyerSelect, #ledgerDateFrom, #ledgerDateTo").on(
@@ -23,8 +25,13 @@ export function destroyBuyerLedger() {
     const receiptModal = document.getElementById("ledgerReceiptModal");
     const modalInstance = bootstrap.Modal.getInstance(receiptModal);
     if (modalInstance) modalInstance.hide();
+    const openingBalanceModal = document.getElementById("ledgerOpeningBalanceModal");
+    const openingBalanceModalInstance = bootstrap.Modal.getInstance(openingBalanceModal);
+    if (openingBalanceModalInstance) openingBalanceModalInstance.hide();
     $("#ledgerApplyBtn").off("click");
     $("#ledgerExportBtn").off("click");
+    $("#editOpeningBalanceBtn").off("click");
+    $("#ledgerOpeningBalanceForm").off("submit");
     $("#ledgerReceiptBtn").off("click");
     $("#ledgerReceiptForm").off("submit");
     $("#ledgerBuyerSelect, #ledgerDateFrom, #ledgerDateTo").off("change");
@@ -54,9 +61,8 @@ async function loadLedgerBuyers() {
         const label = buyer.ntn_cnic
             ? `${buyer.name} (${buyer.ntn_cnic})`
             : buyer.name;
-        select.append(
-            $("<option>", { value: buyer.id, text: label })
-        );
+        select.append($("<option>", { value: buyer.id, text: label })
+            .data("openingBalance", buyer.opening_balance));
     });
     if (selectedId && select.find(`option[value="${selectedId}"]`).length) {
         select.val(selectedId);
@@ -101,12 +107,61 @@ async function loadBuyerLedger() {
     );
     currentLedger = { buyerId, fromDate, toDate };
     $("#ledgerOpeningBalance").text(formatCurrency(result.opening_balance));
+    $("#ledgerOpeningBalance").data("baseOpeningBalance", result.buyer.opening_balance);
     $("#ledgerClosingBalance").text(formatCurrency(result.closing_balance));
     renderLedgerRows(result.transactions);
     $("#ledgerStatus").text(
         `${result.buyer.name}: ${result.transactions.length} transaction${result.transactions.length === 1 ? "" : "s"}.`
     );
     $("#ledgerExportBtn").prop("disabled", false);
+}
+
+function openOpeningBalanceForm() {
+    const select = $("#ledgerBuyerSelect");
+    const buyerId = select.val();
+    if (!buyerId) {
+        $("#ledgerStatus").text("Select a buyer before editing the opening balance.");
+        return;
+    }
+    const selectedOption = select.find("option:selected");
+    $("#ledgerOpeningBalanceBuyer").text(selectedOption.text());
+    $("#ledgerOpeningBalanceInput").val(
+        Number(selectedOption.data("openingBalance") ?? 0).toFixed(2)
+    );
+    bootstrap.Modal.getOrCreateInstance(
+        document.getElementById("ledgerOpeningBalanceModal")
+    ).show();
+}
+
+async function saveOpeningBalance(event) {
+    event.preventDefault();
+    const buyerId = $("#ledgerBuyerSelect").val();
+    const openingBalance = $("#ledgerOpeningBalanceInput").val();
+    if (!buyerId || openingBalance === "" || !Number.isFinite(Number(openingBalance))) {
+        $("#ledgerStatus").text("Enter a valid opening balance for the selected buyer.");
+        return;
+    }
+
+    const saveButton = $("#ledgerOpeningBalanceSaveBtn").prop("disabled", true);
+    try {
+        const result = await apiFetch(`/buyer-ledger/${buyerId}/opening-balance`, {
+            method: "PUT",
+            body: { opening_balance: openingBalance }
+        });
+        $("#ledgerBuyerSelect option:selected").data(
+            "openingBalance",
+            result.opening_balance
+        );
+        bootstrap.Modal.getOrCreateInstance(
+            document.getElementById("ledgerOpeningBalanceModal")
+        ).hide();
+        await loadBuyerLedger();
+        showToast("Opening balance updated.", "success");
+    } catch (error) {
+        $("#ledgerStatus").text(error.message || "Could not update the opening balance.");
+    } finally {
+        saveButton.prop("disabled", false);
+    }
 }
 
 function renderLedgerRows(transactions) {
