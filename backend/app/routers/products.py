@@ -11,7 +11,6 @@ from app.dependencies.auth_dependency import get_current_user
 
 router = APIRouter(prefix="/products", tags=["products"])
 
-
 def get_owned_client(db: Session, client_id: int, user_id: int):
     client = db.query(models.Client).filter(
         models.Client.id == client_id,
@@ -97,6 +96,7 @@ def create_product(
         client_id=client_id,
         name=name,
         hs_code=payload.hs_code.strip() if payload.hs_code else None,
+        opening_stock_quantity=payload.stock_quantity,
         stock_quantity=payload.stock_quantity,
     )
     db.add(product)

@@ -234,6 +234,7 @@ class ProductUpdate(BaseModel):
 class ProductOut(ProductCreate):
     id: int
     client_id: int
+    opening_stock_quantity: Decimal
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

@@ -58,7 +58,7 @@ async function handleProductDescriptionInput() {
     }
     selectedProductId = selectedProduct.id;
     $("#productStockHint").text(
-        `Available stock: ${selectedProduct.stock_quantity}`
+        `Available stock: ${formatAvailableStock(selectedProduct.stock_quantity)}`
     );
     if (selectedProduct.hs_code) {
         const hsOption = $("#hsCode option").filter(function () {
@@ -519,6 +519,10 @@ function resetInvoiceForm() {
     syncInvoiceMeta();
 }
 
+function formatAvailableStock(quantity) {
+    return Number(quantity).toFixed(2);
+}
+
 async function editItem(index) {
     const item = currentItems[index];
     if (!item) {
@@ -531,7 +535,7 @@ async function editItem(index) {
     );
     $("#productStockHint").text(
         savedProduct
-            ? `Available stock: ${savedProduct.stock_quantity}`
+            ? `Available stock: ${formatAvailableStock(savedProduct.stock_quantity)}`
             : ""
     );
     $("#productDescription").val(item.productDescription);

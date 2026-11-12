@@ -62,7 +62,7 @@ async function loadProducts() {
     } catch (error) {
         console.error("Failed to load products:", error);
         $("#productsTableBody").html(
-            '<tr><td colspan="4" class="text-center text-danger">Unable to load products.</td></tr>'
+            '<tr><td colspan="5" class="text-center text-danger">Unable to load products.</td></tr>'
         );
     }
 }
@@ -110,6 +110,7 @@ function editProduct(productId) {
     }
     editingProductId = product.id;
     $("#productFormTitle").text("Edit product");
+    $("#productStockLabel").text("Current stock");
     $("#productNameInput").val(product.name);
     $("#productHsCodeInput").val(product.hs_code || "");
     $("#productStockInput").val(product.stock_quantity);
@@ -122,6 +123,7 @@ function resetProductForm() {
     editingProductId = null;
     $("#productForm")[0].reset();
     $("#productFormTitle").text("Add product");
+    $("#productStockLabel").text("Opening stock");
     $("#saveProductBtn").text("Save product");
     $("#cancelProductEditBtn").addClass("d-none");
 }
@@ -135,7 +137,7 @@ function renderProducts() {
     );
     if (!filtered.length) {
         $("#productsTableBody").html(
-            '<tr><td colspan="4" class="text-center text-muted">No products found.</td></tr>'
+            '<tr><td colspan="5" class="text-center text-muted">No products found.</td></tr>'
         );
         return;
     }
@@ -143,6 +145,7 @@ function renderProducts() {
         <tr>
             <td class="fw-semibold">${escapeHtml(product.name)}</td>
             <td>${escapeHtml(product.hs_code || "-")}</td>
+            <td class="text-end">${formatNumber(product.opening_stock_quantity)}</td>
             <td class="text-end">${formatNumber(product.stock_quantity)}</td>
             <td>
                 <div class="d-flex gap-1">
