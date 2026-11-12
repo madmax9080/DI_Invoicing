@@ -135,7 +135,7 @@ async function loadMonthlySalesChart() {
     const fiscalYear =
         response.fiscal_year;
     document.querySelector("#monthlySalesFY").textContent =
-        `FY ${fiscalYear}`;
+        fiscalYear;
     const monthNames =
         ["Jul","Aug","Sep","Oct","Nov","Dec",
          "Jan","Feb","Mar","Apr","May","Jun"];
@@ -375,7 +375,7 @@ async function loadQuarterlySalesChart(){
         states:{ hover:{ filter:{ type:"lighten", value:0.06 } } }
     };
     document.querySelector("#quarterlySalesFY").textContent =
-        `FY ${response.fiscal_year}`;
+        response.fiscal_year;
     const el =
         document.querySelector(
             "#quarterlySalesChart"
@@ -410,7 +410,7 @@ async function loadInvoiceCountChart() {
     const fiscalYear =
         response.fiscal_year;
     document.querySelector("#invoiceCountFY").textContent =
-        `FY ${fiscalYear}`;
+        fiscalYear;
     const labels =
         data.map(d =>
             `${getMonthName(d.month)} ${d.year}`

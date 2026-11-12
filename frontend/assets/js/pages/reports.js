@@ -1,7 +1,6 @@
 import { apiFetch } from "../api.js";
 import { FYManager } from "../utils.js?v=9";
 import { showToast} from "../toast.js"
-import { formatCompactPKR } from "../utils.js?v=9";
 
 const state = {
     invoices: [],
@@ -24,6 +23,13 @@ function initReportsFY() {
     FYManager.init("globalFySelect");
 }
 
+function formatBuyerSales(value) {
+    return Number(value || 0).toLocaleString("en", {
+        notation: "compact",
+        maximumFractionDigits: 1
+    });
+}
+
 let buyerChart = null;
 async function loadSalesByBuyerChart() {
     const fy = FYManager.get();
@@ -32,7 +38,7 @@ async function loadSalesByBuyerChart() {
     const labels = response.labels || [];
     const values = response.series || [];
     document.querySelector("#buyerChartFYLabel").textContent =
-        `FY ${response.fiscal_year}`;
+        response.fiscal_year;
     const options = {
         chart: {
             type: "bar",
@@ -48,7 +54,13 @@ async function loadSalesByBuyerChart() {
             },
             dropShadow: { enabled: false }
         },
-        series: [{ name: "Sales", data: values }],
+        series: [{
+            name: "Sales",
+            data: values.map((value, index) => ({
+                x: labels[index],
+                y: value
+            }))
+        }],
         colors: ["#009be5"],
         plotOptions: {
             bar: {
@@ -72,7 +84,7 @@ async function loadSalesByBuyerChart() {
         },
         dataLabels: {
             enabled: true,
-            formatter: value => formatCompactPKR(value),
+            formatter: formatBuyerSales,
             style: {
                 colors: ["#146e98"],
                 fontSize: "10px",
@@ -95,10 +107,12 @@ async function loadSalesByBuyerChart() {
             }
         },
         xaxis: {
-            categories: labels,
+            type: "numeric",
+            min: 0,
             axisBorder: { show: false },
             axisTicks: { show: false },
             labels: {
+                formatter: formatBuyerSales,
                 style: {
                     colors: "#334155",
                     fontSize: "11px",
@@ -107,17 +121,13 @@ async function loadSalesByBuyerChart() {
             }
         },
         yaxis: {
-            min: 0,
-            tickAmount: 5,
             axisBorder: { show: false },
             axisTicks: { show: false },
             labels: {
-                formatter: function(val) {
-                    return formatCompactPKR(val);
-                },
                 style: {
-                    colors: "#64748b",
-                    fontSize: "10px"
+                    colors: "#334155",
+                    fontSize: "11px",
+                    fontWeight: 500
                 }
             }
         },

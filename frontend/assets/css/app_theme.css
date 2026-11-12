@@ -1,0 +1,258 @@
+:root {
+    --app-primary: #146e98;
+    --app-primary-bright: #009be5;
+    --app-text: #173c59;
+    --app-muted: #64748b;
+    --app-border: #e4edf4;
+    --app-surface: #fff;
+    --app-surface-tint: #f5faff;
+    --app-shadow: 0 12px 30px rgba(15, 54, 84, 0.055);
+    --app-shadow-hover: 0 16px 34px rgba(15, 54, 84, 0.09);
+}
+
+.main #appContent {
+    color: var(--app-text);
+}
+
+.main #appContent .reports-container,
+.main #appContent .dashboard-shell,
+.main #appContent .import-shell,
+.main #appContent .invoice-create-page,
+.main #appContent .pending-invoices-page {
+    gap: 16px;
+}
+
+.main #appContent .pending-invoices-page {
+    display: flex;
+    flex-direction: column;
+}
+
+.main #appContent .reports-hero,
+.main #appContent .import-hero,
+.main #appContent .dashboard-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(20, 110, 152, 0.1);
+    border-radius: 20px;
+    background:
+        radial-gradient(ellipse at top right, rgba(0, 155, 229, 0.07), transparent 40%),
+        linear-gradient(135deg, #fff, #f5faff);
+    box-shadow: var(--app-shadow);
+}
+
+.main #appContent .reports-hero h2,
+.main #appContent .import-hero h2,
+.main #appContent .dashboard-hero h2 {
+    color: var(--app-text);
+    letter-spacing: -0.025em;
+}
+
+.main #appContent .reports-hero p,
+.main #appContent .import-hero p,
+.main #appContent .dashboard-hero p {
+    color: var(--app-muted);
+}
+
+.main #appContent .panel-card:not(.dashboard-chart-panel):not(.reports-buyer-chart-panel) {
+    border: 1px solid rgba(20, 110, 152, 0.1);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: var(--app-shadow);
+    transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.main #appContent .panel-card:not(.dashboard-chart-panel):not(.reports-buyer-chart-panel):hover {
+    box-shadow: var(--app-shadow-hover);
+}
+
+.main #appContent .panel-title {
+    color: var(--app-text);
+    letter-spacing: -0.01em;
+}
+
+.main #appContent .panel-subtitle {
+    color: var(--app-muted);
+}
+
+.main #appContent .donezo-form-group label,
+.main #appContent .donezo-label,
+.main #appContent .invoice-create-page label {
+    color: #536d80;
+    font-weight: 600;
+}
+
+.main #appContent .donezo-input,
+.main #appContent .form-control,
+.main #appContent .form-select,
+.main #appContent .select2-container--default .select2-selection--single {
+    border: 1px solid #dce8f1;
+    border-radius: 10px;
+    background-color: #f8fbfe;
+    color: #263f54;
+    box-shadow: none;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.main #appContent .donezo-input:focus,
+.main #appContent .form-control:focus,
+.main #appContent .form-select:focus,
+.main #appContent .select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: #69bce5;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 155, 229, 0.12);
+}
+
+.main #appContent .btn-donezo-primary,
+.main #appContent .export-btn,
+.main #appContent .template-btn,
+.main #appContent .primary-btn,
+.main #appContent .create-invoice-btn {
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--app-primary), var(--app-primary-bright));
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 6px 14px rgba(0, 115, 173, 0.16);
+    transition: box-shadow 0.16s ease, transform 0.16s ease, filter 0.16s ease;
+}
+
+.main #appContent .btn-donezo-primary:hover,
+.main #appContent .export-btn:hover,
+.main #appContent .template-btn:hover,
+.main #appContent .primary-btn:hover,
+.main #appContent .create-invoice-btn:hover {
+    color: #fff;
+    filter: brightness(1.04);
+    box-shadow: 0 9px 18px rgba(0, 115, 173, 0.22);
+    transform: translateY(-1px);
+}
+
+.main #appContent .btn-donezo-secondary,
+.main #appContent .toolbar-btn,
+.main #appContent .secondary-btn {
+    border: 1px solid #dce8f1;
+    border-radius: 10px;
+    background: #f7fbfe;
+    color: #3e5a70;
+    font-weight: 600;
+    transition: border-color 0.16s ease, background-color 0.16s ease, transform 0.16s ease;
+}
+
+.main #appContent .btn-donezo-secondary:hover,
+.main #appContent .toolbar-btn:hover,
+.main #appContent .secondary-btn:hover {
+    border-color: #b7d6e8;
+    background: #edf7fc;
+    color: var(--app-primary);
+    transform: translateY(-1px);
+}
+
+.main #appContent .save-btn,
+.main #appContent .success-btn,
+.main #appContent .btn-donezo-success {
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0f766e, #16a394);
+    color: #fff;
+    font-weight: 600;
+}
+
+.main #appContent .erp-party-box,
+.main #appContent .erp-item-panel,
+.main #appContent .erp-grid-section,
+.main #appContent .upload-box {
+    border-color: #e1ebf3;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #fbfdff, #f6faff);
+}
+
+.main #appContent .box-title {
+    color: var(--app-text);
+}
+
+.main #appContent .invoice-table-shell,
+.main #appContent .buyer-table-shell,
+.main #appContent .table-wrapper,
+.main #appContent .preview-table-wrapper {
+    border-color: var(--app-border);
+    border-radius: 14px;
+}
+
+.main #appContent .donezo-table,
+.main #appContent .erp-table,
+.main #appContent .modern-invoice-table,
+.main #appContent .invoice-items-table {
+    color: #344f63;
+}
+
+.main #appContent .donezo-table thead th,
+.main #appContent .erp-table thead th,
+.main #appContent .modern-invoice-table thead th,
+.main #appContent .invoice-items-table thead th {
+    background: #eef6fb;
+    color: #3e5d73;
+}
+
+.main #appContent .donezo-table tbody td,
+.main #appContent .erp-table tbody td,
+.main #appContent .modern-invoice-table tbody td,
+.main #appContent .invoice-items-table tbody td {
+    border-bottom-color: #edf2f6;
+}
+
+.main #appContent .donezo-table tbody tr:hover td,
+.main #appContent .erp-table tbody tr:hover td,
+.main #appContent .modern-invoice-table tbody tr:hover td {
+    background-color: #f2f9fd;
+}
+
+.main #appContent .donezo-pagination {
+    padding-right: 4px;
+    padding-left: 4px;
+}
+
+.client-card {
+    border-color: rgba(20, 110, 152, 0.12);
+    border-radius: 14px;
+    box-shadow: var(--app-shadow);
+}
+
+.client-avatar {
+    background: linear-gradient(135deg, var(--app-primary), var(--app-primary-bright));
+}
+
+.client-name {
+    color: var(--app-text);
+}
+
+.client-business {
+    color: var(--app-muted);
+}
+
+.logout-btn:focus-visible,
+.main #appContent button:focus-visible {
+    outline: 3px solid rgba(0, 155, 229, 0.22);
+    outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+    .main #appContent .panel-card:not(.dashboard-chart-panel):not(.reports-buyer-chart-panel) {
+        border-radius: 15px;
+        padding: 14px;
+    }
+
+    .main #appContent .reports-hero,
+    .main #appContent .import-hero,
+    .main #appContent .dashboard-hero {
+        border-radius: 17px;
+        padding: 18px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .main #appContent *,
+    .client-card {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
