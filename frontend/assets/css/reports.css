@@ -322,16 +322,16 @@
     position: sticky;
     top: 0;
     z-index: 2;
-    padding: 8px 12px;
+    padding: 6px 10px;
     color: #26445c;
     background: #edf5fb;
     border: 0;
     border-bottom: 1px solid #d6e4ef;
     box-shadow: 0 2px 0 rgba(36, 71, 96, 0.04);
-    font-size: 0.72rem;
+    font-size: 0.66rem;
     font-weight: 700;
     letter-spacing: 0.045em;
-    line-height: 1.25;
+    line-height: 1.2;
     text-transform: uppercase;
     vertical-align: middle;
     white-space: nowrap;
@@ -340,13 +340,13 @@
 .donezo-table tbody td,
 .erp-table tbody td,
 .modern-invoice-table tbody td {
-    padding: 6px 12px;
+    padding: 4px 10px;
     color: #334155;
     background-color: #fff;
     border: 0;
     border-bottom: 1px solid #edf1f5;
-    font-size: 0.82rem;
-    line-height: 1.3;
+    font-size: 0.74rem;
+    line-height: 1.2;
     vertical-align: middle;
 }
 
@@ -383,7 +383,7 @@
 .donezo-table tbody td[colspan],
 .erp-table tbody td[colspan],
 .modern-invoice-table tbody td[colspan] {
-    padding: 16px;
+    padding: 12px;
     color: #64748b;
     text-align: center;
 }
@@ -409,19 +409,19 @@
 
 .invoice-items-table thead th {
     position: static;
-    padding: 6px 8px;
+    padding: 4px 7px;
     color: #3d566d;
     background: #f4f8fb;
     border: 0;
     border-bottom: 1px solid #dfe8ef;
     box-shadow: none;
-    font-size: 0.68rem;
+    font-size: 0.62rem;
     letter-spacing: 0.035em;
 }
 
 .invoice-items-table tbody td {
-    padding: 5px 8px;
-    font-size: 0.76rem;
+    padding: 3px 7px;
+    font-size: 0.68rem;
     white-space: nowrap;
 }
 
@@ -434,12 +434,12 @@
     .donezo-table thead th,
     .erp-table thead th,
     .modern-invoice-table thead th {
-        padding: 7px 9px;
+        padding: 5px 8px;
     }
 
     .donezo-table tbody td,
     .erp-table tbody td,
     .modern-invoice-table tbody td {
-        padding: 6px 9px;
+        padding: 4px 8px;
     }
 }
