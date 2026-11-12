@@ -475,21 +475,26 @@ body {
 
 .toolbar-actions {
     display: flex;
-    gap: 12px;
+    flex-wrap: nowrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 6px;
 }
 
 .toolbar-btn {
     height: 40px;
-    min-width: 120px;
-    padding: 0 12px;
+    min-width: 0;
+    flex: 0 1 auto;
+    padding: 0 8px;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     background: #fff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    font-size: 14px;
+    gap: 6px;
+    font-size: 12px;
+    white-space: nowrap;
     font-weight: 500;
     transition: all .18s ease;
 }
@@ -506,13 +511,15 @@ body {
 .toolbar-right {
     display: flex;
     align-items: center;
-    gap: 20px;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    gap: 8px;
 }
 
 .tax-year-group {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .tax-year-label {
@@ -568,14 +575,48 @@ body {
 
 @media (max-width: 1200px) {
     .dashboard-toolbar {
-        flex-direction: column;
-        align-items: stretch;
+        gap: 6px;
+        padding: 10px 12px;
     }
     .toolbar-actions {
-        flex-wrap: wrap;
-        gap: 10px;
+        gap: 4px;
     }
     .toolbar-right {
+        gap: 6px;
+    }
+    .toolbar-btn,
+    .create-invoice-btn {
+        height: 36px;
+        padding: 0 6px;
+        gap: 4px;
+        font-size: 11px;
+    }
+    .toolbar-btn i,
+    .create-invoice-btn i {
+        font-size: 14px;
+    }
+    .tax-year-group {
+        gap: 4px;
+        padding: 4px 6px;
+    }
+    .tax-year-label {
+        font-size: 11px;
+    }
+    .tax-year-select {
+        height: 32px;
+        min-width: 82px;
+        padding-left: 26px;
+        padding-right: 4px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 768px) {
+    .toolbar-actions {
+        flex-wrap: wrap;
+    }
+    .toolbar-right {
+        flex-wrap: wrap;
         justify-content: space-between;
     }
 }
