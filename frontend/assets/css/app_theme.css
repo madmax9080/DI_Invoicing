@@ -278,7 +278,215 @@
     outline-offset: 2px;
 }
 
+.mobile-menu-toggle,
+.mobile-sidebar-close,
+.mobile-menu-backdrop {
+    display: none;
+}
+
 @media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    body.mobile-menu-open {
+        overflow: hidden;
+    }
+
+    .sidebar {
+        display: flex;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(280px, 86vw);
+        height: 100vh;
+        height: 100dvh;
+        padding: 18px 16px;
+        transform: translateX(-105%);
+        visibility: hidden;
+        transition: transform 0.22s ease, visibility 0.22s ease;
+        z-index: 1200;
+    }
+
+    .sidebar.is-open {
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    .sidebar-brand-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 42px;
+        margin-bottom: 12px;
+    }
+
+    .sidebar .brand-logo {
+        width: 8rem;
+        margin: 0 0 0 6px;
+    }
+
+    .sidebar .menu {
+        min-height: 0;
+    }
+
+    .sidebar .menu-section {
+        height: auto;
+        margin: 6px 10px 4px;
+        overflow: visible;
+        background: none;
+        color: #8ba3ad;
+        font-size: 0.62rem;
+    }
+
+    .sidebar .menu-item {
+        justify-content: flex-start;
+    }
+
+    .sidebar .menu-item span {
+        display: inline;
+    }
+
+    .mobile-menu-toggle,
+    .mobile-sidebar-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #dce8f1;
+        border-radius: 10px;
+        background: #fff;
+        color: #244b63;
+        font-size: 1.2rem;
+    }
+
+    .mobile-sidebar-close {
+        border-color: rgba(203, 224, 232, 0.18);
+        background: rgba(255, 255, 255, 0.08);
+        color: #e8f4f8;
+        font-size: 1rem;
+    }
+
+    .mobile-menu-backdrop {
+        position: fixed;
+        z-index: 1190;
+        inset: 0;
+        display: block;
+        border: 0;
+        background: rgba(7, 19, 29, 0.48);
+        opacity: 1;
+    }
+
+    .mobile-menu-backdrop[hidden] {
+        display: none !important;
+    }
+
+    .dashboard-header {
+        display: grid;
+        grid-template-columns: 40px minmax(0, 1fr);
+        align-items: center;
+        gap: 10px 12px;
+    }
+
+    .header-left {
+        min-width: 0;
+    }
+
+    .welcome-title {
+        font-size: 18px;
+        line-height: 1.3;
+    }
+
+    .welcome-subtitle {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .header-right {
+        grid-column: 1 / -1;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .client-card {
+        width: 100%;
+        min-width: 0;
+        flex-wrap: nowrap;
+        gap: 10px;
+        padding: 9px 10px;
+    }
+
+    .client-details {
+        min-width: 0;
+    }
+
+    .client-name,
+    .client-business {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .topbar {
+        width: 100%;
+        padding: 14px 14px 0;
+    }
+
+    .main {
+        width: 100%;
+        min-width: 0;
+        padding: 14px 14px 24px;
+    }
+
+    .main #appContent,
+    .main #appContent > *,
+    .main #appContent .panel-card {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .main #appContent .table-wrapper,
+    .main #appContent .buyer-table-shell,
+    .main #appContent .invoice-table-shell,
+    .main #appContent .preview-table-wrapper {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dashboard-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .toolbar-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .toolbar-btn {
+        width: 100%;
+        min-width: 0;
+        justify-content: flex-start;
+        white-space: normal;
+    }
+
+    .toolbar-right {
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .main #appContent input,
+    .main #appContent select,
+    .main #appContent textarea {
+        max-width: 100%;
+    }
+
     .buyer-ledger-page .buyer-ledger-summary {
         grid-template-columns: 1fr;
     }
@@ -293,6 +501,37 @@
     .main #appContent .dashboard-hero {
         border-radius: 17px;
         padding: 18px;
+    }
+}
+
+@media (max-width: 420px) {
+    .topbar {
+        padding: 12px 12px 0;
+    }
+
+    .main {
+        padding: 12px 12px 20px;
+    }
+
+    .welcome-title {
+        font-size: 16px;
+    }
+
+    .toolbar-right {
+        align-items: stretch;
+    }
+
+    .tax-year-group {
+        min-width: 0;
+        padding: 4px 6px;
+    }
+
+    .tax-year-select {
+        min-width: 72px;
+    }
+
+    .create-invoice-btn {
+        padding: 0 8px;
     }
 }
 

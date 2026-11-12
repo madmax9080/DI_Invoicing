@@ -1,5 +1,5 @@
 import { apiFetch } from "./api.js";
-const ASSET_VERSION = "10.45";
+const ASSET_VERSION = "10.46";
 let allClients = [];
 
 const routes = {
@@ -71,6 +71,22 @@ const routes = {
 let currentRoute = "dashboard";
 let currentModule = null;
 let isRouting = false;
+
+function setMobileMenuOpen(isOpen) {
+    const sidebar = document.getElementById("appSidebar");
+    const toggle = document.getElementById("mobileMenuToggle");
+    const backdrop = document.getElementById("mobileMenuBackdrop");
+    if (!sidebar || !toggle || !backdrop) return;
+
+    sidebar.classList.toggle("is-open", isOpen);
+    backdrop.hidden = !isOpen;
+    document.body.classList.toggle("mobile-menu-open", isOpen);
+    toggle.setAttribute("aria-expanded", String(isOpen));
+    toggle.setAttribute("aria-label", isOpen ? "Close navigation" : "Open navigation");
+    toggle.title = isOpen ? "Close navigation" : "Open navigation";
+    toggle.querySelector("i").className = isOpen ? "bi bi-x-lg" : "bi bi-list";
+}
+
 async function loadClients() {
     try {
         const clients =
@@ -297,9 +313,22 @@ $(document).ready(async function () {
         "",
         routes[matchedRoute || currentRoute].url
     );
+    $("#mobileMenuToggle").on("click", function () {
+        setMobileMenuOpen(this.getAttribute("aria-expanded") !== "true");
+    });
+    $("#mobileMenuClose, #mobileMenuBackdrop").on("click", function () {
+        setMobileMenuOpen(false);
+    });
+    $(document).on("keydown.mobileMenu", event => {
+        if (event.key === "Escape") setMobileMenuOpen(false);
+    });
+    window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) setMobileMenuOpen(false);
+    });
     $(".menu-item").click(function () {
         const route = $(this).data("route");
         if (route) {
+            setMobileMenuOpen(false);
             loadRoute(route);
         }
     });
