@@ -39,6 +39,7 @@ body {
 .menu {
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 
 .menu-section {
@@ -690,6 +691,7 @@ body {
     margin: 6px -4px 0;
     padding: 2px 4px 12px;
     overflow-y: auto;
+    overscroll-behavior-y: contain;
     scrollbar-width: thin;
     scrollbar-color: rgba(148, 181, 194, 0.65) transparent;
 }
