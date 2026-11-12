@@ -1,0 +1,151 @@
+<div class="buyer-ledger-page reports-container">
+    <section class="reports-hero">
+        <div>
+            <div class="hero-chip">Accounts receivable</div>
+            <h2>Buyer Ledger</h2>
+            <p>Review invoices, debit notes, and receipts with a running buyer balance.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button id="ledgerReceiptBtn" class="btn btn-donezo-success" type="button" disabled>
+                <i class="bi bi-cash-coin"></i>
+                <span>Record Receipt</span>
+            </button>
+            <button id="ledgerExportBtn" class="export-btn" disabled>
+                <i class="bi bi-download"></i>
+                <span>Export Excel</span>
+            </button>
+        </div>
+    </section>
+
+    <section class="panel-card filter-panel reports-filter-panel">
+        <div class="reports-filter-heading">
+            <div class="reports-filter-title">
+                <span class="reports-filter-icon"><i class="bi bi-funnel"></i></span>
+                <div>
+                    <h3>Ledger filters</h3>
+                    <p>Receipts are applied to the oldest outstanding invoices automatically; extra remains as buyer credit.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3 align-items-end">
+            <div class="col-xl-4 col-md-6">
+                <label for="ledgerBuyerSearch" class="donezo-label">Find buyer</label>
+                <div class="input-group">
+                    <input type="search" id="ledgerBuyerSearch" class="form-control donezo-input reports-filter-control" placeholder="Search name or NTN/CNIC">
+                    <button id="ledgerBuyerSearchBtn" class="btn btn-donezo-secondary" type="button" aria-label="Search buyers">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6">
+                <label for="ledgerBuyerSelect" class="donezo-label">Buyer</label>
+                <select id="ledgerBuyerSelect" class="form-select donezo-input reports-filter-control">
+                    <option value="">Select a buyer</option>
+                </select>
+            </div>
+            <div class="col-xl-2 col-md-6">
+                <label for="ledgerDateFrom" class="donezo-label">From date</label>
+                <input type="date" id="ledgerDateFrom" class="form-control donezo-input reports-filter-control">
+            </div>
+            <div class="col-xl-2 col-md-6">
+                <label for="ledgerDateTo" class="donezo-label">To date</label>
+                <input type="date" id="ledgerDateTo" class="form-control donezo-input reports-filter-control">
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+                <button id="ledgerApplyBtn" class="btn btn-donezo-primary">
+                    <i class="bi bi-search"></i>
+                    Show Ledger
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div id="ledgerStatus" class="small text-muted" role="status" aria-live="polite"></div>
+
+    <section class="buyer-ledger-summary" aria-label="Ledger balance summary">
+        <article class="panel-card ledger-summary-card">
+            <span class="ledger-summary-label">Opening balance</span>
+            <strong id="ledgerOpeningBalance">Rs. 0.00</strong>
+            <small>Balance before the selected period</small>
+        </article>
+        <article class="panel-card ledger-summary-card">
+            <span class="ledger-summary-label">Closing balance</span>
+            <strong id="ledgerClosingBalance">Rs. 0.00</strong>
+            <small>Balance after the displayed transactions</small>
+        </article>
+    </section>
+
+    <section class="panel-card table-panel">
+        <div class="table-wrapper">
+            <table class="donezo-table table table-hover align-middle buyer-ledger-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Transaction</th>
+                        <th>System invoice no.</th>
+                        <th>FBR invoice no.</th>
+                        <th>Reference no.</th>
+                        <th>Notes</th>
+                        <th class="text-end">Debit (Rs.)</th>
+                        <th class="text-end">Credit (Rs.)</th>
+                        <th class="text-end">Balance (Rs.)</th>
+                    </tr>
+                </thead>
+                <tbody id="buyerLedgerTableBody">
+                    <tr><td colspan="9" class="text-center text-muted py-4">Select a buyer to view the ledger.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="modal fade" id="ledgerReceiptModal" tabindex="-1" aria-labelledby="ledgerReceiptTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="ledgerReceiptForm">
+                    <div class="modal-header">
+                        <div>
+                            <h5 class="modal-title" id="ledgerReceiptTitle">Record buyer receipt</h5>
+                            <div id="ledgerReceiptBuyer" class="small text-muted"></div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="ledgerReceiptDate" class="donezo-label">Receipt date</label>
+                            <input type="date" id="ledgerReceiptDate" class="form-control donezo-input" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ledgerReceiptAmount" class="donezo-label">Amount (Rs.)</label>
+                            <input type="number" id="ledgerReceiptAmount" class="form-control donezo-input" min="0.01" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ledgerReceiptMethod" class="donezo-label">Payment method</label>
+                            <select id="ledgerReceiptMethod" class="form-select donezo-input">
+                                <option value="">Not specified</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Bank Transfer">Bank transfer</option>
+                                <option value="Cheque">Cheque</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ledgerReceiptReference" class="donezo-label">Reference number</label>
+                            <input type="text" id="ledgerReceiptReference" maxlength="150" class="form-control donezo-input" placeholder="Optional">
+                        </div>
+                        <div>
+                            <label for="ledgerReceiptNotes" class="donezo-label">Notes</label>
+                            <textarea id="ledgerReceiptNotes" maxlength="2000" rows="2" class="form-control donezo-input" placeholder="Optional"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-donezo-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="ledgerReceiptSaveBtn" class="btn btn-donezo-primary">
+                            <i class="bi bi-check2"></i>
+                            Save Receipt
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

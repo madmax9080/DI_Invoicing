@@ -229,6 +229,49 @@
     color: var(--app-muted);
 }
 
+.buyer-ledger-page .buyer-ledger-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.buyer-ledger-page .ledger-summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 18px 20px;
+}
+
+.buyer-ledger-page .ledger-summary-label {
+    color: var(--app-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.buyer-ledger-page .ledger-summary-card strong {
+    color: var(--app-primary);
+    font-size: 1.45rem;
+    letter-spacing: -0.02em;
+}
+
+.buyer-ledger-page .ledger-summary-card small {
+    color: var(--app-muted);
+    font-size: 0.74rem;
+}
+
+.buyer-ledger-page .buyer-ledger-table {
+    min-width: 1000px;
+}
+
+.buyer-ledger-page #ledgerBuyerSearchBtn {
+    border-radius: 0 10px 10px 0;
+}
+
+.buyer-ledger-page #ledgerExportBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
 .logout-btn:focus-visible,
 .main #appContent button:focus-visible {
     outline: 3px solid rgba(0, 155, 229, 0.22);
@@ -236,6 +279,10 @@
 }
 
 @media (max-width: 768px) {
+    .buyer-ledger-page .buyer-ledger-summary {
+        grid-template-columns: 1fr;
+    }
+
     .main #appContent .panel-card:not(.dashboard-chart-panel):not(.reports-buyer-chart-panel) {
         border-radius: 15px;
         padding: 14px;

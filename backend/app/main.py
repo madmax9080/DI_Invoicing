@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from app.routers import auth, dynamic_reference, products
-from app.routers import reference, invoices, clients, dashboard, reports, buyers
+from app.routers import reference, invoices, clients, dashboard, reports, buyers, buyer_ledger
     
 warnings.filterwarnings(
     "ignore",
@@ -42,6 +42,7 @@ app.include_router(dynamic_reference.router)
 app.include_router(dashboard.router)
 app.include_router(reports.router)
 app.include_router(buyers.router)
+app.include_router(buyer_ledger.router)
 app.include_router(products.router)
 app.include_router(auth.router)
 BASE_DIR = Path(__file__).resolve().parent

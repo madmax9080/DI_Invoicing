@@ -1,4 +1,4 @@
-from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String, DateTime, JSON, ForeignKey, Numeric, Text, func
+from sqlalchemy import TIMESTAMP, Boolean, Column, Date, Integer, String, DateTime, JSON, ForeignKey, Numeric, Text, func
 from sqlalchemy.orm import relationship
 from .database import Base
 from sqlalchemy import UniqueConstraint
@@ -79,6 +79,43 @@ class InvoiceItem(Base):
     saleType = Column(String(100), nullable=False) 
     invoice = relationship("Invoice", back_populates="items")
     product = relationship("Product")
+
+class BuyerReceipt(Base):
+    __tablename__ = "buyer_receipts"
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id"), nullable=False, index=True)
+    buyer_id = Column(Integer, ForeignKey("buyers.id"), nullable=False, index=True)
+    received_date = Column(Date, nullable=False, index=True)
+    amount = Column(Numeric(18, 2), nullable=False)
+    payment_method = Column(String(50), nullable=True)
+    reference_number = Column(String(150), nullable=True)
+    notes = Column(Text, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    allocations = relationship(
+        "BuyerReceiptAllocation",
+        back_populates="receipt",
+        cascade="all, delete-orphan",
+    )
+
+class BuyerReceiptAllocation(Base):
+    __tablename__ = "buyer_receipt_allocations"
+    id = Column(Integer, primary_key=True, index=True)
+    receipt_id = Column(
+        Integer,
+        ForeignKey("buyer_receipts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    invoice_id = Column(
+        Integer,
+        ForeignKey("invoices.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    amount = Column(Numeric(18, 2), nullable=False)
+    receipt = relationship("BuyerReceipt", back_populates="allocations")
+    invoice = relationship("Invoice")
 
 class Product(Base):
     __tablename__ = "products"

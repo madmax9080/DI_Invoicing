@@ -1,5 +1,5 @@
 import { apiFetch } from "./api.js";
-const ASSET_VERSION = "10.37";
+const ASSET_VERSION = "10.39";
 let allClients = [];
 
 const routes = {
@@ -58,6 +58,13 @@ const routes = {
         script: "/assets/js/pages/buyers.js",
         init: "initBuyers",
         destroy: "destroyBuyers"
+    },
+    buyer_ledger: {
+        page: "/pages/buyer_ledger.html",
+        url: "#buyer-ledger",
+        script: "/assets/js/pages/buyer_ledger.js",
+        init: "initBuyerLedger",
+        destroy: "destroyBuyerLedger"
     },
 };
 
