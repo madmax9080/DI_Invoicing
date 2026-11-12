@@ -326,6 +326,122 @@ body {
     margin-top: 2px;
 }
 
+.dashboard-shell .dashboard-chart-panel {
+    position: relative;
+    overflow: hidden;
+    padding: 16px 18px 10px;
+    border: 1px solid rgba(20, 110, 152, 0.1);
+    border-radius: 20px;
+    background:
+        radial-gradient(ellipse at top right, rgba(0, 155, 229, 0.055), transparent 38%),
+        rgba(255, 255, 255, 0.98);
+    box-shadow: 0 12px 30px rgba(15, 54, 84, 0.055);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dashboard-shell .dashboard-chart-panel::before {
+    position: absolute;
+    top: 0;
+    right: 20px;
+    left: 20px;
+    height: 3px;
+    border-radius: 0 0 4px 4px;
+    background: linear-gradient(90deg, #146e98, #009be5, #79d2fc);
+    content: "";
+}
+
+.dashboard-shell .dashboard-chart-panel:hover {
+    box-shadow: 0 16px 34px rgba(15, 54, 84, 0.09);
+    transform: translateY(-2px);
+}
+
+.dashboard-shell .dashboard-chart-panel .panel-header {
+    position: relative;
+    z-index: 1;
+    min-height: 42px;
+    margin-bottom: 4px;
+}
+
+.chart-heading {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+}
+
+.chart-heading-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border: 1px solid rgba(20, 110, 152, 0.08);
+    border-radius: 12px;
+    background: linear-gradient(145deg, #eff9ff, #e5f4fc);
+    color: #146e98;
+    font-size: 1rem;
+}
+
+.distribution-chart-icon {
+    background: linear-gradient(145deg, #effcf8, #e3f7f0);
+    color: #0f8878;
+}
+
+.invoices-chart-icon {
+    background: linear-gradient(145deg, #f3f0ff, #ece8ff);
+    color: #7054b8;
+}
+
+.dashboard-shell .dashboard-chart-panel .panel-title {
+    color: #173c59;
+    font-size: 0.94rem;
+    letter-spacing: -0.01em;
+}
+
+.dashboard-shell .dashboard-chart-panel .panel-subtitle {
+    margin-top: 1px;
+    font-size: 0.74rem;
+}
+
+.chart-period-badge {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 9px;
+    border: 1px solid rgba(20, 110, 152, 0.1);
+    border-radius: 999px;
+    background: #f3f9fd;
+    color: #42637a;
+    font-size: 0.68rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.dashboard-chart-host {
+    min-width: 0;
+}
+
+.dashboard-chart-host .apexcharts-canvas,
+.dashboard-chart-host .apexcharts-svg {
+    max-width: 100%;
+}
+
+.dashboard-chart-host .apexcharts-gridline {
+    stroke: #e8eef5;
+}
+
+.dashboard-chart-host .apexcharts-tooltip {
+    border: 1px solid #e2eaf2;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(15, 54, 84, 0.1);
+}
+
+.sales-chart-icon {
+    background: linear-gradient(145deg, #eff7ff, #e1f1fc);
+    color: #1673a4;
+}
+
 .chart-card, .card-custom { display: none; }
 
 @media (max-width: 992px) {
@@ -343,6 +459,18 @@ body {
     .hero-badges { width: 100%; }
     .dashboard-toolbar { flex-direction: column; align-items: stretch; }
     .toolbar-right { justify-content: space-between; }
+    .dashboard-shell .dashboard-chart-panel { padding: 14px 12px 8px; }
+}
+
+@media (max-width: 576px) {
+    .dashboard-shell .dashboard-chart-panel .panel-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .dashboard-shell .dashboard-chart-panel .chart-period-badge {
+        margin-left: 48px;
+    }
 }
 
 .toolbar-actions {

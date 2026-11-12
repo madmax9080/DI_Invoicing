@@ -103,9 +103,10 @@
 }
 
 .buyer-chart-scroll {
-    max-height: 420px;
+    max-height: 520px;
     overflow-y: auto;
-    padding-right: 8px;
+    padding: 4px 8px 4px 0;
+    border-top: 1px solid #eef3f8;
 }
 
 .buyer-chart-scroll::-webkit-scrollbar {
@@ -119,6 +120,79 @@
 
 .buyer-chart-scroll::-webkit-scrollbar-track {
     background: transparent;
+}
+
+.reports-container .reports-buyer-chart-panel {
+    position: relative;
+    overflow: hidden;
+    padding: 16px 18px 12px;
+    border: 1px solid rgba(20, 110, 152, 0.1);
+    border-radius: 20px;
+    background:
+        radial-gradient(ellipse at top right, rgba(0, 155, 229, 0.055), transparent 38%),
+        rgba(255, 255, 255, 0.98);
+    box-shadow: 0 12px 30px rgba(15, 54, 84, 0.055);
+}
+
+.reports-container .reports-buyer-chart-panel::before {
+    position: absolute;
+    top: 0;
+    right: 20px;
+    left: 20px;
+    height: 3px;
+    border-radius: 0 0 4px 4px;
+    background: linear-gradient(90deg, #146e98, #009be5, #79d2fc);
+    content: "";
+}
+
+.reports-container .reports-buyer-chart-panel .panel-header {
+    min-height: 42px;
+    margin-bottom: 8px;
+}
+
+.reports-container .reports-buyer-chart-panel .panel-title {
+    color: #173c59;
+    font-size: 0.94rem;
+    letter-spacing: -0.01em;
+}
+
+.reports-container .reports-buyer-chart-panel .panel-subtitle {
+    margin-top: 1px;
+    font-size: 0.74rem;
+}
+
+.buyer-chart-icon {
+    background: linear-gradient(145deg, #effcf8, #e3f7f0);
+    color: #0f8878;
+}
+
+.reports-buyer-chart-panel #buyerSalesChart .apexcharts-gridline {
+    stroke: #e8eef5;
+}
+
+.reports-buyer-chart-panel #buyerSalesChart .apexcharts-yaxis-label {
+    font-weight: 500;
+}
+
+.reports-buyer-chart-panel #buyerSalesChart .apexcharts-tooltip {
+    border: 1px solid #e2eaf2;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(15, 54, 84, 0.1);
+}
+
+@media (max-width: 576px) {
+    .reports-container .reports-buyer-chart-panel {
+        padding: 14px 12px 10px;
+    }
+
+    .reports-container .reports-buyer-chart-panel .panel-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .reports-container .reports-buyer-chart-panel .chart-period-badge {
+        margin-left: 48px;
+    }
 }
 
 .btn-donezo-primary {

@@ -31,20 +31,12 @@ async function loadSalesByBuyerChart() {
         await apiFetch(`/reports/sales-by-buyer?fy=${fy}`);
     const labels = response.labels || [];
     const values = response.series || [];
-    document.querySelector(
-        "#buyerChartFYLabel"
-    ).textContent = response.fiscal_year;
-    const maxValue = Math.max(...values, 0);
-    const paddedMax = Math.ceil(maxValue * 1.9);
-    const trackSeries =
-        values.map(() => paddedMax);
+    document.querySelector("#buyerChartFYLabel").textContent =
+        `FY ${response.fiscal_year}`;
     const options = {
         chart: {
             type: "bar",
-            height: 360,
-            stacked: true,
-            stackType: "normal",
-            offsetY: 0,
+            height: Math.max(300, labels.length * 34 + 70),
             toolbar: { show: false },
             zoom: { enabled: false },
             background: "transparent",
@@ -54,29 +46,16 @@ async function loadSalesByBuyerChart() {
                 easing: "easeinout",
                 speed: 500
             },
-            dropShadow: {
-                enabled: true,
-                color: "#009be5",
-                top: 8,
-                blur: 12,
-                opacity: 0.16
-            }
+            dropShadow: { enabled: false }
         },
-        series: [
-            {
-                name: "Sales",
-                data: values
-            },
-            {
-                name: "Track",
-                data: trackSeries
-            }
-        ],
-        colors: ["#009be5", "#e2e8f0"],
+        series: [{ name: "Sales", data: values }],
+        colors: ["#009be5"],
         plotOptions: {
             bar: {
-                columnWidth: "34%",
-                borderRadius: 8,
+                horizontal: true,
+                barHeight: "58%",
+                borderRadius: 5,
+                dataLabels: { position: "top" },
                 distributed: false
             }
         },
@@ -84,26 +63,35 @@ async function loadSalesByBuyerChart() {
             type: "gradient",
             gradient: {
                 shade: "light",
-                type: "vertical",
+                type: "horizontal",
                 gradientToColors: ["#146e98"],
-                stops: [0, 100]
+                stops: [0, 100],
+                opacityFrom: 0.95,
+                opacityTo: 0.78
             }
         },
-        dataLabels: { enabled: false },
+        dataLabels: {
+            enabled: true,
+            formatter: value => formatCompactPKR(value),
+            style: {
+                colors: ["#146e98"],
+                fontSize: "10px",
+                fontWeight: 600
+            },
+            offsetX: 6,
+            dropShadow: { enabled: false }
+        },
         grid: {
-            borderColor: "#e2e8f0",
-            strokeDashArray: 4,
-            padding: { bottom: 0 }
+            borderColor: "#e8eef5",
+            strokeDashArray: 3,
+            padding: { left: 8, right: 16, top: 4, bottom: 4 },
+            xaxis: { lines: { show: true } },
+            yaxis: { lines: { show: false } }
         },
         tooltip: {
-            shared: false,
-            intersect: true,
+            theme: "light",
             y: {
-                formatter: function(val, opts) {
-                    if (opts.seriesIndex === 1)
-                        return null;
-                    return "Rs." + val.toLocaleString("en-PK");
-                }
+                formatter: value => "Rs. " + value.toLocaleString("en-PK")
             }
         },
         xaxis: {
@@ -111,17 +99,15 @@ async function loadSalesByBuyerChart() {
             axisBorder: { show: false },
             axisTicks: { show: false },
             labels: {
-                show: false,
                 style: {
-                    colors: "#64748b",
-                    fontSize: "12px"
+                    colors: "#334155",
+                    fontSize: "11px",
+                    fontWeight: 500
                 }
             }
         },
         yaxis: {
             min: 0,
-            max: paddedMax,
-            forceNiceScale: false,
             tickAmount: 5,
             axisBorder: { show: false },
             axisTicks: { show: false },
@@ -131,7 +117,7 @@ async function loadSalesByBuyerChart() {
                 },
                 style: {
                     colors: "#64748b",
-                    fontSize: "12px"
+                    fontSize: "10px"
                 }
             }
         },

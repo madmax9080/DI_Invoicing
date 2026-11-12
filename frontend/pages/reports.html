@@ -11,12 +11,16 @@
         </button>
     </section>
 
-    <section class="panel-card chart-panel">
+    <section class="panel-card chart-panel reports-buyer-chart-panel">
         <div class="panel-header">
-            <div>
-                <div class="panel-title">Sales by Buyer</div>
-                <div class="panel-subtitle" id="buyerChartFYLabel">Fiscal Year</div>
+            <div class="chart-heading">
+                <span class="chart-heading-icon buyer-chart-icon"><i class="bi bi-people"></i></span>
+                <div>
+                    <div class="panel-title">Sales by Buyer</div>
+                    <div class="panel-subtitle">Top buyers ranked by invoice sales</div>
+                </div>
             </div>
+            <span class="chart-period-badge" id="buyerChartFYLabel">Fiscal Year</span>
         </div>
         <div class="buyer-chart-scroll">
             <div id="buyerSalesChart"></div>

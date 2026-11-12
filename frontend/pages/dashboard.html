@@ -52,36 +52,48 @@
 
     <div class="row g-3">
         <div class="col-12">
-            <div class="panel-card chart-panel">
+            <div class="panel-card chart-panel dashboard-chart-panel monthly-sales-panel">
                 <div class="panel-header">
-                    <div>
-                        <div class="panel-title">Monthly Sales</div>
-                        <div class="panel-subtitle">Sales trend by month</div>
+                    <div class="chart-heading">
+                        <span class="chart-heading-icon sales-chart-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                        <div>
+                            <div class="panel-title">Monthly Sales</div>
+                            <div class="panel-subtitle">Sales trend by month</div>
+                        </div>
                     </div>
+                    <span class="chart-period-badge" id="monthlySalesFY"></span>
                 </div>
-                <div id="monthlySalesChart"></div>
+                <div class="dashboard-chart-host" id="monthlySalesChart"></div>
             </div>
         </div>
         <div class="col-xl-6 col-lg-12">
-            <div class="panel-card chart-panel">
+            <div class="panel-card chart-panel dashboard-chart-panel distribution-panel">
                 <div class="panel-header">
-                    <div>
-                        <div class="panel-title">Sales Distribution</div>
-                        <div class="panel-subtitle">Distributed by quarters</div>
+                    <div class="chart-heading">
+                        <span class="chart-heading-icon distribution-chart-icon"><i class="bi bi-pie-chart"></i></span>
+                        <div>
+                            <div class="panel-title">Sales Distribution</div>
+                            <div class="panel-subtitle">Distributed by quarters</div>
+                        </div>
                     </div>
+                    <span class="chart-period-badge" id="quarterlySalesFY"></span>
                 </div>
-                <div id="quarterlySalesChart"></div>
+                <div class="dashboard-chart-host" id="quarterlySalesChart"></div>
             </div>
         </div>
         <div class="col-xl-6 col-lg-12">
-            <div class="panel-card chart-panel">
+            <div class="panel-card chart-panel dashboard-chart-panel invoices-chart-panel">
                 <div class="panel-header">
-                    <div>
-                        <div class="panel-title">Monthly Invoices</div>
-                        <div class="panel-subtitle">Last 12 months performance</div>
+                    <div class="chart-heading">
+                        <span class="chart-heading-icon invoices-chart-icon"><i class="bi bi-receipt-cutoff"></i></span>
+                        <div>
+                            <div class="panel-title">Monthly Invoices</div>
+                            <div class="panel-subtitle">Last 12 months performance</div>
+                        </div>
                     </div>
+                    <span class="chart-period-badge" id="invoiceCountFY"></span>
                 </div>
-                <div id="invoiceCountChart"></div>
+                <div class="dashboard-chart-host" id="invoiceCountChart"></div>
             </div>
         </div>
     </div>

@@ -134,6 +134,8 @@ async function loadMonthlySalesChart() {
         response.data;
     const fiscalYear =
         response.fiscal_year;
+    document.querySelector("#monthlySalesFY").textContent =
+        `FY ${fiscalYear}`;
     const monthNames =
         ["Jul","Aug","Sep","Oct","Nov","Dec",
          "Jan","Feb","Mar","Apr","May","Jun"];
@@ -158,7 +160,7 @@ async function loadMonthlySalesChart() {
             {
                 chart: {
                     type: "area",
-                    height: 320,
+                    height: 300,
                     toolbar: { show: false },
                     zoom: { enabled: false },
                     background: "transparent",
@@ -168,26 +170,9 @@ async function loadMonthlySalesChart() {
                         easing: "easeinout",
                         speed: 500
                     },
-                    dropShadow: {
-                        enabled: true,
-                        color: "#009be5",
-                        top: 8,
-                        blur: 14,
-                        opacity: 0.16
-                    }
+                    dropShadow: { enabled: false }
                 },
                 colors:["#009be5"],
-                title: {
-                    text: `(${fiscalYear})`,
-                    align: "left",
-                    margin: 0,
-                    offsetX: 2,
-                    style: {
-                        fontSize: "13px",
-                        fontWeight: 700,
-                        color: "#146e98"
-                    }
-                },
                 annotations: {
                     points: [{
                         x: labels[labels.length - 1],
@@ -217,7 +202,8 @@ async function loadMonthlySalesChart() {
                     labels: {
                         style: {
                             colors: "#64748b",
-                            fontSize: "12px"
+                            fontSize: "11px",
+                            fontWeight: 500
                         }
                     }
                 },
@@ -234,13 +220,14 @@ async function loadMonthlySalesChart() {
                         },
                         style: {
                             colors: "#64748b",
-                            fontSize: "12px"
+                            fontSize: "11px",
+                            fontWeight: 500
                         }
                     }
                 },
                 stroke: {
                     curve: "smooth",
-                    width: 3,
+                    width: 2.8,
                     lineCap: "round"
                 },
                 fill: {
@@ -249,13 +236,13 @@ async function loadMonthlySalesChart() {
                         shade: "dark",
                         type: "vertical",
                         gradientToColors: ["#046593"],
-                        opacityFrom: 0.75,
-                        opacityTo: 0.18,
+                        opacityFrom: 0.42,
+                        opacityTo: 0.04,
                         stops: [0, 100]
                     }
                 },
                 grid: {
-                    borderColor: "#e2e8f0",
+                    borderColor: "#e8eef5",
                     strokeDashArray: 4,
                     xaxis: { lines: { show: false } },
                     yaxis: { lines: { show: true } },
@@ -313,11 +300,12 @@ async function loadQuarterlySalesChart(){
     const options = {
         chart:{
             type:"bar",
-            height:320,
+            height:300,
             toolbar:{show:false},
             background:"transparent",
             foreColor:"#64748b",
-            animations:{ enabled:true, easing:"easeout", speed:600 }
+            animations:{ enabled:true, easing:"easeout", speed:600 },
+            dropShadow: { enabled: false }
         },
         series:[{
             name:"Sales",
@@ -325,26 +313,15 @@ async function loadQuarterlySalesChart(){
         }],
         xaxis:{
             categories:response.labels,
-            labels:{ style:{ colors:"#64748b", fontSize:"12px" } },
+            labels:{ style:{ colors:"#64748b", fontSize:"11px", fontWeight:500 } },
             axisBorder:{ show:false },
             axisTicks:{ show:false }
         },
         plotOptions:{
             bar: {
-                columnWidth: "58%",
-                borderRadius: 10,
+                columnWidth: "48%",
+                borderRadius: 6,
                 distributed: false
-            }
-        },
-        title:{
-            text:`(${response.fiscal_year})`,
-            align:"left",
-            margin: 0,
-            offsetX: 2,
-            style: {
-                fontSize: "13px",
-                fontWeight: 700,
-                color: "#146e98"
             }
         },
         yaxis:{
@@ -354,7 +331,7 @@ async function loadQuarterlySalesChart(){
                 formatter: function(val) {
                     return formatCompactPKR(val);
                 },
-                style:{ colors:"#64748b", fontSize:"12px" }
+                style:{ colors:"#64748b", fontSize:"11px", fontWeight:500 }
             }
         },
         fill: {
@@ -363,30 +340,42 @@ async function loadQuarterlySalesChart(){
                 shade: "dark",
                 type: "vertical",
                 gradientToColors: ["#015176"],
-                opacityFrom: 0.82,
-                opacityTo: 0.35,
+                opacityFrom: 0.72,
+                opacityTo: 0.18,
                 stops: [0, 100]
             }
         },
         grid: {
-            borderColor: "#e2e8f0",
-            strokeDashArray: 4,
+            borderColor: "#e8eef5",
+            strokeDashArray: 3,
             xaxis: { lines: { show: false } },
             yaxis: { lines: { show: true } }
         },
         tooltip:{
             theme:"light",
-            style:{ fontSize:"13px" },
+            style:{ fontSize:"12px" },
             y:{
                 formatter:(val)=>
                     "Rs." + val.toLocaleString("en-PK")
             }
         },
-        dataLabels: { enabled: false },
+        dataLabels: {
+            enabled: true,
+            formatter: value => formatCompactPKR(value),
+            offsetY: -8,
+            style: {
+                colors: ["#31566e"],
+                fontSize: "10px",
+                fontWeight: 600
+            },
+            background: { enabled: false }
+        },
         colors:["#009be5"],
         legend:{ show:false },
         states:{ hover:{ filter:{ type:"lighten", value:0.06 } } }
     };
+    document.querySelector("#quarterlySalesFY").textContent =
+        `FY ${response.fiscal_year}`;
     const el =
         document.querySelector(
             "#quarterlySalesChart"
@@ -420,6 +409,8 @@ async function loadInvoiceCountChart() {
         response.data;
     const fiscalYear =
         response.fiscal_year;
+    document.querySelector("#invoiceCountFY").textContent =
+        `FY ${fiscalYear}`;
     const labels =
         data.map(d =>
             `${getMonthName(d.month)} ${d.year}`
@@ -438,35 +429,18 @@ async function loadInvoiceCountChart() {
         new ApexCharts(invoiceCountChartEl, {
             chart: {
                 type: "area",
-                height: 320,
+                height: 300,
                 toolbar: { show: false },
                 background: "transparent",
                 foreColor: "#64748b",
-                fontFamily: "Inter, sans-serif",
+                fontFamily: "Poppins, sans-serif",
                 zoom: { enabled: false },
                 animations: {
                     enabled: true,
                     easing: "easeout",
                     speed: 500
                 },
-                dropShadow: {
-                    enabled: true,
-                    color: "#009be5",
-                    top: 8,
-                    blur: 12,
-                    opacity: 0.14
-                }
-            },
-            title: {
-                text: `(${fiscalYear})`,
-                align: "left",
-                margin: 0,
-                offsetX: 2,
-                style: {
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    color: "#146e98"
-                }
+                dropShadow: { enabled: false }
             },
             annotations: {
                 points: [{
@@ -501,8 +475,8 @@ async function loadInvoiceCountChart() {
                     shade: "dark",
                     type: "vertical",
                     gradientToColors: ["#146e98"],
-                    opacityFrom: 0.75,
-                    opacityTo: 0.2,
+                    opacityFrom: 0.4,
+                    opacityTo: 0.04,
                     stops: [0, 100]
                 }
             },
@@ -516,8 +490,8 @@ async function loadInvoiceCountChart() {
                 }
             },
             grid: {
-                borderColor: "#e2e8f0",
-                strokeDashArray: 3,
+                borderColor: "#e8eef5",
+                strokeDashArray: 4,
                 xaxis: { lines: { show: false } },
                 yaxis: { lines: { show: true } },
                 padding: {
@@ -532,7 +506,7 @@ async function loadInvoiceCountChart() {
                 labels: {
                     style: {
                         colors: "#64748b",
-                        fontSize: "12px",
+                        fontSize: "11px",
                         fontWeight: 500
                     }
                 }
@@ -543,7 +517,7 @@ async function loadInvoiceCountChart() {
                 labels: {
                     style: {
                         colors: "#64748b",
-                        fontSize: "12px"
+                        fontSize: "11px"
                     },
                     formatter: val =>
                         val.toLocaleString()
@@ -555,7 +529,7 @@ async function loadInvoiceCountChart() {
             tooltip: {
                 theme: "light",
                 style: {
-                    fontSize: "13px"
+                    fontSize: "12px"
                 },
                 marker: {
                     show: true
