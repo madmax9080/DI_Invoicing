@@ -181,6 +181,14 @@
     margin-bottom: 14px;
 }
 
+.reports-filter-panel > .row {
+    --bs-gutter-x: 0.9rem;
+}
+
+.reports-filter-panel > .row > [class*="col-"] {
+    min-width: 0;
+}
+
 .reports-filter-title {
     display: flex;
     align-items: center;
@@ -219,20 +227,34 @@
 }
 
 .reports-filter-control {
+    display: block;
+    width: 100%;
+    min-width: 0;
     min-height: 40px;
+    max-width: 100%;
     border-radius: 10px;
     padding: 7px 10px;
     font-size: 0.82rem;
+    box-sizing: border-box;
 }
 
 .reports-filter-actions .btn {
     display: inline-flex;
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 40px;
+    padding-right: 8px;
+    padding-left: 8px;
     align-items: center;
     justify-content: center;
     gap: 6px;
     border-radius: 10px;
     font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.reports-filter-actions .btn i {
+    flex: 0 0 auto;
 }
 
 .reports-filter-actions .btn-donezo-primary {
