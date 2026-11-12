@@ -2,6 +2,7 @@ import { apiFetch } from "../api.js";
 import { showToast } from "../toast.js";
 
 let currentLedger = null;
+const LEDGER_START_DATE = "2026-07-01";
 
 export async function initBuyerLedger() {
     $("#ledgerBuyerSearchBtn").on("click", searchLedgerBuyers);
@@ -19,7 +20,9 @@ export async function initBuyerLedger() {
         "change",
         invalidateLedger
     );
-    $("#ledgerReceiptDate").val(localDateString(new Date()));
+    $("#ledgerReceiptDate")
+        .attr("min", LEDGER_START_DATE)
+        .val(localDateString(new Date()));
     await searchLedgerBuyers();
 }
 
@@ -83,6 +86,15 @@ async function loadBuyerLedger() {
     }
     const fromDate = $("#ledgerDateFrom").val();
     const toDate = $("#ledgerDateTo").val();
+    if (
+        (fromDate && fromDate < LEDGER_START_DATE)
+        || (toDate && toDate < LEDGER_START_DATE)
+    ) {
+        $("#ledgerStatus").text(
+            "Buyer ledger history starts on July 1, 2026 (FY 2026-2027)."
+        );
+        return;
+    }
     if (fromDate && toDate && fromDate > toDate) {
         $("#ledgerStatus").text("From date must be on or before to date.");
         return;
@@ -165,7 +177,9 @@ function openReceiptForm() {
     $("#ledgerReceiptBuyer").text(
         $("#ledgerBuyerSelect option:selected").text()
     );
-    $("#ledgerReceiptDate").val(localDateString(new Date()));
+    $("#ledgerReceiptDate")
+        .attr("min", LEDGER_START_DATE)
+        .val(localDateString(new Date()));
     bootstrap.Modal.getOrCreateInstance(
         document.getElementById("ledgerReceiptModal")
     ).show();
@@ -178,6 +192,12 @@ async function saveBuyerReceipt(event) {
     const receiptDate = $("#ledgerReceiptDate").val();
     if (!buyerId || !receiptDate || !amount || Number(amount) <= 0) {
         $("#ledgerStatus").text("Choose a buyer, date, and positive receipt amount.");
+        return;
+    }
+    if (receiptDate < LEDGER_START_DATE) {
+        $("#ledgerStatus").text(
+            "Receipts can be recorded from July 1, 2026 onward."
+        );
         return;
     }
 
@@ -201,7 +221,9 @@ async function saveBuyerReceipt(event) {
             document.getElementById("ledgerReceiptModal")
         ).hide();
         $("#ledgerReceiptForm")[0].reset();
-        $("#ledgerReceiptDate").val(localDateString(new Date()));
+        $("#ledgerReceiptDate")
+            .attr("min", LEDGER_START_DATE)
+            .val(localDateString(new Date()));
         await loadBuyerLedger();
     } catch (error) {
         $("#ledgerStatus").text(error.message || "Could not save the receipt.");

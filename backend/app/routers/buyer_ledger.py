@@ -17,6 +17,7 @@ from app.database import get_db
 from app.dependencies.auth_dependency import get_current_user
 
 router = APIRouter(prefix="/buyer-ledger", tags=["Buyer Ledger"])
+LEDGER_START_DATE = date(2026, 7, 1)
 
 
 class ReceiptCreate(BaseModel):
@@ -29,6 +30,27 @@ class ReceiptCreate(BaseModel):
     payment_method: Optional[str] = Field(default=None, max_length=50)
     reference_number: Optional[str] = Field(default=None, max_length=150)
     notes: Optional[str] = Field(default=None, max_length=2000)
+
+
+def _validate_ledger_dates(
+    from_date: Optional[date],
+    to_date: Optional[date],
+) -> None:
+    if from_date and from_date < LEDGER_START_DATE:
+        raise HTTPException(
+            status_code=422,
+            detail="Buyer ledger starts on 2026-07-01 (FY 2026-2027)",
+        )
+    if to_date and to_date < LEDGER_START_DATE:
+        raise HTTPException(
+            status_code=422,
+            detail="Buyer ledger starts on 2026-07-01 (FY 2026-2027)",
+        )
+    if from_date and to_date and from_date > to_date:
+        raise HTTPException(
+            status_code=422,
+            detail="From date must be on or before to date",
+        )
 
 
 def _client_owned_by_user(
@@ -90,6 +112,8 @@ def _invoice_rows(
             models.Invoice.buyer_id == buyer_id,
             models.Invoice.status == "posted",
             models.Invoice.invoiceType.in_(("Sale Invoice", "Debit Note")),
+            models.Invoice.invoiceDate
+            >= datetime.combine(LEDGER_START_DATE, time.min),
         )
         .group_by(models.Invoice.id)
     )
@@ -132,6 +156,7 @@ def _receipt_rows(
     query = db.query(models.BuyerReceipt).filter(
         models.BuyerReceipt.client_id == client_id,
         models.BuyerReceipt.buyer_id == buyer_id,
+        models.BuyerReceipt.received_date >= LEDGER_START_DATE,
     )
     if before is not None:
         query = query.filter(models.BuyerReceipt.received_date < before)
@@ -154,7 +179,7 @@ def _ledger_data(
     to_date: Optional[date],
 ) -> dict:
     opening_balance = 0.0
-    if from_date:
+    if from_date and from_date > LEDGER_START_DATE:
         opening_rows = _invoice_rows(
             db,
             client_id,
@@ -381,6 +406,11 @@ def create_buyer_receipt(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
+    if payload.received_date < LEDGER_START_DATE:
+        raise HTTPException(
+            status_code=422,
+            detail="Buyer receipts can be recorded from 2026-07-01 (FY 2026-2027)",
+        )
     _owned_buyer(db, buyer_id, client_id, current_user["id"])
     buyer = (
         db.query(models.Buyer)
@@ -441,11 +471,7 @@ def get_buyer_ledger(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    if from_date and to_date and from_date > to_date:
-        raise HTTPException(
-            status_code=422,
-            detail="From date must be on or before to date",
-        )
+    _validate_ledger_dates(from_date, to_date)
     buyer = _owned_buyer(db, buyer_id, client_id, current_user["id"])
     return {
         "buyer": {
@@ -466,11 +492,7 @@ def export_buyer_ledger(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    if from_date and to_date and from_date > to_date:
-        raise HTTPException(
-            status_code=422,
-            detail="From date must be on or before to date",
-        )
+    _validate_ledger_dates(from_date, to_date)
     buyer = _owned_buyer(db, buyer_id, client_id, current_user["id"])
     ledger = _ledger_data(db, client_id, buyer_id, from_date, to_date)
 
