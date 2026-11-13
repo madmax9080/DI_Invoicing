@@ -115,9 +115,9 @@ async function loadBuyerLedger() {
         `/buyer-ledger/${buyerId}${query ? `?${query}` : ""}`
     );
     currentLedger = { buyerId, fromDate, toDate };
-    $("#ledgerOpeningBalance").text(formatCurrency(result.opening_balance));
+    $("#ledgerOpeningBalance").text(formatBalance(result.opening_balance, true));
     $("#ledgerOpeningBalance").data("baseOpeningBalance", result.buyer.opening_balance);
-    $("#ledgerClosingBalance").text(formatCurrency(result.closing_balance));
+    $("#ledgerClosingBalance").text(formatBalance(result.closing_balance, true));
     renderLedgerRows(result.transactions);
     $("#ledgerStatus").text(
         `${result.buyer.name}: ${result.transactions.length} transaction${result.transactions.length === 1 ? "" : "s"}.`
@@ -210,7 +210,7 @@ function renderLedgerRows(transactions) {
             transaction.credit ? formatNumber(transaction.credit) : "—"
         ));
         row.append($("<td>", { class: "text-end fw-semibold" }).text(
-            formatNumber(transaction.balance)
+            formatBalance(transaction.balance)
         ));
         const actions = $("<td>", { class: "text-end text-nowrap" });
         if (transaction.receipt_id) {
@@ -383,8 +383,12 @@ async function saveBuyerReceipt(event) {
     }
 }
 
-function formatCurrency(value) {
-    return `Rs. ${formatNumber(value)}`;
+function formatBalance(value, includeCurrency = false) {
+    const balance = Number(value) || 0;
+    const direction = balance > 0 ? "Dr" : balance < 0 ? "Cr" : "";
+    const currency = includeCurrency ? "Rs. " : "";
+    const suffix = direction ? ` ${direction}` : "";
+    return `${currency}${formatNumber(Math.abs(balance))}${suffix}`;
 }
 
 function formatNumber(value) {

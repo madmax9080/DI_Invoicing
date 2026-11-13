@@ -33,12 +33,23 @@ from app.dependencies.auth_dependency import get_current_user
 router = APIRouter(prefix="/buyer-ledger", tags=["Buyer Ledger"])
 LEDGER_START_DATE = date(2026, 7, 1)
 REPORT_TIMEZONE = timezone(timedelta(hours=5))
+BALANCE_NUMBER_FORMAT = '#,##0.00" Dr";#,##0.00" Cr";0.00'
+BALANCE_CURRENCY_FORMAT = '"Rs. "#,##0.00" Dr";"Rs. "#,##0.00" Cr";"Rs. "0.00'
 
 
 def _report_generated_at() -> str:
     return datetime.now(timezone.utc).astimezone(REPORT_TIMEZONE).strftime(
         "%d %b %Y, %H:%M:%S PKT"
     )
+
+
+def _format_ledger_balance(value, include_currency: bool = False) -> str:
+    balance = Decimal(str(value or 0))
+    direction = "Dr" if balance > 0 else "Cr" if balance < 0 else ""
+    formatted = f"{abs(balance):,.2f}"
+    prefix = "Rs. " if include_currency else ""
+    suffix = f" {direction}" if direction else ""
+    return f"{prefix}{formatted}{suffix}"
 
 
 class ReceiptCreate(BaseModel):
@@ -812,7 +823,11 @@ def export_buyer_ledger(
         label_cell.alignment = Alignment(horizontal="center", vertical="center")
         value_cell.font = Font(name="Aptos", size=13, bold=True, color="17324D")
         value_cell.alignment = Alignment(horizontal="center", vertical="center")
-        value_cell.number_format = '"Rs. "#,##0.00;[Red]-"Rs. "#,##0.00'
+        value_cell.number_format = (
+            BALANCE_CURRENCY_FORMAT
+            if label in ("OPENING BALANCE", "CLOSING BALANCE")
+            else '"Rs. "#,##0.00;[Red]-"Rs. "#,##0.00'
+        )
         for row in (label_row, value_row):
             for column in range(start, end + 1):
                 sheet.cell(row, column).fill = pale_fill
@@ -889,7 +904,11 @@ def export_buyer_ledger(
 
     for row in sheet.iter_rows(min_row=first_data_row, max_row=total_row, min_col=5, max_col=7):
         for cell in row:
-            cell.number_format = '#,##0.00;[Red]-#,##0.00'
+            cell.number_format = (
+                BALANCE_NUMBER_FORMAT
+                if cell.column == 7
+                else '#,##0.00;[Red]-#,##0.00'
+            )
             cell.alignment = Alignment(horizontal="right", vertical="center")
     for column, width in enumerate((15, 23, 23, 52, 18, 18, 18), start=1):
         sheet.column_dimensions[openpyxl.utils.get_column_letter(column)].width = width
@@ -1151,8 +1170,15 @@ def export_buyer_ledger_pdf(
                 for label, _ in summary_values
             ],
             [
-                Paragraph(f"Rs. {float(value or 0):,.2f}", summary_value_style)
-                for _, value in summary_values
+                Paragraph(
+                    (
+                        _format_ledger_balance(value, include_currency=True)
+                        if label in ("OPENING BALANCE", "CLOSING BALANCE")
+                        else f"Rs. {float(value or 0):,.2f}"
+                    ),
+                    summary_value_style,
+                )
+                for label, value in summary_values
             ],
         ],
         colWidths=[doc.width / 4] * 4,
@@ -1205,7 +1231,10 @@ def export_buyer_ledger_pdf(
                 f"{float(row['credit']):,.2f}" if row["credit"] else "-",
                 cell_right_style,
             ),
-            Paragraph(f"{float(row['balance']):,.2f}", cell_right_style),
+            Paragraph(
+                _format_ledger_balance(row["balance"]),
+                cell_right_style,
+            ),
         ])
 
     if not transactions:
