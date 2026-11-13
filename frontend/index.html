@@ -3,19 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pegasus Solutions | Login</title>
+<title>Pegasus Solutions | Secure invoicing</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./assets/css/login.css?v=1.2">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/css/login.css?v=1.4">
 </head>
 <body>
 <div class="auth-shell">
     <div class="auth-card">
         <div class="form-panel">
             <div class="form-box">
-                <img class="logo" src="./assets/images/new_brand.png" alt="Pegasus Solutions logo">
+                <div class="brand-row">
+                    <img class="logo" src="./assets/images/new_brand.png" alt="Pegasus Solutions logo">
+                    <span class="status-badge">Live dashboard</span>
+                </div>
+
                 <h1 class="title">Welcome <span class="color">back</span></h1>
-                <p class="subtitle">Sign in to your invoicing workspace and continue where you left off.</p>
+                <p class="subtitle">Sign in to your invoicing workspace and continue managing your billing with confidence.</p>
 
                 <div class="field-group">
                     <label for="email">Email address</label>
@@ -28,27 +32,31 @@
                     <button type="button" class="eye-btn" onclick="togglePassword()" aria-label="Toggle password visibility">👁</button>
                 </div>
 
-                <button id="loginBtn" class="btn w-100">Sign in →</button>
+                <button id="loginBtn" class="btn w-100">Sign in <span aria-hidden="true">→</span></button>
+                <div class="support-row">
+                    <span>Need access?</span>
+                    <a href="#">Contact admin</a>
+                </div>
                 <p class="brand-footer">© 2026 Pegasus Solutions — Pakistan</p>
             </div>
         </div>
 
         <div class="info-panel">
             <div class="info-card image-hero">
-                <img src="./assets/images/index.png" alt="Digital invoicing">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80" alt="Modern finance team reviewing invoices">
                 <div class="hero-overlay">
-                    <div class="eyebrow">Digital invoicing</div>
-                    <h2>Run your billing workflow with clarity and speed.</h2>
-                    <p>Manage clients, create invoices, and stay ahead of every transaction from one secure dashboard.</p>
+                    <div class="eyebrow">Modern finance</div>
+                    <h2>Smarter invoicing for faster business growth.</h2>
+                    <p>Manage clients, review payments, and track every invoice from one streamlined control center.</p>
 
                     <div class="hero-actions">
                         <div class="stat-pill">
                             <strong>24/7</strong>
-                            <span>Cloud-ready access</span>
+                            <span>Access</span>
                         </div>
                         <div class="stat-pill secondary-pill">
                             <strong>100%</strong>
-                            <span>Secure workflows</span>
+                            <span>Secure</span>
                         </div>
                     </div>
                 </div>
@@ -56,6 +64,49 @@
         </div>
     </div>
 </div>
+
+<section class="insight-band" aria-label="Product highlights">
+    <div class="insight-head">
+        <p class="section-kicker">Built for modern businesses</p>
+        <h2>Everything your invoicing workflow needs, in one place.</h2>
+    </div>
+
+    <div class="stat-row">
+        <div class="mini-stat">
+            <strong>12k+</strong>
+            <span>Invoices issued</span>
+        </div>
+        <div class="mini-stat">
+            <strong>98.6%</strong>
+            <span>On-time payments</span>
+        </div>
+        <div class="mini-stat">
+            <strong>4.9/5</strong>
+            <span>User satisfaction</span>
+        </div>
+    </div>
+
+    <div class="feature-grid">
+        <article class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Faster invoicing</h3>
+            <p>Create, send, and track invoices in minutes instead of hours.</p>
+        </article>
+
+        <article class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Live reporting</h3>
+            <p>See revenue performance and collection trends with instant visibility.</p>
+        </article>
+
+        <article class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Secure workflows</h3>
+            <p>Keep operations protected with reliable access, audit-friendly records, and safe financial data.</p>
+        </article>
+    </div>
+</section>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function togglePassword() {
@@ -63,7 +114,7 @@ function togglePassword() {
     input.type = input.type === "password" ? "text" : "password";
 }
 </script>
-<script type="module" src="./assets/js/pages/login.js?v=1.2"></script>
+<script type="module" src="./assets/js/pages/login.js?v=1.4"></script>
 <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index:1100;"></div>
 </body>
 </html>
