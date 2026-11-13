@@ -667,6 +667,8 @@ def _buyer_ledger_export_data(
 
 def _ledger_description(row: dict) -> str:
     parts = [row["notes"]] if row.get("notes") else []
+    if row.get("invoice_type") == "Sale Invoice" and not row.get("notes"):
+        parts.append("Sale as per invoice")
     if row.get("payment_method"):
         parts.append(f"Payment method: {row['payment_method']}")
     if row.get("reference_number"):
@@ -703,12 +705,13 @@ def export_buyer_ledger(
     stripe_fill = PatternFill("solid", fgColor="F7FAFD")
     white_font = Font(name="Aptos", color="FFFFFF", bold=True)
     title_font = Font(name="Aptos Display", size=18, bold=True, color="FFFFFF")
+    buyer_font = Font(name="Aptos", size=10, bold=True, color="17324D")
     border_bottom = Border(
         bottom=Side(style="hair", color="DCE5EF")
     )
 
     sheet.merge_cells("A1:G1")
-    sheet["A1"] = "BUYER LEDGER"
+    sheet["A1"] = seller.sellerBusinessName
     sheet["A1"].font = title_font
     sheet["A1"].alignment = Alignment(vertical="center")
     for cell in sheet[1]:
@@ -716,7 +719,7 @@ def export_buyer_ledger(
     sheet.row_dimensions[1].height = 34
 
     sheet.merge_cells("A2:G2")
-    sheet["A2"] = "ACCOUNT STATEMENT"
+    sheet["A2"] = "BUYER LEDGER"
     sheet["A2"].font = Font(name="Aptos", size=10, color="D8E8F7")
     sheet["A2"].alignment = Alignment(vertical="center")
     for cell in sheet[2]:
@@ -728,14 +731,16 @@ def export_buyer_ledger(
         f"{to_date.isoformat() if to_date else 'Current'}"
     )
     generated_at = _report_generated_at()
+    sheet.cell(4, 1, "SELLER NTN/CNIC")
+    sheet.merge_cells("B4:G4")
+    sheet.cell(4, 2, seller.sellerNTNCNIC)
+    sheet.cell(4, 1).font = Font(
+        name="Aptos", size=9, bold=True, color="64748B"
+    )
+    sheet.cell(4, 2).font = Font(name="Aptos", size=10, color="17324D")
+    sheet.row_dimensions[4].height = 22
+
     for row, label, value, second_label, second_value in (
-        (
-            4,
-            "SELLER",
-            seller.sellerBusinessName,
-            "SELLER NTN/CNIC",
-            seller.sellerNTNCNIC,
-        ),
         (5, "BUYER", buyer.name, "BUYER NTN/CNIC", buyer.ntn_cnic or "-"),
         (6, "PERIOD", period, "GENERATED", generated_at),
     ):
@@ -753,6 +758,8 @@ def export_buyer_ledger(
             sheet.cell(row, column).font = Font(
                 name="Aptos", size=10, color="17324D"
             )
+        if row == 5:
+            sheet.cell(row, 2).font = buyer_font
         sheet.row_dimensions[row].height = 22
 
     summary_items = (
@@ -1002,6 +1009,11 @@ def export_buyer_ledger_pdf(
         textColor=ink,
         splitLongWords=True,
     )
+    buyer_value_style = ParagraphStyle(
+        "LedgerBuyerValue",
+        parent=meta_value_style,
+        fontName="Helvetica-Bold",
+    )
     summary_label_style = ParagraphStyle(
         "LedgerSummaryLabel",
         parent=styles["Normal"],
@@ -1069,14 +1081,14 @@ def export_buyer_ledger_pdf(
         Table(
             [
                 [
-                    Paragraph("BUYER LEDGER", title_style),
+                    Paragraph(
+                        escape(str(seller.sellerBusinessName or "-")),
+                        title_style,
+                    ),
                     Paragraph("ACCOUNT STATEMENT", eyebrow_style),
                 ],
                 [
-                    Paragraph(
-                        escape(str(seller.sellerBusinessName or "-")),
-                        seller_style,
-                    ),
+                    Paragraph("BUYER LEDGER", seller_style),
                     Paragraph(
                         f"Seller NTN/CNIC: {escape(str(seller.sellerNTNCNIC or '-'))}",
                         header_meta_style,
@@ -1101,7 +1113,7 @@ def export_buyer_ledger_pdf(
         [
             [
                 Paragraph("BUYER", meta_label_style),
-                Paragraph(escape(str(buyer.name or "-")), meta_value_style),
+                Paragraph(escape(str(buyer.name or "-")), buyer_value_style),
                 Paragraph("BUYER NTN/CNIC", meta_label_style),
                 Paragraph(escape(str(buyer.ntn_cnic or "-")), meta_value_style),
             ],

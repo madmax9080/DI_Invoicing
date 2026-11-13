@@ -241,6 +241,9 @@ function renderLedgerRows(transactions) {
 function getTransactionDescription(transaction) {
     const parts = [];
     if (transaction.notes) parts.push(transaction.notes);
+    if (transaction.invoice_type === "Sale Invoice" && !transaction.notes) {
+        parts.push("Sale as per invoice");
+    }
     if (transaction.payment_method) {
         parts.push(`Payment method: ${transaction.payment_method}`);
     }
