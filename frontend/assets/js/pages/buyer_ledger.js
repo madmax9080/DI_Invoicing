@@ -171,10 +171,18 @@ async function saveOpeningBalance(event) {
 
 function renderLedgerRows(transactions) {
     const body = $("#buyerLedgerTableBody").empty();
+    const totals = transactions.reduce((sum, transaction) => ({
+        debit: sum.debit + (Number(transaction.debit) || 0),
+        credit: sum.credit + (Number(transaction.credit) || 0)
+    }), { debit: 0, credit: 0 });
+    $("#ledgerDebitTotal").text(formatNumber(totals.debit));
+    $("#ledgerCreditTotal").text(formatNumber(totals.credit));
+    $("#buyerLedgerTotals").prop("hidden", false);
+
     if (!transactions.length) {
         body.append(`
             <tr>
-                <td colspan="10" class="text-center text-muted py-4">
+                <td colspan="9" class="text-center text-muted py-4">
                     No posted transactions found for this buyer and date range.
                 </td>
             </tr>
@@ -190,7 +198,6 @@ function renderLedgerRows(transactions) {
                 ? `${transaction.invoice_type} (${transaction.payment_method})`
                 : transaction.invoice_type,
             transaction.invoice_number,
-            transaction.fbr_invoice_number || "—",
             transaction.reference_number || "—",
             transaction.notes || "—"
         ].forEach(value => row.append($("<td>").text(value)));

@@ -80,7 +80,6 @@
                         <th>Date</th>
                         <th>Transaction</th>
                         <th>System invoice no.</th>
-                        <th>FBR invoice no.</th>
                         <th>Reference no.</th>
                         <th>Notes</th>
                         <th class="text-end">Debit (Rs.)</th>
@@ -90,8 +89,17 @@
                     </tr>
                 </thead>
                 <tbody id="buyerLedgerTableBody">
-                    <tr><td colspan="10" class="text-center text-muted py-4">Select a buyer to view the ledger.</td></tr>
+                    <tr><td colspan="9" class="text-center text-muted py-4">Select a buyer to view the ledger.</td></tr>
                 </tbody>
+                <tfoot id="buyerLedgerTotals" hidden>
+                    <tr>
+                        <th colspan="5">Totals</th>
+                        <th id="ledgerDebitTotal" class="text-end"></th>
+                        <th id="ledgerCreditTotal" class="text-end"></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </section>

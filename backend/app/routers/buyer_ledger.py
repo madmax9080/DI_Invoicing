@@ -651,7 +651,6 @@ def export_buyer_ledger(
             "Date",
             "Transaction",
             "System Invoice No.",
-            "FBR Invoice No.",
             "Reference No.",
             "Payment Method",
             "Notes",
@@ -675,7 +674,6 @@ def export_buyer_ledger(
             None,
             None,
             None,
-            None,
             ledger["opening_balance"],
         ]
     )
@@ -685,7 +683,6 @@ def export_buyer_ledger(
                 row["date"],
                 row["invoice_type"],
                 row["invoice_number"],
-                row["fbr_invoice_number"],
                 row["reference_number"],
                 row["payment_method"],
                 row["notes"],
@@ -694,6 +691,22 @@ def export_buyer_ledger(
                 row["balance"],
             ]
         )
+    sheet.append(
+        [
+            None,
+            "Totals",
+            None,
+            None,
+            None,
+            None,
+            sum(row["debit"] for row in ledger["transactions"]),
+            sum(row["credit"] for row in ledger["transactions"]),
+            None,
+        ]
+    )
+    for cell in sheet[sheet.max_row]:
+        cell.font = Font(bold=True)
+
     end_date = to_date.isoformat() if to_date else "Current"
     sheet.append(
         [
@@ -705,12 +718,11 @@ def export_buyer_ledger(
             None,
             None,
             None,
-            None,
             ledger["closing_balance"],
         ]
     )
 
-    for row in sheet.iter_rows(min_row=6, min_col=8, max_col=10):
+    for row in sheet.iter_rows(min_row=6, min_col=7, max_col=9):
         for cell in row:
             cell.number_format = '#,##0.00;[Red]-#,##0.00'
     for column_cells in sheet.columns:
