@@ -188,22 +188,6 @@ body {
     transform: translateY(0);
 }
 
-.support-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 16px;
-    color: var(--text-muted);
-    font-size: 0.84rem;
-}
-
-.support-row a {
-    color: var(--accent-strong);
-    text-decoration: none;
-    font-weight: 700;
-}
-
 .brand-footer {
     margin-top: 28px;
     text-align: center;
