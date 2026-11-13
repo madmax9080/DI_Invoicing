@@ -1,5 +1,5 @@
 from collections import deque
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from io import BytesIO
 from typing import Optional
@@ -11,7 +11,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from pydantic import BaseModel, Field
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
@@ -32,6 +32,13 @@ from app.dependencies.auth_dependency import get_current_user
 
 router = APIRouter(prefix="/buyer-ledger", tags=["Buyer Ledger"])
 LEDGER_START_DATE = date(2026, 7, 1)
+REPORT_TIMEZONE = timezone(timedelta(hours=5))
+
+
+def _report_generated_at() -> str:
+    return datetime.now(timezone.utc).astimezone(REPORT_TIMEZONE).strftime(
+        "%d %b %Y, %H:%M:%S PKT"
+    )
 
 
 class ReceiptCreate(BaseModel):
@@ -637,6 +644,16 @@ def _buyer_ledger_export_data(
 ):
     _validate_ledger_dates(from_date, to_date)
     buyer = _owned_buyer(db, buyer_id, client_id, user_id)
+    seller = (
+        db.query(models.Client)
+        .filter(
+            models.Client.id == client_id,
+            models.Client.user_id == user_id,
+        )
+        .first()
+    )
+    if seller is None:
+        raise HTTPException(status_code=404, detail="Seller not found.")
     ledger = _ledger_data(
         db,
         client_id,
@@ -645,7 +662,7 @@ def _buyer_ledger_export_data(
         to_date,
         Decimal(str(buyer.opening_balance or 0)),
     )
-    return buyer, ledger
+    return seller, buyer, ledger
 
 
 @router.get("/{buyer_id}/export/excel")
@@ -657,7 +674,7 @@ def export_buyer_ledger(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    buyer, ledger = _buyer_ledger_export_data(
+    seller, buyer, ledger = _buyer_ledger_export_data(
         buyer_id,
         client_id,
         from_date,
@@ -677,7 +694,6 @@ def export_buyer_ledger(
     stripe_fill = PatternFill("solid", fgColor="F7FAFD")
     white_font = Font(name="Aptos", color="FFFFFF", bold=True)
     title_font = Font(name="Aptos Display", size=18, bold=True, color="FFFFFF")
-    muted_font = Font(name="Aptos", size=10, color="64748B")
     border_bottom = Border(
         bottom=Side(style="hair", color="DCE5EF")
     )
@@ -702,10 +718,17 @@ def export_buyer_ledger(
         f"{from_date.isoformat() if from_date else 'Beginning'} to "
         f"{to_date.isoformat() if to_date else 'Current'}"
     )
-    generated_at = datetime.now().strftime("%d %b %Y, %H:%M")
+    generated_at = _report_generated_at()
     for row, label, value, second_label, second_value in (
-        (4, "BUYER", buyer.name, "NTN/CNIC", buyer.ntn_cnic or "-"),
-        (5, "PERIOD", period, "GENERATED", generated_at),
+        (
+            4,
+            "SELLER",
+            seller.sellerBusinessName,
+            "SELLER NTN/CNIC",
+            seller.sellerNTNCNIC,
+        ),
+        (5, "BUYER", buyer.name, "BUYER NTN/CNIC", buyer.ntn_cnic or "-"),
+        (6, "PERIOD", period, "GENERATED", generated_at),
     ):
         sheet.cell(row, 1, label)
         sheet.merge_cells(start_row=row, start_column=2, end_row=row, end_column=4)
@@ -741,23 +764,23 @@ def export_buyer_ledger(
     ):
         start = openpyxl.utils.column_index_from_string(start_column)
         end = openpyxl.utils.column_index_from_string(end_column)
-        sheet.merge_cells(start_row=7, start_column=start, end_row=7, end_column=end)
         sheet.merge_cells(start_row=8, start_column=start, end_row=8, end_column=end)
-        label_cell = sheet.cell(7, start, label)
-        value_cell = sheet.cell(8, start, float(value or 0))
+        sheet.merge_cells(start_row=9, start_column=start, end_row=9, end_column=end)
+        label_cell = sheet.cell(8, start, label)
+        value_cell = sheet.cell(9, start, float(value or 0))
         label_cell.font = Font(name="Aptos", size=9, bold=True, color="52677D")
         label_cell.alignment = Alignment(horizontal="center", vertical="center")
         value_cell.font = Font(name="Aptos", size=13, bold=True, color="17324D")
         value_cell.alignment = Alignment(horizontal="center", vertical="center")
         value_cell.number_format = '"Rs. "#,##0.00;[Red]-"Rs. "#,##0.00'
-        for row in (7, 8):
+        for row in (8, 9):
             for column in range(start, end + 1):
                 sheet.cell(row, column).fill = pale_fill
                 sheet.cell(row, column).border = Border(
                     bottom=Side(style="thin", color="FFFFFF")
                 )
-    sheet.row_dimensions[7].height = 20
-    sheet.row_dimensions[8].height = 28
+    sheet.row_dimensions[8].height = 20
+    sheet.row_dimensions[9].height = 28
 
     headers = [
         "Date",
@@ -770,7 +793,7 @@ def export_buyer_ledger(
         "Credit (Rs.)",
         "Balance (Rs.)",
     ]
-    header_row = 10
+    header_row = 11
     sheet.append([])
     sheet.append(headers)
     for cell in sheet[header_row]:
@@ -834,11 +857,11 @@ def export_buyer_ledger(
             cell.alignment = Alignment(horizontal="right", vertical="center")
     for column, width in enumerate((14, 22, 23, 20, 19, 38, 17, 17, 18), start=1):
         sheet.column_dimensions[openpyxl.utils.get_column_letter(column)].width = width
-    sheet.freeze_panes = "A11"
+    sheet.freeze_panes = "A12"
     sheet.auto_filter.ref = f"A{header_row}:I{max(header_row, last_data_row)}"
     sheet.print_title_rows = f"{header_row}:{header_row}"
     sheet.sheet_properties.pageSetUpPr.fitToPage = True
-    sheet.page_setup.orientation = "landscape"
+    sheet.page_setup.orientation = "portrait"
     sheet.page_setup.paperSize = sheet.PAPERSIZE_A4
     sheet.page_setup.fitToWidth = 1
     sheet.page_setup.fitToHeight = 0
@@ -855,7 +878,10 @@ def export_buyer_ledger(
     return StreamingResponse(
         buffer,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-store",
+        },
     )
 
 
@@ -868,7 +894,7 @@ def export_buyer_ledger_pdf(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    buyer, ledger = _buyer_ledger_export_data(
+    seller, buyer, ledger = _buyer_ledger_export_data(
         buyer_id,
         client_id,
         from_date,
@@ -877,14 +903,14 @@ def export_buyer_ledger_pdf(
         current_user["id"],
     )
 
-    page_size = landscape(A4)
+    page_size = A4
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,
         pagesize=page_size,
-        leftMargin=12 * mm,
-        rightMargin=12 * mm,
-        topMargin=15 * mm,
+        leftMargin=10 * mm,
+        rightMargin=10 * mm,
+        topMargin=13 * mm,
         bottomMargin=18 * mm,
         title=f"Buyer Ledger - {buyer.name}",
         author="DI Invoicing",
@@ -969,8 +995,8 @@ def export_buyer_ledger_pdf(
     cell_style = ParagraphStyle(
         "LedgerCell",
         parent=styles["Normal"],
-        fontSize=7,
-        leading=9,
+        fontSize=6.2,
+        leading=7.6,
         textColor=ink,
         splitLongWords=True,
     )
@@ -983,8 +1009,8 @@ def export_buyer_ledger_pdf(
         "LedgerTableHeader",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=7,
-        leading=8,
+        fontSize=6.2,
+        leading=7.2,
         textColor=colors.white,
         alignment=TA_LEFT,
     )
@@ -998,7 +1024,7 @@ def export_buyer_ledger_pdf(
         f"{from_date.isoformat() if from_date else 'Beginning'} to "
         f"{to_date.isoformat() if to_date else 'Current'}"
     )
-    generated_at = datetime.now().strftime("%d %b %Y, %H:%M")
+    generated_at = _report_generated_at()
     transactions = ledger["transactions"]
     total_debit = sum(row["debit"] for row in transactions)
     total_credit = sum(row["credit"] for row in transactions)
@@ -1023,9 +1049,15 @@ def export_buyer_ledger_pdf(
     meta_table = Table(
         [
             [
+                Paragraph("SELLER", meta_label_style),
+                Paragraph(escape(str(seller.sellerBusinessName or "-")), meta_value_style),
+                Paragraph("SELLER NTN/CNIC", meta_label_style),
+                Paragraph(escape(str(seller.sellerNTNCNIC or "-")), meta_value_style),
+            ],
+            [
                 Paragraph("BUYER", meta_label_style),
                 Paragraph(escape(str(buyer.name or "-")), meta_value_style),
-                Paragraph("NTN/CNIC", meta_label_style),
+                Paragraph("BUYER NTN/CNIC", meta_label_style),
                 Paragraph(escape(str(buyer.ntn_cnic or "-")), meta_value_style),
             ],
             [
@@ -1035,7 +1067,7 @@ def export_buyer_ledger_pdf(
                 Paragraph(escape(generated_at), meta_value_style),
             ],
         ],
-        colWidths=[20 * mm, 88 * mm, 24 * mm, doc.width - 132 * mm],
+        colWidths=[20 * mm, 75 * mm, 24 * mm, doc.width - 119 * mm],
     )
     meta_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F7FAFD")),
@@ -1087,13 +1119,13 @@ def export_buyer_ledger_pdf(
     headers = (
         "Date",
         "Transaction",
-        "System invoice no.",
-        "Reference no.",
-        "Payment method",
+        "System inv. no.",
+        "Reference",
+        "Payment",
         "Notes",
-        "Debit (Rs.)",
-        "Credit (Rs.)",
-        "Balance (Rs.)",
+        "Debit",
+        "Credit",
+        "Balance",
     )
     table_data = [[
         Paragraph(escape(label), header_right_style if index >= 6 else header_style)
@@ -1155,7 +1187,7 @@ def export_buyer_ledger_pdf(
         Paragraph(f"{float(total_credit):,.2f}", cell_right_style),
         "",
     ])
-    col_widths = [17, 35, 33, 26, 24, 46, 29, 29, 29]
+    col_widths = [14, 21, 21, 16, 16, 22, 26, 26, 28]
     col_widths = [width * mm for width in col_widths]
     transaction_table = LongTable(
         table_data,
@@ -1220,5 +1252,8 @@ def export_buyer_ledger_pdf(
     return StreamingResponse(
         buffer,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-store",
+        },
     )
