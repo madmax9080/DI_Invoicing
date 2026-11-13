@@ -214,20 +214,24 @@ function renderLedgerRows(transactions) {
         ));
         const actions = $("<td>", { class: "text-end text-nowrap" });
         if (transaction.receipt_id) {
-            actions.append(
+            const actionButtons = $("<div>", {
+                class: "d-inline-flex align-items-center gap-1"
+            });
+            actionButtons.append(
                 $("<button>", {
                     type: "button",
-                    class: "btn btn-sm btn-donezo-secondary me-1 ledger-receipt-edit",
+                    class: "btn btn-sm btn-donezo-secondary ledger-receipt-action ledger-receipt-edit",
                     title: "Edit receipt",
                     "aria-label": "Edit receipt"
                 }).append($("<i>", { class: "bi bi-pencil" })).data("receipt", transaction),
                 $("<button>", {
                     type: "button",
-                    class: "btn btn-sm btn-outline-danger ledger-receipt-delete",
+                    class: "btn btn-sm btn-donezo-secondary ledger-receipt-action ledger-receipt-delete",
                     title: "Delete receipt",
                     "aria-label": "Delete receipt"
                 }).append($("<i>", { class: "bi bi-trash" })).data("receiptId", transaction.receipt_id)
             );
+            actions.append(actionButtons);
         }
         row.append(actions);
         body.append(row);

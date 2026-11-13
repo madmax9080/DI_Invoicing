@@ -86,6 +86,20 @@
     white-space: nowrap;
 }
 
+.buyer-ledger-page .ledger-receipt-action {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+}
+
+.buyer-ledger-page .ledger-receipt-action i {
+    font-size: 0.75rem;
+}
+
 .save-btn {
     border: none;
     border-radius: 999px;
