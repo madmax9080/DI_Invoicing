@@ -127,6 +127,51 @@
 .welcome-title {
     font-size: 24px;
 }
+@media (max-width: 768px) {
+    .dashboard-header {
+        gap: 12px;
+    }
+
+    .header-left {
+        display: none;
+    }
+
+    .header-right {
+        margin-left: auto;
+    }
+
+    .client-card {
+        width: auto;
+        min-width: 0;
+        flex-wrap: nowrap;
+        gap: 8px;
+        padding: 6px 8px;
+    }
+
+    .client-avatar,
+    .client-business {
+        display: none;
+    }
+
+    .client-details {
+        flex: 0 1 auto;
+        min-width: 0;
+    }
+
+    .client-name {
+        max-width: 40vw;
+        overflow: hidden;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .logout-btn {
+        flex: 0 0 36px;
+        width: 36px;
+        height: 36px;
+    }
+}
 </style>
 </head>
 <body>
