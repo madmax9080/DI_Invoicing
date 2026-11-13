@@ -187,7 +187,7 @@ function renderLedgerRows(transactions) {
     if (!transactions.length) {
         body.append(`
             <tr>
-                <td colspan="9" class="text-center text-muted py-4">
+                <td colspan="8" class="text-center text-muted py-4">
                     No posted transactions found for this buyer and date range.
                 </td>
             </tr>
@@ -199,12 +199,9 @@ function renderLedgerRows(transactions) {
         const row = $("<tr>");
         [
             transaction.date,
-            transaction.payment_method
-                ? `${transaction.invoice_type} (${transaction.payment_method})`
-                : transaction.invoice_type,
+            transaction.invoice_type,
             transaction.invoice_number,
-            transaction.reference_number || "—",
-            transaction.notes || "—"
+            getTransactionDescription(transaction)
         ].forEach(value => row.append($("<td>").text(value)));
         row.append($("<td>", { class: "text-end" }).text(
             transaction.debit ? formatNumber(transaction.debit) : "—"
@@ -235,6 +232,18 @@ function renderLedgerRows(transactions) {
         row.append(actions);
         body.append(row);
     });
+}
+
+function getTransactionDescription(transaction) {
+    const parts = [];
+    if (transaction.notes) parts.push(transaction.notes);
+    if (transaction.payment_method) {
+        parts.push(`Payment method: ${transaction.payment_method}`);
+    }
+    if (transaction.reference_number) {
+        parts.push(`Reference: ${transaction.reference_number}`);
+    }
+    return parts.join(" | ") || "—";
 }
 
 async function exportBuyerLedger(format) {
@@ -286,9 +295,8 @@ function openReceiptEdit(event) {
     );
     $("#ledgerReceiptDate").val(receipt.date);
     $("#ledgerReceiptAmount").val(receipt.credit);
-    $("#ledgerReceiptMethod").val(receipt.payment_method || "");
-    $("#ledgerReceiptReference").val(receipt.reference_number || "");
-    $("#ledgerReceiptNotes").val(receipt.notes || "");
+    const description = getTransactionDescription(receipt);
+    $("#ledgerReceiptDescription").val(description === "—" ? "" : description);
     $("#ledgerReceiptSaveBtn").html('<i class="bi bi-check2"></i> Update Receipt');
     bootstrap.Modal.getOrCreateInstance(
         document.getElementById("ledgerReceiptModal")
@@ -341,9 +349,9 @@ async function saveBuyerReceipt(event) {
             body: {
                 received_date: receiptDate,
                 amount,
-                payment_method: $("#ledgerReceiptMethod").val() || null,
-                reference_number: $("#ledgerReceiptReference").val().trim() || null,
-                notes: $("#ledgerReceiptNotes").val().trim() || null
+                payment_method: null,
+                reference_number: null,
+                notes: $("#ledgerReceiptDescription").val().trim() || null
             }
         });
         showToast(editingReceiptId

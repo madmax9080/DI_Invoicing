@@ -665,6 +665,15 @@ def _buyer_ledger_export_data(
     return seller, buyer, ledger
 
 
+def _ledger_description(row: dict) -> str:
+    parts = [row["notes"]] if row.get("notes") else []
+    if row.get("payment_method"):
+        parts.append(f"Payment method: {row['payment_method']}")
+    if row.get("reference_number"):
+        parts.append(f"Reference: {row['reference_number']}")
+    return " | ".join(parts) or "-"
+
+
 @router.get("/{buyer_id}/export/excel")
 def export_buyer_ledger(
     buyer_id: int,
@@ -698,7 +707,7 @@ def export_buyer_ledger(
         bottom=Side(style="hair", color="DCE5EF")
     )
 
-    sheet.merge_cells("A1:I1")
+    sheet.merge_cells("A1:G1")
     sheet["A1"] = "BUYER LEDGER"
     sheet["A1"].font = title_font
     sheet["A1"].alignment = Alignment(vertical="center")
@@ -706,7 +715,7 @@ def export_buyer_ledger(
         cell.fill = navy_fill
     sheet.row_dimensions[1].height = 34
 
-    sheet.merge_cells("A2:I2")
+    sheet.merge_cells("A2:G2")
     sheet["A2"] = "ACCOUNT STATEMENT"
     sheet["A2"].font = Font(name="Aptos", size=10, color="D8E8F7")
     sheet["A2"].alignment = Alignment(vertical="center")
@@ -734,7 +743,7 @@ def export_buyer_ledger(
         sheet.merge_cells(start_row=row, start_column=2, end_row=row, end_column=4)
         sheet.cell(row, 2, value)
         sheet.cell(row, 5, second_label)
-        sheet.merge_cells(start_row=row, start_column=6, end_row=row, end_column=9)
+        sheet.merge_cells(start_row=row, start_column=6, end_row=row, end_column=7)
         sheet.cell(row, 6, second_value)
         for column in (1, 5):
             sheet.cell(row, column).font = Font(
@@ -747,53 +756,75 @@ def export_buyer_ledger(
         sheet.row_dimensions[row].height = 22
 
     summary_items = (
-        ("OPENING BALANCE", ledger["opening_balance"]),
         (
+            8,
+            1,
+            3,
+            "OPENING BALANCE",
+            ledger["opening_balance"],
+        ),
+        (
+            8,
+            4,
+            7,
             "TOTAL DEBIT",
             sum(row["debit"] for row in ledger["transactions"]),
         ),
         (
+            11,
+            1,
+            3,
             "TOTAL CREDIT",
             sum(row["credit"] for row in ledger["transactions"]),
         ),
-        ("CLOSING BALANCE", ledger["closing_balance"]),
+        (
+            11,
+            4,
+            7,
+            "CLOSING BALANCE",
+            ledger["closing_balance"],
+        ),
     )
-    summary_ranges = (("A", "B"), ("C", "D"), ("E", "F"), ("G", "I"))
-    for (label, value), (start_column, end_column) in zip(
-        summary_items, summary_ranges
-    ):
-        start = openpyxl.utils.column_index_from_string(start_column)
-        end = openpyxl.utils.column_index_from_string(end_column)
-        sheet.merge_cells(start_row=8, start_column=start, end_row=8, end_column=end)
-        sheet.merge_cells(start_row=9, start_column=start, end_row=9, end_column=end)
-        label_cell = sheet.cell(8, start, label)
-        value_cell = sheet.cell(9, start, float(value or 0))
+    for label_row, start, end, label, value in summary_items:
+        value_row = label_row + 1
+        sheet.merge_cells(
+            start_row=label_row,
+            start_column=start,
+            end_row=label_row,
+            end_column=end,
+        )
+        sheet.merge_cells(
+            start_row=value_row,
+            start_column=start,
+            end_row=value_row,
+            end_column=end,
+        )
+        label_cell = sheet.cell(label_row, start, label)
+        value_cell = sheet.cell(value_row, start, float(value or 0))
         label_cell.font = Font(name="Aptos", size=9, bold=True, color="52677D")
         label_cell.alignment = Alignment(horizontal="center", vertical="center")
         value_cell.font = Font(name="Aptos", size=13, bold=True, color="17324D")
         value_cell.alignment = Alignment(horizontal="center", vertical="center")
         value_cell.number_format = '"Rs. "#,##0.00;[Red]-"Rs. "#,##0.00'
-        for row in (8, 9):
+        for row in (label_row, value_row):
             for column in range(start, end + 1):
                 sheet.cell(row, column).fill = pale_fill
                 sheet.cell(row, column).border = Border(
                     bottom=Side(style="thin", color="FFFFFF")
                 )
-    sheet.row_dimensions[8].height = 20
-    sheet.row_dimensions[9].height = 28
+        sheet.row_dimensions[label_row].height = 20
+        sheet.row_dimensions[value_row].height = 28
 
     headers = [
         "Date",
         "Transaction",
-        "System Invoice No.",
-        "Reference No.",
-        "Payment Method",
-        "Notes",
+        "Inv No.",
+        "Description",
         "Debit (Rs.)",
         "Credit (Rs.)",
         "Balance (Rs.)",
     ]
-    header_row = 11
+    header_row = 14
     sheet.append([])
     sheet.append(headers)
     for cell in sheet[header_row]:
@@ -808,9 +839,7 @@ def export_buyer_ledger(
                 date.fromisoformat(row["date"]),
                 row["invoice_type"],
                 row["invoice_number"],
-                row["reference_number"],
-                row["payment_method"],
-                row["notes"],
+                _ledger_description(row),
                 row["debit"],
                 row["credit"],
                 row["balance"],
@@ -822,14 +851,14 @@ def export_buyer_ledger(
     for row_number in range(first_data_row, last_data_row + 1):
         sheet.cell(row_number, 1).number_format = "dd mmm yyyy"
         sheet.row_dimensions[row_number].height = 23
-        for column in range(1, 10):
+        for column in range(1, 8):
             cell = sheet.cell(row_number, column)
             cell.font = Font(name="Aptos", size=9, color="243B53")
             cell.border = border_bottom
             cell.alignment = Alignment(
                 vertical="center",
-                horizontal="right" if column >= 7 else "left",
-                wrap_text=column in (2, 4, 5, 6),
+                horizontal="right" if column >= 5 else "left",
+                wrap_text=column in (2, 3, 4),
             )
             if (row_number - first_data_row) % 2:
                 cell.fill = stripe_fill
@@ -838,12 +867,12 @@ def export_buyer_ledger(
     sheet.cell(total_row, 2, "TOTALS")
     sheet.cell(
         total_row,
-        7,
+        5,
         sum(row["debit"] for row in ledger["transactions"]),
     )
     sheet.cell(
         total_row,
-        8,
+        6,
         sum(row["credit"] for row in ledger["transactions"]),
     )
     for cell in sheet[total_row]:
@@ -851,14 +880,13 @@ def export_buyer_ledger(
         cell.font = Font(name="Aptos", size=10, bold=True, color="17324D")
         cell.border = Border(top=Side(style="thin", color="2563EB"))
 
-    for row in sheet.iter_rows(min_row=first_data_row, max_row=total_row, min_col=7, max_col=9):
+    for row in sheet.iter_rows(min_row=first_data_row, max_row=total_row, min_col=5, max_col=7):
         for cell in row:
             cell.number_format = '#,##0.00;[Red]-#,##0.00'
             cell.alignment = Alignment(horizontal="right", vertical="center")
-    for column, width in enumerate((14, 22, 23, 20, 19, 38, 17, 17, 18), start=1):
+    for column, width in enumerate((15, 23, 23, 52, 18, 18, 18), start=1):
         sheet.column_dimensions[openpyxl.utils.get_column_letter(column)].width = width
-    sheet.freeze_panes = "A12"
-    sheet.auto_filter.ref = f"A{header_row}:I{max(header_row, last_data_row)}"
+    sheet.auto_filter.ref = f"A{header_row}:G{max(header_row, last_data_row)}"
     sheet.print_title_rows = f"{header_row}:{header_row}"
     sheet.sheet_properties.pageSetUpPr.fitToPage = True
     sheet.page_setup.orientation = "portrait"
@@ -869,7 +897,7 @@ def export_buyer_ledger(
     sheet.page_margins.right = 0.25
     sheet.page_margins.top = 0.5
     sheet.page_margins.bottom = 0.5
-    sheet.print_area = f"A1:I{total_row}"
+    sheet.print_area = f"A1:G{total_row}"
 
     buffer = BytesIO()
     workbook.save(buffer)
@@ -927,27 +955,36 @@ def export_buyer_ledger_pdf(
         "LedgerTitle",
         parent=styles["Title"],
         fontName="Helvetica-Bold",
-        fontSize=20,
-        leading=24,
+        fontSize=18,
+        leading=21,
         alignment=TA_LEFT,
-        textColor=navy,
+        textColor=colors.white,
         spaceAfter=2,
     )
     eyebrow_style = ParagraphStyle(
         "LedgerEyebrow",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=8,
-        leading=10,
+        fontSize=7.5,
+        leading=9,
         alignment=TA_RIGHT,
-        textColor=blue,
+        textColor=colors.HexColor("#9FD5FF"),
     )
-    subtitle_style = ParagraphStyle(
-        "LedgerSubtitle",
+    seller_style = ParagraphStyle(
+        "LedgerSeller",
         parent=styles["Normal"],
-        fontSize=8,
+        fontSize=9,
         leading=11,
-        textColor=muted,
+        textColor=colors.HexColor("#D7E6F3"),
+        splitLongWords=True,
+    )
+    header_meta_style = ParagraphStyle(
+        "LedgerHeaderMeta",
+        parent=styles["Normal"],
+        fontSize=7,
+        leading=9,
+        alignment=TA_RIGHT,
+        textColor=colors.HexColor("#D7E6F3"),
     )
     meta_label_style = ParagraphStyle(
         "LedgerMetaLabel",
@@ -995,8 +1032,8 @@ def export_buyer_ledger_pdf(
     cell_style = ParagraphStyle(
         "LedgerCell",
         parent=styles["Normal"],
-        fontSize=6.2,
-        leading=7.6,
+        fontSize=7.2,
+        leading=9,
         textColor=ink,
         splitLongWords=True,
     )
@@ -1009,8 +1046,8 @@ def export_buyer_ledger_pdf(
         "LedgerTableHeader",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=6.2,
-        leading=7.2,
+        fontSize=7,
+        leading=8.5,
         textColor=colors.white,
         alignment=TA_LEFT,
     )
@@ -1030,30 +1067,38 @@ def export_buyer_ledger_pdf(
     total_credit = sum(row["credit"] for row in transactions)
     story = [
         Table(
-            [[
-                Paragraph("BUYER LEDGER", title_style),
-                Paragraph("ACCOUNT STATEMENT", eyebrow_style),
-            ]],
+            [
+                [
+                    Paragraph("BUYER LEDGER", title_style),
+                    Paragraph("ACCOUNT STATEMENT", eyebrow_style),
+                ],
+                [
+                    Paragraph(
+                        escape(str(seller.sellerBusinessName or "-")),
+                        seller_style,
+                    ),
+                    Paragraph(
+                        f"Seller NTN/CNIC: {escape(str(seller.sellerNTNCNIC or '-'))}",
+                        header_meta_style,
+                    ),
+                ],
+            ],
             colWidths=[doc.width * 0.68, doc.width * 0.32],
             style=TableStyle([
-                ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                ("BACKGROUND", (0, 0), (-1, -1), navy),
+                ("LINEBELOW", (0, -1), (-1, -1), 2, blue),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 11),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 11),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
             ]),
         ),
-        Paragraph("Buyer account activity and running balance", subtitle_style),
-        Spacer(1, 5 * mm),
+        Spacer(1, 4 * mm),
     ]
 
     meta_table = Table(
         [
-            [
-                Paragraph("SELLER", meta_label_style),
-                Paragraph(escape(str(seller.sellerBusinessName or "-")), meta_value_style),
-                Paragraph("SELLER NTN/CNIC", meta_label_style),
-                Paragraph(escape(str(seller.sellerNTNCNIC or "-")), meta_value_style),
-            ],
             [
                 Paragraph("BUYER", meta_label_style),
                 Paragraph(escape(str(buyer.name or "-")), meta_value_style),
@@ -1079,7 +1124,7 @@ def export_buyer_ledger_pdf(
         ("TOPPADDING", (0, 0), (-1, -1), 7),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
     ]))
-    story.extend([meta_table, Spacer(1, 5 * mm)])
+    story.extend([meta_table, Spacer(1, 4 * mm)])
 
     summary_values = (
         ("OPENING BALANCE", ledger["opening_balance"]),
@@ -1119,29 +1164,22 @@ def export_buyer_ledger_pdf(
     headers = (
         "Date",
         "Transaction",
-        "System inv. no.",
-        "Reference",
-        "Payment",
-        "Notes",
-        "Debit",
-        "Credit",
-        "Balance",
+        "Inv No.",
+        "Description",
+        "Debit (Rs.)",
+        "Credit (Rs.)",
+        "Balance (Rs.)",
     )
     table_data = [[
-        Paragraph(escape(label), header_right_style if index >= 6 else header_style)
+        Paragraph(escape(label), header_right_style if index >= 4 else header_style)
         for index, label in enumerate(headers)
     ]]
     for row in transactions:
-        description = row["invoice_type"]
-        if row.get("payment_method"):
-            description = f"{description} ({row['payment_method']})"
         display_values = (
             date.fromisoformat(row["date"]).strftime("%d %b %Y"),
-            description,
+            row["invoice_type"],
             row["invoice_number"],
-            row["reference_number"],
-            row["payment_method"],
-            row["notes"],
+            _ledger_description(row),
         )
         table_data.append([
             Paragraph(escape(str(value or "-")), cell_style)
@@ -1167,8 +1205,6 @@ def export_buyer_ledger_pdf(
             "",
             "",
             "",
-            "",
-            "",
         ])
     total_row = len(table_data)
     table_data.append([
@@ -1181,13 +1217,11 @@ def export_buyer_ledger_pdf(
         "",
         "",
         "",
-        "",
-        "",
         Paragraph(f"{float(total_debit):,.2f}", cell_right_style),
         Paragraph(f"{float(total_credit):,.2f}", cell_right_style),
         "",
     ])
-    col_widths = [14, 21, 21, 16, 16, 22, 26, 26, 28]
+    col_widths = [20, 28, 25, 55, 20, 20, 22]
     col_widths = [width * mm for width in col_widths]
     transaction_table = LongTable(
         table_data,
@@ -1207,8 +1241,8 @@ def export_buyer_ledger_pdf(
         ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ("BACKGROUND", (0, total_row), (-1, total_row), pale),
         ("LINEABOVE", (0, total_row), (-1, total_row), 0.8, blue),
-        ("SPAN", (0, total_row), (5, total_row)),
-        ("ALIGN", (6, 0), (-1, -1), "RIGHT"),
+        ("SPAN", (0, total_row), (3, total_row)),
+        ("ALIGN", (4, 0), (-1, -1), "RIGHT"),
     ]
     for row_index in range(1, total_row):
         if row_index % 2 == 0:
