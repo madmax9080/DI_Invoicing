@@ -943,13 +943,13 @@ def export_buyer_ledger_pdf(
         title=f"Buyer Ledger - {buyer.name}",
         author="DI Invoicing",
     )
-    navy = colors.HexColor("#17324D")
-    blue = colors.HexColor("#2563EB")
-    pale = colors.HexColor("#EEF5FC")
-    stripe = colors.HexColor("#F7FAFD")
-    ink = colors.HexColor("#243B53")
+    navy = colors.HexColor("#146E98")
+    blue = colors.HexColor("#009BE5")
+    pale = colors.HexColor("#F5FAFF")
+    stripe = colors.HexColor("#F5FAFF")
+    ink = colors.HexColor("#173C59")
     muted = colors.HexColor("#64748B")
-    border = colors.HexColor("#DCE5EF")
+    border = colors.HexColor("#E4EDF4")
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         "LedgerTitle",
@@ -968,14 +968,14 @@ def export_buyer_ledger_pdf(
         fontSize=7.5,
         leading=9,
         alignment=TA_RIGHT,
-        textColor=colors.HexColor("#9FD5FF"),
+        textColor=colors.white,
     )
     seller_style = ParagraphStyle(
         "LedgerSeller",
         parent=styles["Normal"],
         fontSize=9,
         leading=11,
-        textColor=colors.HexColor("#D7E6F3"),
+        textColor=colors.HexColor("#F5FAFF"),
         splitLongWords=True,
     )
     header_meta_style = ParagraphStyle(
@@ -984,7 +984,7 @@ def export_buyer_ledger_pdf(
         fontSize=7,
         leading=9,
         alignment=TA_RIGHT,
-        textColor=colors.HexColor("#D7E6F3"),
+        textColor=colors.HexColor("#F5FAFF"),
     )
     meta_label_style = ParagraphStyle(
         "LedgerMetaLabel",
@@ -1115,7 +1115,7 @@ def export_buyer_ledger_pdf(
         colWidths=[20 * mm, 75 * mm, 24 * mm, doc.width - 119 * mm],
     )
     meta_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F7FAFD")),
+        ("BACKGROUND", (0, 0), (-1, -1), pale),
         ("BOX", (0, 0), (-1, -1), 0.5, border),
         ("INNERGRID", (0, 0), (-1, -1), 0.35, border),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
