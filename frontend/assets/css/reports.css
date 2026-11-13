@@ -65,6 +65,27 @@
     box-shadow: 0 10px 20px rgba(0, 155, 229, 0.2);
 }
 
+.buyer-ledger-page .buyer-ledger-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 8px;
+}
+
+.buyer-ledger-page .buyer-ledger-actions > button {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
 .save-btn {
     border: none;
     border-radius: 999px;
@@ -479,9 +500,34 @@
         align-items: flex-start;
     }
 
+    .buyer-ledger-page .buyer-ledger-actions {
+        gap: 5px;
+    }
+
+    .buyer-ledger-page .buyer-ledger-actions > button {
+        gap: 4px;
+        padding: 5px 7px;
+        font-size: 0.72rem;
+    }
+
     .donezo-pagination {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+@media (max-width: 360px) {
+    .buyer-ledger-page .buyer-ledger-actions {
+        gap: 3px;
+    }
+
+    .buyer-ledger-page .buyer-ledger-actions > button {
+        padding: 4px 5px;
+        font-size: 0.65rem;
+    }
+
+    .buyer-ledger-page .buyer-ledger-actions > button i {
+        display: none;
     }
 }
 
