@@ -7,7 +7,8 @@ const LEDGER_START_DATE = "2026-07-01";
 
 export async function initBuyerLedger() {
     $("#ledgerApplyBtn").on("click", loadBuyerLedger);
-    $("#ledgerExportBtn").on("click", exportBuyerLedger);
+    $("#ledgerExportBtn").on("click", () => exportBuyerLedger("excel"));
+    $("#ledgerPdfExportBtn").on("click", () => exportBuyerLedger("pdf"));
     $("#editOpeningBalanceBtn").on("click", openOpeningBalanceForm);
     $("#ledgerOpeningBalanceForm").on("submit", saveOpeningBalance);
     $("#ledgerReceiptBtn").on("click", openReceiptForm);
@@ -34,6 +35,7 @@ export function destroyBuyerLedger() {
     if (openingBalanceModalInstance) openingBalanceModalInstance.hide();
     $("#ledgerApplyBtn").off("click");
     $("#ledgerExportBtn").off("click");
+    $("#ledgerPdfExportBtn").off("click");
     $("#editOpeningBalanceBtn").off("click");
     $("#ledgerOpeningBalanceForm").off("submit");
     $("#ledgerReceiptBtn").off("click");
@@ -45,6 +47,7 @@ export function destroyBuyerLedger() {
 function invalidateLedger() {
     currentLedger = null;
     $("#ledgerExportBtn").prop("disabled", true);
+    $("#ledgerPdfExportBtn").prop("disabled", true);
     $("#ledgerReceiptBtn").prop("disabled", !$("#ledgerBuyerSelect").val());
 }
 
@@ -85,6 +88,7 @@ async function loadBuyerLedger() {
     if (!buyerId) {
         $("#ledgerStatus").text("Select a buyer before loading the ledger.");
         $("#ledgerExportBtn").prop("disabled", true);
+        $("#ledgerPdfExportBtn").prop("disabled", true);
         return;
     }
     const fromDate = $("#ledgerDateFrom").val();
@@ -119,6 +123,7 @@ async function loadBuyerLedger() {
         `${result.buyer.name}: ${result.transactions.length} transaction${result.transactions.length === 1 ? "" : "s"}.`
     );
     $("#ledgerExportBtn").prop("disabled", false);
+    $("#ledgerPdfExportBtn").prop("disabled", false);
 }
 
 function openOpeningBalanceForm() {
@@ -232,17 +237,23 @@ function renderLedgerRows(transactions) {
     });
 }
 
-async function exportBuyerLedger() {
-    if (!currentLedger) return;
+async function exportBuyerLedger(format) {
+    const ledger = currentLedger;
+    if (!ledger) return;
     const params = new URLSearchParams();
-    if (currentLedger.fromDate) params.set("from_date", currentLedger.fromDate);
-    if (currentLedger.toDate) params.set("to_date", currentLedger.toDate);
+    if (ledger.fromDate) params.set("from_date", ledger.fromDate);
+    if (ledger.toDate) params.set("to_date", ledger.toDate);
     const query = params.toString();
-    const blob = await apiFetch(
-        `/buyer-ledger/${currentLedger.buyerId}/export/excel${query ? `?${query}` : ""}`,
-        { responseType: "blob" }
-    );
-    downloadFile(blob, `Buyer_Ledger_${currentLedger.buyerId}.xlsx`);
+    const extension = format === "pdf" ? "pdf" : "xlsx";
+    try {
+        const blob = await apiFetch(
+            `/buyer-ledger/${ledger.buyerId}/export/${format}${query ? `?${query}` : ""}`,
+            { responseType: "blob" }
+        );
+        downloadFile(blob, `Buyer_Ledger_${ledger.buyerId}.${extension}`);
+    } catch (error) {
+        $("#ledgerStatus").text(error.message || `Could not export the buyer ledger as ${format.toUpperCase()}.`);
+    }
 }
 
 function openReceiptForm() {
