@@ -123,6 +123,8 @@ class Product(Base):
     client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, index=True)
     name = Column(String(150), nullable=False)
     hs_code = Column(String(20), nullable=True)
+    product_type = Column(String(30), nullable=False, default="finished_good", server_default="finished_good")
+    uom = Column(String(30), nullable=False, default="unit", server_default="unit")
     opening_stock_quantity = Column(Numeric(15, 4), nullable=False, default=0)
     stock_quantity = Column(Numeric(15, 4), nullable=False, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -131,6 +133,84 @@ class Product(Base):
     __table_args__ = (
         UniqueConstraint("client_id", "name", name="uq_product_name_per_client"),
     )
+
+
+class InventoryMovement(Base):
+    __tablename__ = "inventory_movements"
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False, index=True)
+    movement_type = Column(String(40), nullable=False)
+    quantity = Column(Numeric(15, 4), nullable=False)
+    movement_date = Column(Date, nullable=False, server_default=func.current_date(), index=True)
+    reference_type = Column(String(40), nullable=True)
+    reference_id = Column(Integer, nullable=True)
+    notes = Column(Text, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+class PurchaseReceipt(Base):
+    __tablename__ = "purchase_receipts"
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, index=True)
+    supplier_name = Column(String(150), nullable=False)
+    supplier_reference = Column(String(100), nullable=True)
+    received_date = Column(Date, nullable=False, index=True)
+    notes = Column(Text, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    items = relationship("PurchaseReceiptItem", cascade="all, delete-orphan")
+
+
+class PurchaseReceiptItem(Base):
+    __tablename__ = "purchase_receipt_items"
+    id = Column(Integer, primary_key=True, index=True)
+    receipt_id = Column(Integer, ForeignKey("purchase_receipts.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False, index=True)
+    quantity = Column(Numeric(15, 4), nullable=False)
+    unit_cost = Column(Numeric(18, 4), nullable=False, default=0)
+
+
+class ProductBOM(Base):
+    __tablename__ = "product_boms"
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, index=True)
+    finished_product_id = Column(Integer, ForeignKey("products.id"), nullable=False, unique=True, index=True)
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+    components = relationship("ProductBOMComponent", cascade="all, delete-orphan")
+
+
+class ProductBOMComponent(Base):
+    __tablename__ = "product_bom_components"
+    id = Column(Integer, primary_key=True, index=True)
+    bom_id = Column(Integer, ForeignKey("product_boms.id", ondelete="CASCADE"), nullable=False, index=True)
+    component_product_id = Column(Integer, ForeignKey("products.id"), nullable=False, index=True)
+    quantity_per_unit = Column(Numeric(15, 4), nullable=False)
+    __table_args__ = (
+        UniqueConstraint("bom_id", "component_product_id", name="uq_bom_component"),
+    )
+
+
+class ProductionOrder(Base):
+    __tablename__ = "production_orders"
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, index=True)
+    finished_product_id = Column(Integer, ForeignKey("products.id"), nullable=False, index=True)
+    quantity_produced = Column(Numeric(15, 4), nullable=False)
+    produced_date = Column(Date, nullable=False, index=True)
+    notes = Column(Text, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    components = relationship("ProductionOrderComponent", cascade="all, delete-orphan")
+
+
+class ProductionOrderComponent(Base):
+    __tablename__ = "production_order_components"
+    id = Column(Integer, primary_key=True, index=True)
+    production_order_id = Column(Integer, ForeignKey("production_orders.id", ondelete="CASCADE"), nullable=False, index=True)
+    component_product_id = Column(Integer, ForeignKey("products.id"), nullable=False, index=True)
+    quantity_consumed = Column(Numeric(15, 4), nullable=False)
     
 class Client(Base):
     __tablename__ = "clients"

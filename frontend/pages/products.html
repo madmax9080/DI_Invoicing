@@ -30,6 +30,21 @@
         </div>
         <div class="col-md-3">
           <div class="donezo-form-group">
+            <label for="productTypeInput">Inventory type</label>
+            <select id="productTypeInput" class="form-select donezo-input" required>
+              <option value="finished_good">Finished good</option>
+              <option value="raw_material">Raw material</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="donezo-form-group">
+            <label for="productUomInput">Unit of measure</label>
+            <input id="productUomInput" class="form-control donezo-input" maxlength="30" value="unit" required>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="donezo-form-group">
             <label id="productStockLabel" for="productStockInput">Opening stock</label>
             <input id="productStockInput" type="number" min="0" step="0.0001" value="0" class="form-control donezo-input" required>
           </div>
@@ -48,7 +63,7 @@
     <div class="panel-header flex-wrap gap-3">
       <div>
         <div class="panel-title">Product list</div>
-        <div class="panel-subtitle">Opening stock is recorded when a product is added; closing stock decreases after a Sale Invoice is accepted by FBR.</div>
+        <div class="panel-subtitle">Stock movements are recorded for opening balances, purchases, production, sales, and adjustments.</div>
       </div>
       <div class="col-lg-4 col-md-6">
         <label for="productSearchInput" class="donezo-label">Search products</label>
@@ -61,13 +76,15 @@
           <tr>
             <th>Product / invoice description</th>
             <th>HS Code</th>
+            <th>Type</th>
+            <th>Unit</th>
             <th class="text-end">Opening balance</th>
             <th class="text-end">Closing balance</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody id="productsTableBody">
-          <tr><td colspan="5" class="text-center text-muted">Loading products...</td></tr>
+          <tr><td colspan="7" class="text-center text-muted">Loading products...</td></tr>
         </tbody>
       </table>
     </div>

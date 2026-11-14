@@ -62,7 +62,7 @@ async function loadProducts() {
     } catch (error) {
         console.error("Failed to load products:", error);
         $("#productsTableBody").html(
-            '<tr><td colspan="5" class="text-center text-danger">Unable to load products.</td></tr>'
+            '<tr><td colspan="7" class="text-center text-danger">Unable to load products.</td></tr>'
         );
     }
 }
@@ -76,6 +76,8 @@ async function saveProduct(event) {
     const payload = {
         name: getInputValue("#productNameInput").trim(),
         hs_code: getInputValue("#productHsCodeInput").trim() || null,
+        product_type: $("#productTypeInput").val(),
+        uom: getInputValue("#productUomInput").trim(),
         stock_quantity: Number($("#productStockInput").val())
     };
     const $button = $("#saveProductBtn");
@@ -113,6 +115,8 @@ function editProduct(productId) {
     $("#productStockLabel").text("Current stock");
     $("#productNameInput").val(product.name);
     $("#productHsCodeInput").val(product.hs_code || "");
+    $("#productTypeInput").val(product.product_type || "finished_good");
+    $("#productUomInput").val(product.uom || "unit");
     $("#productStockInput").val(product.stock_quantity);
     $("#saveProductBtn").text("Update product");
     $("#cancelProductEditBtn").removeClass("d-none");
@@ -131,13 +135,13 @@ function resetProductForm() {
 function renderProducts() {
     const search = getInputValue("#productSearchInput").trim().toLowerCase();
     const filtered = products.filter(product =>
-        `${product.name} ${product.hs_code || ""}`
+        `${product.name} ${product.hs_code || ""} ${product.product_type || ""}`
             .toLowerCase()
             .includes(search)
     );
     if (!filtered.length) {
         $("#productsTableBody").html(
-            '<tr><td colspan="5" class="text-center text-muted">No products found.</td></tr>'
+            '<tr><td colspan="7" class="text-center text-muted">No products found.</td></tr>'
         );
         return;
     }
@@ -145,6 +149,8 @@ function renderProducts() {
         <tr>
             <td class="fw-semibold">${escapeHtml(product.name)}</td>
             <td>${escapeHtml(product.hs_code || "-")}</td>
+            <td>${escapeHtml(formatProductType(product.product_type))}</td>
+            <td>${escapeHtml(product.uom || "unit")}</td>
             <td class="text-end">${formatNumber(product.opening_stock_quantity)}</td>
             <td class="text-end">${formatNumber(product.stock_quantity)}</td>
             <td>
@@ -159,6 +165,13 @@ function renderProducts() {
             </td>
         </tr>
     `).join(""));
+}
+
+function formatProductType(type) {
+    return {
+        raw_material: "Raw material",
+        finished_good: "Finished good"
+    }[type] || "Finished good";
 }
 
 function getInputValue(selector) {

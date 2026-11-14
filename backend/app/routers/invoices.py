@@ -53,6 +53,17 @@ def _validate_invoice_products(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="An invoice product is not available for this business",
         )
+    if invoice.invoiceType.value == "Sale Invoice":
+        raw_material = db.query(models.Product.name).filter(
+            models.Product.client_id == client_id,
+            models.Product.id.in_(product_ids),
+            models.Product.product_type != "finished_good",
+        ).first()
+        if raw_material:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"{raw_material.name} is not a finished good and cannot be sold",
+            )
 
 
 def _lock_invoice_products(
@@ -82,6 +93,11 @@ def _lock_invoice_products(
     products_by_id = {product.id: product for product in products}
     if products_by_id.keys() != quantities.keys():
         raise ValueError("An invoice product is no longer available")
+    for product in products_by_id.values():
+        if product.product_type != "finished_good":
+            raise ValueError(
+                f"{product.name} is not a finished good and cannot be sold"
+            )
     return products_by_id, quantities
 
 
@@ -462,6 +478,19 @@ async def post_invoice_to_fbr(
         ):
             for product_id, quantity in product_quantities.items():
                 locked_products[product_id].stock_quantity -= quantity
+                db.add(
+                    models.InventoryMovement(
+                        client_id=client_id,
+                        product_id=product_id,
+                        movement_type="sale",
+                        quantity=-quantity,
+                        movement_date=db_invoice.invoiceDate.date(),
+                        reference_type="invoice",
+                        reference_id=db_invoice.id,
+                        notes=f"Sale invoice {db_invoice.internal_invoice_no}",
+                        created_by=current_user["id"],
+                    )
+                )
             db_invoice.stock_deducted = True
         db.commit()
         clear_cache(
@@ -1029,6 +1058,19 @@ def cancel_invoice(
         for item in invoice.items:
             if item.product_id is not None:
                 products_by_id[item.product_id].stock_quantity += item.quantity
+                db.add(
+                    models.InventoryMovement(
+                        client_id=invoice.client_id,
+                        product_id=item.product_id,
+                        movement_type="sale_reversal",
+                        quantity=item.quantity,
+                        movement_date=date.today(),
+                        reference_type="invoice",
+                        reference_id=invoice.id,
+                        notes=f"Reversal of cancelled invoice {invoice.internal_invoice_no}",
+                        created_by=current_user["id"],
+                    )
+                )
         invoice.stock_deducted = False
     invoice.status = "cancelled"
     db.commit()

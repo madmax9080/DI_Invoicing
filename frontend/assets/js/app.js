@@ -1,5 +1,5 @@
 import { apiFetch } from "./api.js";
-const ASSET_VERSION = "10.52";
+const ASSET_VERSION = "10.53";
 let allClients = [];
 
 const routes = {
@@ -23,6 +23,13 @@ const routes = {
         script: "/assets/js/pages/products.js",
         init: "initProducts",
         destroy: "destroyProducts"
+    },
+    inventory: {
+        page: "/pages/inventory.html",
+        url: "#inventory",
+        script: "/assets/js/pages/inventory.js",
+        init: "initInventory",
+        destroy: "destroyInventory"
     },
     pending_invoices: {
         page: "/pages/pending_invoices.html",

@@ -206,6 +206,82 @@
     background-color: #f2f9fd;
 }
 
+.inventory-page .inventory-tabs {
+    gap: 8px;
+}
+
+.inventory-page .inventory-tabs .nav-link {
+    border-radius: 10px;
+    color: #3e5a70;
+    font-weight: 600;
+}
+
+.inventory-page .inventory-tabs .nav-link.active {
+    background: linear-gradient(135deg, var(--app-primary), var(--app-primary-bright));
+    color: #fff;
+}
+
+.inventory-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.inventory-subheading {
+    margin: 0;
+    color: var(--app-text);
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+.inventory-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inventory-line {
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) minmax(120px, 1fr) minmax(120px, 1fr) 40px;
+    align-items: end;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--app-border);
+    border-radius: 12px;
+    background: #fbfdff;
+}
+
+.inventory-line.bom-line {
+    grid-template-columns: minmax(240px, 2fr) minmax(140px, 1fr) 40px;
+}
+
+.inventory-line label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--app-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.inventory-recipe-preview {
+    padding: 12px 14px;
+    border: 1px solid #dce8f1;
+    border-radius: 10px;
+    background: #f7fbfe;
+    color: #536d80;
+}
+
+@media (max-width: 700px) {
+    .inventory-line,
+    .inventory-line.bom-line {
+        grid-template-columns: minmax(0, 1fr) 40px;
+    }
+
+    .inventory-line > div:first-child {
+        grid-column: 1 / -1;
+    }
+}
+
 .main #appContent .donezo-pagination {
     padding-right: 4px;
     padding-left: 4px;

@@ -224,11 +224,15 @@ class ClientOut(ClientBase):
 class ProductCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=150)
     hs_code: Optional[str] = Field(default=None, max_length=20)
+    product_type: str = Field(default="finished_good", pattern="^(raw_material|finished_good)$")
+    uom: str = Field(default="unit", min_length=1, max_length=30)
     stock_quantity: Decimal = Field(default=Decimal("0"), ge=0)
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = Field(default=None, min_length=1, max_length=150)
     hs_code: Optional[str] = Field(default=None, max_length=20)
+    product_type: Optional[str] = Field(default=None, pattern="^(raw_material|finished_good)$")
+    uom: Optional[str] = Field(default=None, min_length=1, max_length=30)
     stock_quantity: Optional[Decimal] = Field(default=None, ge=0)
 
 class ProductOut(ProductCreate):
@@ -240,3 +244,43 @@ class ProductOut(ProductCreate):
 
     class Config:
         from_attributes = True
+
+
+class PurchaseReceiptLineCreate(BaseModel):
+    product_id: int = Field(..., ge=1)
+    quantity: Decimal = Field(..., gt=0)
+    unit_cost: Decimal = Field(default=Decimal("0"), ge=0)
+
+
+class PurchaseReceiptCreate(BaseModel):
+    supplier_name: str = Field(..., min_length=1, max_length=150)
+    supplier_reference: Optional[str] = Field(default=None, max_length=100)
+    received_date: date
+    notes: Optional[str] = Field(default=None, max_length=2000)
+    items: List[PurchaseReceiptLineCreate] = Field(..., min_items=1, max_items=100)
+
+
+class BOMComponentCreate(BaseModel):
+    component_product_id: int = Field(..., ge=1)
+    quantity_per_unit: Decimal = Field(..., gt=0)
+
+
+class BOMCreate(BaseModel):
+    finished_product_id: int = Field(..., ge=1)
+    components: List[BOMComponentCreate] = Field(..., min_items=1, max_items=100)
+
+    @model_validator(mode="after")
+    def validate_unique_components(self):
+        ids = [component.component_product_id for component in self.components]
+        if len(ids) != len(set(ids)):
+            raise ValueError("A BOM cannot contain the same component more than once")
+        if self.finished_product_id in ids:
+            raise ValueError("A finished good cannot be one of its own components")
+        return self
+
+
+class ProductionOrderCreate(BaseModel):
+    finished_product_id: int = Field(..., ge=1)
+    quantity_produced: Decimal = Field(..., gt=0)
+    produced_date: date
+    notes: Optional[str] = Field(default=None, max_length=2000)

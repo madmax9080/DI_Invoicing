@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.database import get_db
 from app.dependencies.auth_dependency import get_current_user
+from decimal import Decimal
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -27,8 +28,10 @@ def get_owned_product(
     product_id: int,
     client_id: int,
     user_id: int,
+    *,
+    lock: bool = False,
 ):
-    product = (
+    query = (
         db.query(models.Product)
         .join(models.Client)
         .filter(
@@ -36,8 +39,10 @@ def get_owned_product(
             models.Product.client_id == client_id,
             models.Client.user_id == user_id,
         )
-        .first()
     )
+    if lock:
+        query = query.with_for_update()
+    product = query.first()
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -81,6 +86,12 @@ def create_product(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Product name is required",
         )
+    uom = payload.uom.strip()
+    if not uom:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Unit of measure is required",
+        )
     duplicate = db.query(models.Product.id).filter(
         models.Product.client_id == client_id,
         func.lower(models.Product.name) == name.lower(),
@@ -94,10 +105,24 @@ def create_product(
         client_id=client_id,
         name=name,
         hs_code=payload.hs_code.strip() if payload.hs_code else None,
+        product_type=payload.product_type,
+        uom=uom,
         opening_stock_quantity=payload.stock_quantity,
         stock_quantity=payload.stock_quantity,
     )
     db.add(product)
+    db.flush()
+    if payload.stock_quantity > 0:
+        db.add(
+            models.InventoryMovement(
+                client_id=client_id,
+                product_id=product.id,
+                movement_type="opening_balance",
+                quantity=payload.stock_quantity,
+                notes="Opening stock entered when product was created",
+                created_by=current_user["id"],
+            )
+        )
     try:
         db.commit()
     except IntegrityError:
@@ -119,14 +144,14 @@ def update_product(
     current_user=Depends(get_current_user),
 ):
     product = get_owned_product(
-        db, product_id, client_id, current_user["id"]
+        db, product_id, client_id, current_user["id"], lock=True
     )
     updates = payload.model_dump(exclude_unset=True)
-    required_values = ("name", "stock_quantity")
+    required_values = ("name", "stock_quantity", "product_type", "uom")
     if any(field in updates and updates[field] is None for field in required_values):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Name and stock cannot be null",
+            detail="Name, type, unit, and stock cannot be null",
         )
     if "name" in updates:
         updates["name"] = updates["name"].strip()
@@ -147,8 +172,68 @@ def update_product(
             )
     if updates.get("hs_code") is not None:
         updates["hs_code"] = updates["hs_code"].strip() or None
+    if updates.get("uom") is not None:
+        updates["uom"] = updates["uom"].strip()
+        if not updates["uom"]:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Unit of measure is required",
+            )
+    if (
+        "product_type" in updates
+        and updates["product_type"] != product.product_type
+    ):
+        has_invoice_items = db.query(models.InvoiceItem.id).filter(
+            models.InvoiceItem.product_id == product_id
+        ).first()
+        is_bom_output = db.query(models.ProductBOM.id).filter(
+            models.ProductBOM.finished_product_id == product_id
+        ).first()
+        is_bom_component = db.query(models.ProductBOMComponent.id).filter(
+            models.ProductBOMComponent.component_product_id == product_id
+        ).first()
+        is_production_output = db.query(models.ProductionOrder.id).filter(
+            models.ProductionOrder.finished_product_id == product_id
+        ).first()
+        is_production_component = db.query(models.ProductionOrderComponent.id).filter(
+            models.ProductionOrderComponent.component_product_id == product_id
+        ).first()
+        if (
+            (has_invoice_items and updates["product_type"] != "finished_good")
+            or (is_bom_output and updates["product_type"] != "finished_good")
+            or (
+                is_bom_component
+                and updates["product_type"] != "raw_material"
+            )
+            or (
+                is_production_output
+                and updates["product_type"] != "finished_good"
+            )
+            or (
+                is_production_component
+                and updates["product_type"] != "raw_material"
+            )
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Product type cannot conflict with its saved BOMs or production history",
+            )
+    stock_delta = Decimal("0")
+    if "stock_quantity" in updates:
+        stock_delta = updates["stock_quantity"] - product.stock_quantity
     for field, value in updates.items():
         setattr(product, field, value)
+    if stock_delta:
+        db.add(
+            models.InventoryMovement(
+                client_id=client_id,
+                product_id=product.id,
+                movement_type="adjustment",
+                quantity=stock_delta,
+                notes="Stock balance adjusted from the product catalog",
+                created_by=current_user["id"],
+            )
+        )
     try:
         db.commit()
     except IntegrityError:
@@ -178,6 +263,27 @@ def delete_product(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="This product is used by invoices and cannot be deleted",
+        )
+    has_inventory_history = db.query(models.InventoryMovement.id).filter(
+        models.InventoryMovement.product_id == product_id
+    ).first()
+    has_purchase_history = db.query(models.PurchaseReceiptItem.id).filter(
+        models.PurchaseReceiptItem.product_id == product_id
+    ).first()
+    has_bom_usage = db.query(models.ProductBOM.id).filter(
+        models.ProductBOM.finished_product_id == product_id
+    ).first() or db.query(models.ProductBOMComponent.id).filter(
+        models.ProductBOMComponent.component_product_id == product_id
+    ).first()
+    has_production_usage = db.query(models.ProductionOrder.id).filter(
+        models.ProductionOrder.finished_product_id == product_id
+    ).first() or db.query(models.ProductionOrderComponent.id).filter(
+        models.ProductionOrderComponent.component_product_id == product_id
+    ).first()
+    if has_inventory_history or has_purchase_history or has_bom_usage or has_production_usage:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This product has inventory, purchase, or production history and cannot be deleted",
         )
     db.delete(product)
     db.commit()

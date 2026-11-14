@@ -1,0 +1,155 @@
+<div class="reports-container inventory-page">
+  <section class="reports-hero">
+    <div>
+      <div class="hero-chip">Inventory operations</div>
+      <h2>Purchases, production, and stock movements.</h2>
+      <p>Receive materials, define what each finished good consumes, and post production to update stock together.</p>
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="nav nav-pills inventory-tabs" role="tablist" aria-label="Inventory sections">
+      <button class="nav-link active" type="button" data-inventory-tab="purchases">Purchase receipts</button>
+      <button class="nav-link" type="button" data-inventory-tab="boms">Bills of materials</button>
+      <button class="nav-link" type="button" data-inventory-tab="production">Production</button>
+      <button class="nav-link" type="button" data-inventory-tab="movements">Stock ledger</button>
+    </div>
+  </section>
+
+  <section class="inventory-pane" data-inventory-pane="purchases">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Receive a purchase</div>
+          <div class="panel-subtitle">Stock increases when a receipt is saved. Enter supplier invoice cost for reference.</div>
+        </div>
+      </div>
+      <form id="purchaseForm">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="donezo-label" for="purchaseSupplierName">Supplier</label>
+            <input id="purchaseSupplierName" class="form-control donezo-input" maxlength="150" required>
+          </div>
+          <div class="col-md-4">
+            <label class="donezo-label" for="purchaseReference">Supplier invoice / reference</label>
+            <input id="purchaseReference" class="form-control donezo-input" maxlength="100">
+          </div>
+          <div class="col-md-4">
+            <label class="donezo-label" for="purchaseDate">Received date</label>
+            <input id="purchaseDate" type="date" class="form-control donezo-input" required>
+          </div>
+          <div class="col-12">
+            <label class="donezo-label" for="purchaseNotes">Notes</label>
+            <input id="purchaseNotes" class="form-control donezo-input" maxlength="2000">
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+          <h3 class="inventory-subheading">Received items</h3>
+          <button id="addPurchaseLineBtn" class="btn btn-donezo-secondary btn-sm" type="button">Add item</button>
+        </div>
+        <div id="purchaseLines" class="inventory-lines"></div>
+        <button id="savePurchaseBtn" class="btn btn-donezo-primary mt-3" type="submit">Save receipt</button>
+      </form>
+    </div>
+    <div class="panel-card table-panel">
+      <div class="panel-header"><div><div class="panel-title">Recent purchase receipts</div></div></div>
+      <div class="buyer-table-shell">
+        <table class="donezo-table buyer-table table table-hover align-middle">
+          <thead><tr><th>Date</th><th>Supplier</th><th>Reference</th><th>Items</th><th class="text-end">Total cost</th></tr></thead>
+          <tbody id="purchaseHistoryBody"><tr><td colspan="5" class="text-center text-muted">Loading receipts...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="inventory-pane d-none" data-inventory-pane="boms">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Bill of materials</div>
+          <div class="panel-subtitle">Set raw-material quantities required for one finished unit. Saving replaces that product's current recipe.</div>
+        </div>
+      </div>
+      <form id="bomForm">
+        <div class="col-md-6 mb-3">
+          <label class="donezo-label" for="bomFinishedProduct">Finished good</label>
+          <select id="bomFinishedProduct" class="form-select donezo-input" required></select>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h3 class="inventory-subheading">Raw material components</h3>
+          <button id="addBomLineBtn" class="btn btn-donezo-secondary btn-sm" type="button">Add component</button>
+        </div>
+        <div id="bomLines" class="inventory-lines"></div>
+        <button id="saveBomBtn" class="btn btn-donezo-primary mt-3" type="submit">Save recipe</button>
+      </form>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">Production recipes</div>
+      <div class="table-responsive mt-3">
+        <table class="donezo-table table table-hover align-middle">
+          <thead><tr><th>Finished good</th><th>Components per unit</th></tr></thead>
+          <tbody id="bomHistoryBody"><tr><td colspan="2" class="text-center text-muted">Loading recipes...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="inventory-pane d-none" data-inventory-pane="production">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Record production</div>
+          <div class="panel-subtitle">Posting consumes the recipe's raw materials and adds the finished quantity in one transaction.</div>
+        </div>
+      </div>
+      <form id="productionForm">
+        <div class="row g-3">
+          <div class="col-md-5">
+            <label class="donezo-label" for="productionFinishedProduct">Finished good</label>
+            <select id="productionFinishedProduct" class="form-select donezo-input" required></select>
+          </div>
+          <div class="col-md-3">
+            <label class="donezo-label" for="productionQuantity">Quantity produced</label>
+            <input id="productionQuantity" type="number" min="0.0001" step="0.0001" class="form-control donezo-input" required>
+          </div>
+          <div class="col-md-4">
+            <label class="donezo-label" for="productionDate">Production date</label>
+            <input id="productionDate" type="date" class="form-control donezo-input" required>
+          </div>
+          <div class="col-12">
+            <label class="donezo-label" for="productionNotes">Notes</label>
+            <input id="productionNotes" class="form-control donezo-input" maxlength="2000">
+          </div>
+        </div>
+        <div id="productionBomSummary" class="inventory-recipe-preview mt-3">Select a finished good with a saved recipe.</div>
+        <button id="saveProductionBtn" class="btn btn-donezo-primary mt-3" type="submit">Post production</button>
+      </form>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">Recent production orders</div>
+      <div class="table-responsive mt-3">
+        <table class="donezo-table table table-hover align-middle">
+          <thead><tr><th>Date</th><th>Finished good</th><th class="text-end">Produced</th><th>Materials consumed</th></tr></thead>
+          <tbody id="productionHistoryBody"><tr><td colspan="4" class="text-center text-muted">Loading production...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="inventory-pane d-none" data-inventory-pane="movements">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Stock movement ledger</div>
+          <div class="panel-subtitle">Signed quantities show stock increases and consumption, sales, or reversals.</div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="donezo-table table table-hover align-middle">
+          <thead><tr><th>Date</th><th>Product</th><th>Movement</th><th class="text-end">Quantity</th><th>Reference</th><th>Notes</th></tr></thead>
+          <tbody id="inventoryMovementsBody"><tr><td colspan="6" class="text-center text-muted">Loading movements...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>

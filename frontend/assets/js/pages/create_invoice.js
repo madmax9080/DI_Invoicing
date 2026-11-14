@@ -31,7 +31,8 @@ function getClientId() {
 
 async function loadProductCatalog() {
     try {
-        productCatalog = await apiFetch("/products/");
+        productCatalog = (await apiFetch("/products/"))
+            .filter(product => product.product_type === "finished_good");
         $("#savedProductOptions").empty();
         productCatalog.forEach(product => {
             $("#savedProductOptions").append(
