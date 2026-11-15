@@ -4,7 +4,9 @@ import { showToast } from "../toast.js";
 const EVENTS_NS = ".inventory";
 let products = [];
 let boms = [];
+let purchaseReceipts = [];
 let nextLineId = 0;
+let editingPurchaseId = null;
 
 export async function initInventory() {
     bindEvents();
@@ -16,12 +18,14 @@ export async function initInventory() {
 
 export function destroyInventory() {
     $("#purchaseForm, #bomForm, #productionForm").off(EVENTS_NS);
-    $("#addPurchaseLineBtn, #addBomLineBtn").off(EVENTS_NS);
-    $("#purchaseLines, #bomLines, #bomHistoryBody").off(EVENTS_NS);
+    $("#addPurchaseLineBtn, #addBomLineBtn, #cancelPurchaseEditBtn").off(EVENTS_NS);
+    $("#purchaseLines, #bomLines, #bomHistoryBody, #purchaseHistoryBody").off(EVENTS_NS);
     $("#bomFinishedProduct, #productionFinishedProduct, #productionQuantity").off(EVENTS_NS);
     $(".inventory-tabs").off(EVENTS_NS);
     products = [];
     boms = [];
+    purchaseReceipts = [];
+    editingPurchaseId = null;
 }
 
 function bindEvents() {
@@ -61,6 +65,34 @@ function bindEvents() {
     $("#purchaseForm")
         .off(EVENTS_NS)
         .on(`submit${EVENTS_NS}`, savePurchase);
+    $("#cancelPurchaseEditBtn")
+        .off(EVENTS_NS)
+        .on(`click${EVENTS_NS}`, resetPurchaseForm);
+    $("#purchaseHistoryBody")
+        .off(EVENTS_NS)
+        .on(`click${EVENTS_NS}`, "[data-edit-purchase]", function () {
+            startPurchaseEdit(Number($(this).data("edit-purchase")));
+        })
+        .on(`click${EVENTS_NS}`, "[data-delete-purchase]", async function () {
+            const receiptId = Number($(this).data("delete-purchase"));
+            const receipt = purchaseReceipts.find(item => item.id === receiptId);
+            if (
+                !receipt ||
+                !window.confirm(
+                    `Delete the purchase receipt from "${receipt.supplier_name}"? This will reduce stock and may be blocked if that stock has already been used.`
+                )
+            ) {
+                return;
+            }
+            await withDisabledButton(this, async () => {
+                await apiFetch(`/inventory/purchases/${receiptId}`, {
+                    method: "DELETE"
+                });
+                if (editingPurchaseId === receiptId) resetPurchaseForm();
+                showToast("Purchase receipt deleted and stock updated.", "success");
+                await refreshInventoryData();
+            });
+        });
     $("#bomForm")
         .off(EVENTS_NS)
         .on(`submit${EVENTS_NS}`, saveBOM);
@@ -91,6 +123,7 @@ async function refreshInventoryData() {
         ]);
     products = loadedProducts;
     boms = loadedBoms;
+    purchaseReceipts = purchases;
     renderProductOptions();
     renderPurchaseHistory(purchases);
     renderBOMHistory();
@@ -197,23 +230,68 @@ async function savePurchase(event) {
         };
     }).get();
     await withDisabledButton("#savePurchaseBtn", async () => {
-        await apiFetch("/inventory/purchases", {
-            method: "POST",
-            body: {
-                supplier_name: $("#purchaseSupplierName").val().trim(),
-                supplier_reference: $("#purchaseReference").val().trim() || null,
-                received_date: $("#purchaseDate").val(),
-                notes: $("#purchaseNotes").val().trim() || null,
-                items
+        const receiptId = editingPurchaseId;
+        await apiFetch(
+            receiptId
+                ? `/inventory/purchases/${receiptId}`
+                : "/inventory/purchases",
+            {
+                method: receiptId ? "PUT" : "POST",
+                body: {
+                    supplier_name: $("#purchaseSupplierName").val().trim(),
+                    supplier_reference: $("#purchaseReference").val().trim() || null,
+                    received_date: $("#purchaseDate").val(),
+                    notes: $("#purchaseNotes").val().trim() || null,
+                    items
+                }
             }
-        });
-        showToast("Purchase receipt saved and stock updated.", "success");
-        $("#purchaseForm")[0].reset();
-        $("#purchaseDate").val(localDateString(new Date()));
-        $("#purchaseLines").empty();
-        addPurchaseLine();
+        );
+        showToast(
+            receiptId
+                ? "Purchase receipt updated and stock reconciled."
+                : "Purchase receipt saved and stock updated.",
+            "success"
+        );
+        resetPurchaseForm();
         await refreshInventoryData();
     });
+}
+
+function startPurchaseEdit(receiptId) {
+    const receipt = purchaseReceipts.find(item => item.id === receiptId);
+    if (!receipt) return;
+
+    editingPurchaseId = receipt.id;
+    $("#purchaseSupplierName").val(receipt.supplier_name);
+    $("#purchaseReference").val(receipt.supplier_reference || "");
+    $("#purchaseDate").val(receipt.received_date);
+    $("#purchaseNotes").val(receipt.notes || "");
+    $("#purchaseLines").empty();
+    receipt.items.forEach(item =>
+        addPurchaseLine(item.product_id, item.quantity, item.unit_cost)
+    );
+    $("#purchaseFormTitle").text("Edit purchase receipt");
+    $("#purchaseFormSubtitle").text(
+        "Updating this receipt will reconcile the stock balance and ledger."
+    );
+    $("#savePurchaseBtn").text("Update receipt");
+    $("#cancelPurchaseEditBtn").removeClass("d-none");
+    $(".inventory-tabs [data-inventory-tab='purchases']").trigger("click");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function resetPurchaseForm() {
+    editingPurchaseId = null;
+    $("#purchaseForm")[0].reset();
+    $("#purchaseDate").val(localDateString(new Date()));
+    $("#purchaseLines").empty();
+    addPurchaseLine();
+    $("#purchaseFormTitle").text("Receive a purchase");
+    $("#purchaseFormSubtitle").text(
+        "Stock increases when a receipt is saved. Enter supplier invoice cost for reference."
+    );
+    $("#savePurchaseBtn").text("Save receipt");
+    $("#cancelPurchaseEditBtn").addClass("d-none");
 }
 
 async function saveBOM(event) {
@@ -283,7 +361,7 @@ function renderProductionPreview() {
 
 function renderPurchaseHistory(receipts) {
     if (!receipts.length) {
-        $("#purchaseHistoryBody").html('<tr><td colspan="5" class="text-center text-muted">No purchase receipts yet.</td></tr>');
+        $("#purchaseHistoryBody").html('<tr><td colspan="6" class="text-center text-muted">No purchase receipts yet.</td></tr>');
         return;
     }
     $("#purchaseHistoryBody").html(receipts.map(receipt => {
@@ -297,6 +375,10 @@ function renderPurchaseHistory(receipts) {
             <td>${escapeHtml(receipt.supplier_reference || "-")}</td>
             <td>${receipt.items.map(item => `${escapeHtml(item.product_name)}: ${formatNumber(item.quantity)} ${escapeHtml(item.uom)}`).join("<br>")}</td>
             <td class="text-end">${formatMoney(total)}</td>
+            <td class="text-end text-nowrap">
+                <button class="btn btn-sm btn-outline-primary me-1" type="button" data-edit-purchase="${Number(receipt.id)}" aria-label="Edit purchase receipt" title="Edit receipt">Edit</button>
+                <button class="btn btn-sm btn-outline-danger" type="button" data-delete-purchase="${Number(receipt.id)}" aria-label="Delete purchase receipt" title="Delete receipt">Delete</button>
+            </td>
         </tr>`;
     }).join(""));
 }

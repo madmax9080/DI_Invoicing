@@ -20,8 +20,8 @@
     <div class="panel-card">
       <div class="panel-header">
         <div>
-          <div class="panel-title">Receive a purchase</div>
-          <div class="panel-subtitle">Stock increases when a receipt is saved. Enter supplier invoice cost for reference.</div>
+          <div id="purchaseFormTitle" class="panel-title">Receive a purchase</div>
+          <div id="purchaseFormSubtitle" class="panel-subtitle">Stock increases when a receipt is saved. Enter supplier invoice cost for reference.</div>
         </div>
       </div>
       <form id="purchaseForm">
@@ -49,14 +49,15 @@
         </div>
         <div id="purchaseLines" class="inventory-lines"></div>
         <button id="savePurchaseBtn" class="btn btn-donezo-primary mt-3" type="submit">Save receipt</button>
+        <button id="cancelPurchaseEditBtn" class="btn btn-outline-secondary mt-3 d-none" type="button">Cancel edit</button>
       </form>
     </div>
     <div class="panel-card table-panel">
       <div class="panel-header"><div><div class="panel-title">Recent purchase receipts</div></div></div>
       <div class="buyer-table-shell">
         <table class="donezo-table buyer-table table table-hover align-middle">
-          <thead><tr><th>Date</th><th>Supplier</th><th>Reference</th><th>Items</th><th class="text-end">Total cost</th></tr></thead>
-          <tbody id="purchaseHistoryBody"><tr><td colspan="5" class="text-center text-muted">Loading receipts...</td></tr></tbody>
+          <thead><tr><th>Date</th><th>Supplier</th><th>Reference</th><th>Items</th><th class="text-end">Total cost</th><th class="text-end">Actions</th></tr></thead>
+          <tbody id="purchaseHistoryBody"><tr><td colspan="6" class="text-center text-muted">Loading receipts...</td></tr></tbody>
         </table>
       </div>
     </div>
