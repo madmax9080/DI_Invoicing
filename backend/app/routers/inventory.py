@@ -202,6 +202,135 @@ def create_purchase(
     return {"id": receipt.id, "message": "Purchase receipt recorded"}
 
 
+@router.put("/purchases/{receipt_id}")
+def update_purchase(
+    receipt_id: int,
+    payload: schemas.PurchaseReceiptCreate,
+    client_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    _owned_client(db, client_id, current_user["id"])
+    receipt = db.query(models.PurchaseReceipt).filter(
+        models.PurchaseReceipt.id == receipt_id,
+        models.PurchaseReceipt.client_id == client_id,
+    ).with_for_update().first()
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Purchase receipt not found")
+
+    supplier_name = payload.supplier_name.strip()
+    if not supplier_name:
+        raise HTTPException(status_code=422, detail="Supplier name is required")
+
+    previous_quantities: dict[int, Decimal] = {}
+    for item in receipt.items:
+        previous_quantities[item.product_id] = (
+            previous_quantities.get(item.product_id, Decimal("0")) + item.quantity
+        )
+    product_ids = set(previous_quantities) | {item.product_id for item in payload.items}
+    products = _get_products(db, client_id, product_ids, lock=True)
+
+    updated_quantities: dict[int, Decimal] = {}
+    for item in payload.items:
+        updated_quantities[item.product_id] = (
+            updated_quantities.get(item.product_id, Decimal("0")) + item.quantity
+        )
+    for product_id in product_ids:
+        product = products[product_id]
+        adjusted_stock = (
+            product.stock_quantity
+            + updated_quantities.get(product_id, Decimal("0"))
+            - previous_quantities.get(product_id, Decimal("0"))
+        )
+        if adjusted_stock < 0:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Insufficient stock to reduce the purchase quantity for {product.name}",
+            )
+        product.stock_quantity = adjusted_stock
+
+    receipt.supplier_name = supplier_name
+    receipt.supplier_reference = (
+        payload.supplier_reference.strip() if payload.supplier_reference else None
+    )
+    receipt.received_date = payload.received_date
+    receipt.notes = payload.notes.strip() if payload.notes else None
+
+    receipt.items.clear()
+    db.query(models.InventoryMovement).filter(
+        models.InventoryMovement.client_id == client_id,
+        models.InventoryMovement.reference_type == "purchase",
+        models.InventoryMovement.reference_id == receipt.id,
+        models.InventoryMovement.movement_type == "purchase_receipt",
+    ).delete(synchronize_session=False)
+
+    for item in payload.items:
+        product = products[item.product_id]
+        receipt.items.append(
+            models.PurchaseReceiptItem(
+                product_id=product.id,
+                quantity=item.quantity,
+                unit_cost=item.unit_cost,
+            )
+        )
+        db.add(
+            models.InventoryMovement(
+                client_id=client_id,
+                product_id=product.id,
+                movement_type="purchase_receipt",
+                quantity=item.quantity,
+                movement_date=payload.received_date,
+                reference_type="purchase",
+                reference_id=receipt.id,
+                notes=supplier_name,
+                created_by=current_user["id"],
+            )
+        )
+    db.commit()
+    return {"id": receipt.id, "message": "Purchase receipt updated"}
+
+
+@router.delete("/purchases/{receipt_id}")
+def delete_purchase(
+    receipt_id: int,
+    client_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    _owned_client(db, client_id, current_user["id"])
+    receipt = db.query(models.PurchaseReceipt).filter(
+        models.PurchaseReceipt.id == receipt_id,
+        models.PurchaseReceipt.client_id == client_id,
+    ).with_for_update().first()
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Purchase receipt not found")
+
+    quantities: dict[int, Decimal] = {}
+    for item in receipt.items:
+        quantities[item.product_id] = (
+            quantities.get(item.product_id, Decimal("0")) + item.quantity
+        )
+    products = _get_products(db, client_id, set(quantities), lock=True)
+    for product_id, quantity in quantities.items():
+        product = products[product_id]
+        if product.stock_quantity < quantity:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Insufficient stock to delete this purchase for {product.name}",
+            )
+        product.stock_quantity -= quantity
+
+    db.query(models.InventoryMovement).filter(
+        models.InventoryMovement.client_id == client_id,
+        models.InventoryMovement.reference_type == "purchase",
+        models.InventoryMovement.reference_id == receipt.id,
+        models.InventoryMovement.movement_type == "purchase_receipt",
+    ).delete(synchronize_session=False)
+    db.delete(receipt)
+    db.commit()
+    return {"message": "Purchase receipt deleted"}
+
+
 @router.get("/boms")
 def list_boms(
     client_id: int,
