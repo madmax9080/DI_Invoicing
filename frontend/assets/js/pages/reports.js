@@ -229,10 +229,6 @@ async function downloadInvoicePDF(invoiceId, buyerBusinessName) {
     }
 }
 
-$("#exportExcelBtn").click(() => {
-    exportExcel();
-});
-
 function readFilters() {
     state.filters.status = $("#filterStatus").val();
     state.filters.buyer_name = $("#filterBuyerName").val().trim();
@@ -515,6 +511,9 @@ async function reload() {
 
 export async function initReports() {
     initReportsFY();
+    $("#exportExcelBtn")
+        .off("click.reports")
+        .on("click.reports", exportExcel);
     if (buyerChart) {
         buyerChart.destroy();
         buyerChart = null;
@@ -568,6 +567,7 @@ export async function initReports() {
 }
 
 export function destroyReports() {
+    $("#exportExcelBtn").off(".reports");
     $(document).off(".reports");
     $("#reportsPageNumbers").off(".reports");
 }

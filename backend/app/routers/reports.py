@@ -3,7 +3,7 @@ from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
 from io import BytesIO
 from typing import Optional
-from sqlalchemy import extract, func
+from sqlalchemy import func
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, selectinload
 from app.routers.dashboard import get_cache, get_fiscal_range
@@ -24,6 +24,19 @@ from app.services.cache import get_cache, set_cache
 router = APIRouter(prefix="/reports", tags=["Reports"])
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = BASE_DIR / "templates"
+MONTH_PATTERN = r"^\d{4}-(0[1-9]|1[0-2])$"
+
+
+def get_month_date_range(month: str) -> tuple[date, date]:
+    year, month_num = map(int, month.split("-"))
+    if year < 1:
+        raise HTTPException(
+            status_code=422,
+            detail="Month must include a valid year."
+        )
+    start = date(year, month_num, 1)
+    end = date(year + (month_num // 12), (month_num % 12) + 1, 1)
+    return start, end
 
 @router.get("/sales-by-buyer")
 def sales_by_buyer(
@@ -78,7 +91,7 @@ def reports_invoices(
     buyer_name: Optional[str] = Query(None, max_length=100),
     date_from: Optional[date] = Query(None),
     date_to: Optional[date] = Query(None),
-    month: Optional[str] = Query(None),
+    month: Optional[str] = Query(None, pattern=MONTH_PATTERN),
     db: Session = Depends(get_db),
     fbr = Depends(get_fbr_client_secure)
 ):
@@ -97,9 +110,7 @@ def reports_invoices(
             )
         )
     if month:
-        year, month_num = map(int, month.split("-"))
-        start = date(year, month_num, 1)
-        end = date(year + (month_num // 12), (month_num % 12) + 1, 1)
+        start, end = get_month_date_range(month)
         base_filter.append(Invoice.invoiceDate >= start)
         base_filter.append(Invoice.invoiceDate < end)
     else:
@@ -190,7 +201,7 @@ def export_excel(
     buyer_name: Optional[str] = None,
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
-    month: Optional[int] = None,
+    month: Optional[str] = Query(None, pattern=MONTH_PATTERN),
     db: Session = Depends(get_db),
     fbr = Depends(get_fbr_client_secure)
 ):  
@@ -205,14 +216,17 @@ def export_excel(
                 f"%{buyer_name.strip()}%"
             )
         )
-    if date_from:
-        query = query.filter(Invoice.invoiceDate >= date_from)
-    if date_to:
-        query = query.filter(Invoice.invoiceDate <= date_to)
     if month:
+        month_start, month_end = get_month_date_range(month)
         query = query.filter(
-            extract("month", Invoice.invoiceDate) == month
+            Invoice.invoiceDate >= month_start,
+            Invoice.invoiceDate < month_end
         )
+    else:
+        if date_from:
+            query = query.filter(Invoice.invoiceDate >= date_from)
+        if date_to:
+            query = query.filter(Invoice.invoiceDate <= date_to)
     if fy:
         start_year = int(fy.split("-")[0])
         query = query.filter(
