@@ -550,3 +550,52 @@ def create_production_order(
     db.commit()
     return {"id": order.id, "message": "Production recorded"}
 
+
+@router.delete("/production-orders/{order_id}")
+def delete_production_order(
+    order_id: int,
+    client_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    _owned_client(db, client_id, current_user["id"])
+    order = db.query(models.ProductionOrder).filter(
+        models.ProductionOrder.id == order_id,
+        models.ProductionOrder.client_id == client_id,
+    ).with_for_update().first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Production order not found")
+
+    components = list(order.components)
+    product_ids = {
+        order.finished_product_id,
+        *(component.component_product_id for component in components),
+    }
+    products = _get_products(db, client_id, product_ids, lock=True)
+    finished_product = products[order.finished_product_id]
+    if finished_product.stock_quantity < order.quantity_produced:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                f"Cannot delete this production order because only "
+                f"{finished_product.stock_quantity} {finished_product.uom} of "
+                f"{finished_product.name} remain in stock; "
+                f"{order.quantity_produced} would need to be removed"
+            ),
+        )
+
+    finished_product.stock_quantity -= order.quantity_produced
+    for component in components:
+        products[component.component_product_id].stock_quantity += (
+            component.quantity_consumed
+        )
+
+    db.query(models.InventoryMovement).filter(
+        models.InventoryMovement.client_id == client_id,
+        models.InventoryMovement.reference_type == "production",
+        models.InventoryMovement.reference_id == order.id,
+    ).delete(synchronize_session=False)
+    db.delete(order)
+    db.commit()
+    return {"message": "Production order deleted and stock restored"}
+

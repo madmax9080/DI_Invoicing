@@ -154,7 +154,7 @@ def reports_invoices(
             "totalValues": float(item.totalValues or 0),
             "fixedNotifiedValueOrRetailPrice": float(item.fixedNotifiedValueOrRetailPrice or 0)
         }
-
+ 
     def serialize_invoice(invoice: Invoice) -> dict:
         return {
             "id": invoice.id,

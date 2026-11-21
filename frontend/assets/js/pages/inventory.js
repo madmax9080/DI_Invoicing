@@ -5,6 +5,7 @@ const EVENTS_NS = ".inventory";
 let products = [];
 let boms = [];
 let purchaseReceipts = [];
+let productionOrders = [];
 let nextLineId = 0;
 let editingPurchaseId = null;
 
@@ -19,12 +20,13 @@ export async function initInventory() {
 export function destroyInventory() {
     $("#purchaseForm, #bomForm, #productionForm").off(EVENTS_NS);
     $("#addPurchaseLineBtn, #addBomLineBtn, #cancelPurchaseEditBtn").off(EVENTS_NS);
-    $("#purchaseLines, #bomLines, #bomHistoryBody, #purchaseHistoryBody").off(EVENTS_NS);
+    $("#purchaseLines, #bomLines, #bomHistoryBody, #purchaseHistoryBody, #productionHistoryBody").off(EVENTS_NS);
     $("#bomFinishedProduct, #productionFinishedProduct, #productionQuantity").off(EVENTS_NS);
     $(".inventory-tabs").off(EVENTS_NS);
     products = [];
     boms = [];
     purchaseReceipts = [];
+    productionOrders = [];
     editingPurchaseId = null;
 }
 
@@ -93,6 +95,30 @@ function bindEvents() {
                 await refreshInventoryData();
             });
         });
+    $("#productionHistoryBody")
+        .off(EVENTS_NS)
+        .on(`click${EVENTS_NS}`, "[data-delete-production]", async function () {
+            const orderId = Number($(this).data("delete-production"));
+            const order = productionOrders.find(item => item.id === orderId);
+            if (
+                !order ||
+                !window.confirm(
+                    `Delete production of ${formatNumber(order.quantity_produced)} ${order.finished_product_uom} ${order.finished_product_name}? This removes its ledger movements and restores the consumed materials. It will be blocked if the produced stock has already been used.`
+                )
+            ) {
+                return;
+            }
+            await withDisabledButton(this, async () => {
+                await apiFetch(`/inventory/production-orders/${orderId}`, {
+                    method: "DELETE"
+                });
+                showToast(
+                    "Production deleted and stock restored.",
+                    "success"
+                );
+                await refreshInventoryData();
+            });
+        });
     $("#bomForm")
         .off(EVENTS_NS)
         .on(`submit${EVENTS_NS}`, saveBOM);
@@ -113,7 +139,7 @@ async function refreshInventoryData() {
     if (!clientId) {
         throw new Error("Select a business before using inventory.");
     }
-    const [loadedProducts, loadedBoms, purchases, productionOrders, movements] =
+    const [loadedProducts, loadedBoms, purchases, orders, movements] =
         await Promise.all([
             apiFetch("/products/"),
             apiFetch("/inventory/boms"),
@@ -124,10 +150,11 @@ async function refreshInventoryData() {
     products = loadedProducts;
     boms = loadedBoms;
     purchaseReceipts = purchases;
+    productionOrders = orders;
     renderProductOptions();
     renderPurchaseHistory(purchases);
     renderBOMHistory();
-    renderProductionHistory(productionOrders);
+    renderProductionHistory(orders);
     renderMovements(movements);
     loadSelectedBOM();
     renderProductionPreview();
@@ -403,7 +430,7 @@ function renderBOMHistory() {
 
 function renderProductionHistory(orders) {
     if (!orders.length) {
-        $("#productionHistoryBody").html('<tr><td colspan="4" class="text-center text-muted">No production recorded yet.</td></tr>');
+        $("#productionHistoryBody").html('<tr><td colspan="5" class="text-center text-muted">No production recorded yet.</td></tr>');
         return;
     }
     $("#productionHistoryBody").html(orders.map(order => `
@@ -414,6 +441,9 @@ function renderProductionHistory(orders) {
             <td>${order.components.map(component =>
         `${formatNumber(component.quantity_consumed)} ${escapeHtml(component.uom)} ${escapeHtml(component.product_name)}`
     ).join("<br>")}</td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-danger" type="button" data-delete-production="${Number(order.id)}" aria-label="Delete production order" title="Delete production order">Delete</button>
+            </td>
         </tr>
     `).join(""));
 }
