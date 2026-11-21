@@ -254,7 +254,7 @@ def delete_product(
     current_user=Depends(get_current_user),
 ):
     product = get_owned_product(
-        db, product_id, client_id, current_user["id"]
+        db, product_id, client_id, current_user["id"], lock=True
     )
     has_invoice_items = db.query(models.InvoiceItem.id).filter(
         models.InvoiceItem.product_id == product_id
@@ -264,26 +264,41 @@ def delete_product(
             status_code=status.HTTP_409_CONFLICT,
             detail="This product is used by invoices and cannot be deleted",
         )
-    has_inventory_history = db.query(models.InventoryMovement.id).filter(
-        models.InventoryMovement.product_id == product_id
-    ).first()
     has_purchase_history = db.query(models.PurchaseReceiptItem.id).filter(
         models.PurchaseReceiptItem.product_id == product_id
-    ).first()
-    has_bom_usage = db.query(models.ProductBOM.id).filter(
-        models.ProductBOM.finished_product_id == product_id
-    ).first() or db.query(models.ProductBOMComponent.id).filter(
-        models.ProductBOMComponent.component_product_id == product_id
     ).first()
     has_production_usage = db.query(models.ProductionOrder.id).filter(
         models.ProductionOrder.finished_product_id == product_id
     ).first() or db.query(models.ProductionOrderComponent.id).filter(
         models.ProductionOrderComponent.component_product_id == product_id
     ).first()
-    if has_inventory_history or has_purchase_history or has_bom_usage or has_production_usage:
+    if has_purchase_history or has_production_usage:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="This product has inventory, purchase, or production history and cannot be deleted",
+            detail="This product has purchase or production history and cannot be deleted",
         )
+    if product.stock_quantity != 0:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This product has stock remaining and cannot be deleted",
+        )
+    is_bom_component = db.query(models.ProductBOMComponent.id).filter(
+        models.ProductBOMComponent.component_product_id == product_id
+    ).first()
+    if is_bom_component:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This product is used in another product's BOM; remove it from that BOM before deleting it",
+        )
+
+    product_boms = db.query(models.ProductBOM).filter(
+        models.ProductBOM.finished_product_id == product_id
+    ).all()
+    for bom in product_boms:
+        db.delete(bom)
+    db.query(models.InventoryMovement).filter(
+        models.InventoryMovement.client_id == client_id,
+        models.InventoryMovement.product_id == product_id,
+    ).delete(synchronize_session=False)
     db.delete(product)
     db.commit()
