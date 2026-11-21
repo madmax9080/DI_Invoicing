@@ -291,11 +291,19 @@ def delete_product(
             detail="This product is used in another product's BOM; remove it from that BOM before deleting it",
         )
 
-    product_boms = db.query(models.ProductBOM).filter(
-        models.ProductBOM.finished_product_id == product_id
-    ).all()
-    for bom in product_boms:
-        db.delete(bom)
+    product_bom_ids = [
+        bom_id
+        for (bom_id,) in db.query(models.ProductBOM.id).filter(
+            models.ProductBOM.finished_product_id == product_id
+        ).all()
+    ]
+    if product_bom_ids:
+        db.query(models.ProductBOMComponent).filter(
+            models.ProductBOMComponent.bom_id.in_(product_bom_ids)
+        ).delete(synchronize_session=False)
+        db.query(models.ProductBOM).filter(
+            models.ProductBOM.id.in_(product_bom_ids)
+        ).delete(synchronize_session=False)
     db.query(models.InventoryMovement).filter(
         models.InventoryMovement.client_id == client_id,
         models.InventoryMovement.product_id == product_id,
