@@ -1,5 +1,5 @@
 import { apiFetch } from "./api.js";
-const ASSET_VERSION = "10.58";
+const ASSET_VERSION = "10.59";
 let allClients = [];
 
 const routes = {
@@ -131,6 +131,10 @@ async function loadClients() {
                 selectedClient
                     .sellerBusinessName || ""
             );
+            localStorage.setItem(
+                "client_ntn",
+                selectedClient.sellerNTNCNIC || ""
+            );
             const initials =
                 selectedClient.name
                     .split(" ")
@@ -160,10 +164,14 @@ function updateClientUI() {
         localStorage.getItem("client_name");
     const clientBusiness =
         localStorage.getItem("client_business");
+    const clientNTN =
+        localStorage.getItem("client_ntn");
     if (!clientName) return;
-    $("#clientNameDisplay").text(clientName);
-    $("#clientBusiness").text(
+    $("#clientNameDisplay").text(
         clientBusiness || ""
+    );
+    $("#clientBusiness").text(
+        clientNTN || ""
     );
     const initials = clientName
         .split(" ")

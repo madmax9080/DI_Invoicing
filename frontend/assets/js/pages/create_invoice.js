@@ -95,7 +95,10 @@ async function loadClientDetails(forceReload = false) {
             currentClient = client;
         }
         $("#clientNameDisplay").text(
-            currentClient.name || "—"
+            currentClient.sellerBusinessName || "—"
+        );
+        $("#clientBusiness").text(
+            currentClient.sellerNTNCNIC || "—"
         );
         $("#sellerNTNCNIC").val(
             currentClient.sellerNTNCNIC

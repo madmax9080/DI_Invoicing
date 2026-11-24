@@ -150,6 +150,16 @@ function bindEvents() {
                     "client_business",
                     payload.sellerBusinessName
                 );
+                localStorage.setItem(
+                    "client_ntn",
+                    payload.sellerNTNCNIC
+                );
+                $("#clientNameDisplay").text(
+                    payload.sellerBusinessName
+                );
+                $("#clientBusiness").text(
+                    payload.sellerNTNCNIC
+                );
                 setEditMode(false);
                 await loadClientProfile();
             } catch (err) {

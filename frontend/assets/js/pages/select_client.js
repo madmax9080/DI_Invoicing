@@ -228,6 +228,10 @@ function renderClients(clients) {
                 "client_business",
                 client.sellerBusinessName
             );
+            localStorage.setItem(
+                "client_ntn",
+                client.sellerNTNCNIC || ""
+            );
             const initials =
                 client.name
                     .split(" ")
