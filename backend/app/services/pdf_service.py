@@ -565,6 +565,7 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
         fontSize=6.5,
         leading=7.5,
         textColor=brand_dark,
+        alignment=TA_CENTER,
     )
     table_data = [
         [
@@ -818,6 +819,14 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
                     "LEFT"
                 )
             )
+    table_style.append(
+        (
+            "ALIGN",
+            (0, 0),
+            (-1, 0),
+            "CENTER",
+        )
+    )
     items.setStyle(
         TableStyle(table_style)
     )
