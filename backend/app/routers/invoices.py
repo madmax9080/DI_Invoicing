@@ -284,6 +284,7 @@ async def post_invoice_to_fbr(
     buyer_strn = raw_payload.get("buyerSTRN")
     payload = raw_payload.copy()
     payload.pop("internalInvoiceNo", None)
+    crud.normalize_invoice_numeric_values(payload)
     fbr_payload = copy.deepcopy(payload)
     fbr_payload.pop("sellerSTRN", None)
     fbr_payload.pop("buyerSTRN", None)
@@ -607,6 +608,7 @@ async def validate_invoice_with_fbr(
 ):
     _validate_invoice_products(db, fbr_client.client_id, invoice)
     payload = invoice.model_dump(mode="json")
+    crud.normalize_invoice_numeric_values(payload)
     fbr_payload = payload.copy()
     for item in fbr_payload.get("items", []):
         item.pop("itemRate", None)
@@ -736,6 +738,7 @@ async def validate_excel(
                 k: v for k, v in inv.items()
                 if k not in {"excelInvoiceId", "internalInvoiceNo"}
             }
+            crud.normalize_invoice_numeric_values(payload)
             # ✅ DEBUG LOG HERE
             # print("\n========== FBR VALIDATE PAYLOAD ==========")
             # print(json.dumps(payload, indent=2, ensure_ascii=False))
@@ -847,6 +850,7 @@ async def submit_excel(
                         "internalInvoiceNo",
                     ]
                 }
+                crud.normalize_invoice_numeric_values(payload)
                 existing = (
                     db.query(models.Invoice)
                     .filter(

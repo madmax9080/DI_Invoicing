@@ -4,9 +4,63 @@ from psycopg2 import IntegrityError
 from sqlalchemy.orm import Session
 from . import models, schemas
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional, Union
 from sqlalchemy import or_
+
+INVOICE_ITEM_DECIMAL_PLACES = {
+    "quantity": 4,
+    "itemRate": 2,
+    "totalValues": 2,
+    "valueSalesExcludingST": 2,
+    "fixedNotifiedValueOrRetailPrice": 2,
+    "salesTaxApplicable": 2,
+    "salesTaxWithheldAtSource": 2,
+    "extraTax": 2,
+    "furtherTax": 2,
+    "fedPayable": 2,
+    "discount": 2,
+    "tax236HRate": 2,
+    "tax236H": 2,
+}
+
+
+def round_invoice_value(
+    value: Union[str, int, float, Decimal],
+    decimal_places: int,
+) -> Decimal:
+    quantum = Decimal(1).scaleb(-decimal_places)
+    return Decimal(str(value)).quantize(
+        quantum,
+        rounding=ROUND_HALF_UP,
+    )
+
+
+def normalize_invoice_numeric_values(payload: dict) -> dict:
+    for item in payload.get("items", []):
+        for field, decimal_places in INVOICE_ITEM_DECIMAL_PLACES.items():
+            value = item.get(field)
+            if value is None or (
+                isinstance(value, str) and not value.strip()
+            ):
+                continue
+            rounded_value = round_invoice_value(
+                value,
+                decimal_places,
+            )
+            if isinstance(value, Decimal):
+                item[field] = rounded_value
+            elif isinstance(value, str):
+                item[field] = format(
+                    rounded_value,
+                    f".{decimal_places}f",
+                )
+            elif isinstance(value, int):
+                item[field] = int(rounded_value)
+            else:
+                item[field] = float(rounded_value)
+    return payload
+
 
 def update_reference_cache(db: Session, endpoint: str, data: dict):
     cache = db.query(models.ReferenceCache).filter(models.ReferenceCache.endpoint == endpoint).first()
@@ -23,10 +77,13 @@ def update_reference_cache(db: Session, endpoint: str, data: dict):
 def get_cached_reference(db: Session, endpoint: str,):
     return db.query(models.ReferenceCache).filter(models.ReferenceCache.endpoint == endpoint).first()
 
-def normalize_for_db(value: Union[str, int, float, None]) -> Optional[Decimal]:
+def normalize_for_db(
+    value: Union[str, int, float, Decimal, None],
+    decimal_places: int = 2,
+) -> Optional[Decimal]:
     if value == "" or value is None:
         return None
-    return Decimal(str(value))
+    return round_invoice_value(value, decimal_places)
 
 def create_invoice(
         db: Session, 
@@ -40,6 +97,7 @@ def create_invoice(
         internal_invoice_no=None
     ):
     try:
+        normalize_invoice_numeric_values(payload)
         buyer = get_or_create_buyer(db, payload, client_id, user_id) 
         db_invoice = models.Invoice(
             invoiceRefNo=payload.get("invoiceRefNo"),
@@ -75,7 +133,7 @@ def create_invoice(
                 hsCode=item["hsCode"],
                 productDescription=item["productDescription"],
                 uom=item.get("uoM"), 
-                quantity=normalize_for_db(item["quantity"]),
+                quantity=normalize_for_db(item["quantity"], 4),
                 rate=item["rate"],
                 itemRate=normalize_for_db(item.get("itemRate")),
                 valueSalesExcludingST=normalize_for_db(item.get("valueSalesExcludingST")),
@@ -242,6 +300,7 @@ def update_invoice_draft(
         raise ValueError("Cannot edit a cancelled invoice")
     if invoice.status == "posting":
         raise ValueError("Invoice is currently being processed")
+    normalize_invoice_numeric_values(payload)
     buyer = get_or_create_buyer(db, payload, client_id, user_id)
     # Update header
     invoice.internal_invoice_no = payload["internalInvoiceNo"]
@@ -278,7 +337,7 @@ def update_invoice_draft(
             hsCode=item["hsCode"],
             productDescription=item["productDescription"],
             uom=item.get("uoM"),
-            quantity=normalize_for_db(item["quantity"]),
+            quantity=normalize_for_db(item["quantity"], 4),
             rate=item["rate"],
             itemRate=normalize_for_db(item.get("itemRate")),
             valueSalesExcludingST=normalize_for_db(item.get("valueSalesExcludingST")),
