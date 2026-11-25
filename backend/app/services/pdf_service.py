@@ -490,15 +490,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "width": 0.14,
         },
         {
-            "key": "rate",
-            "header": "S.T Rate",
-            "formatter": lambda item: str(
-                item.get("rate", "")
-            ),
-            "style": cell_right_style,
-            "width": 0.08,
-        },
-        {
             "key": "sales_tax",
             "header": "Sales Tax",
             "formatter": lambda item: fmt_money(
@@ -567,9 +558,24 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
     # ---------------------------------------------------------
     # Table header
     # ---------------------------------------------------------
+    sales_tax_header_style = ParagraphStyle(
+        "SalesTaxHeader",
+        parent=cell_right_style,
+        fontName="Helvetica-Bold",
+        fontSize=6.5,
+        leading=7.5,
+        textColor=brand_dark,
+    )
     table_data = [
         [
-            column["header"]
+            (
+                Paragraph(
+                    "Sales Tax<br/>@ 18.00%",
+                    sales_tax_header_style,
+                )
+                if column["key"] == "sales_tax"
+                else column["header"]
+            )
             for column in visible_columns
         ]
     ]
@@ -792,7 +798,6 @@ def generate_invoice_pdf_rl(data: dict) -> bytes:
             "quantity",
             "item_rate",
             "retail_price",
-            "rate",
             "sales_tax",
             "value_excl",
         ):
