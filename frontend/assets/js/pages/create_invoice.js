@@ -552,7 +552,8 @@ function selectOptionByText(selector, text) {
     const fallbackOption = new Option(label, label, true, true);
     fallbackOption.dataset.savedInvoiceFallback = "true";
     if (selector === "#rate") {
-        const parsedRate = Number.parseFloat(label);
+        const rateMatch = label.match(/[-+]?(?:\d+(?:\.\d*)?|\.\d+)/);
+        const parsedRate = rateMatch ? Number(rateMatch[0]) : 0;
         fallbackOption.dataset.rateValue = String(
             Number.isFinite(parsedRate) ? parsedRate : 0
         );
@@ -581,7 +582,7 @@ function selectOptionByValue(selector, value) {
     $select.val(optionValue).trigger("change.select2");
 }
 
-async function editItem(index) {
+function editItem(index) {
     const item = currentItems[index];
     if (!item) {
         return;
@@ -597,36 +598,10 @@ async function editItem(index) {
             : ""
     );
     selectOptionByValue("#hsCode", item.hsCode);
-    await handleHSCodeChange.call($("#hsCode")[0]);
     selectOptionByText("#uoM", item.uomText);
-
-    const hasSaleType = selectOptionByText(
-        "#saleType",
-        item.saleTypeLabel
-    );
-    if (hasSaleType) {
-        await handleSaleTypeChange.call($("#saleType")[0]);
-    } else {
-        resetSelect($("#rate"), "Select Rate");
-        resetSelect($("#sroSchedule"), "Select SRO");
-        resetSelect($("#sroItem"), "Select SRO Item");
-    }
-    const hasRate = selectOptionByText("#rate", item.rateLabel);
-    if (hasRate) {
-        await handleRateChange.call($("#rate")[0]);
-    } else {
-        resetSelect($("#sroSchedule"), "Select SRO");
-        resetSelect($("#sroItem"), "Select SRO Item");
-    }
-    const hasSro = selectOptionByText(
-        "#sroSchedule",
-        item.sroText
-    );
-    if (hasSro) {
-        await handleSROScheduleChange.call($("#sroSchedule")[0]);
-    } else {
-        resetSelect($("#sroItem"), "Select SRO Item");
-    }
+    selectOptionByText("#saleType", item.saleTypeLabel);
+    selectOptionByText("#rate", item.rateLabel);
+    selectOptionByText("#sroSchedule", item.sroText);
     selectOptionByText("#sroItem", item.sroItemText);
 
     $("#productDescription").val(item.productDescription);
