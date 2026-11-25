@@ -1,17 +1,17 @@
 import { showToast } from "../toast.js";
 import { apiFetch } from "../api.js";
 import { loadProvinces, loadDocumentTypes, loadSaleTypes, loadHSCodes } from "../reference.js"
-import { resetSelect, disableSelect, enableSelect } from "../utils.js?v=9";
-import { initDynamicBindings } from "../utils.js?v=9";
-import { getItemInputValues } from "../utils.js?v=9";
-import { syncInvoiceMeta } from "../utils.js?v=9";
-import { computeItemTotals } from "../utils.js?v=9";
-import { normalizeItem } from "../utils.js?v=9";
-import { validateItem } from "../utils.js?v=9";
-import { formatAmount } from "../utils.js?v=9";
+import { resetSelect, disableSelect, enableSelect } from "../utils.js?v=10";
+import { initDynamicBindings } from "../utils.js?v=10";
+import { getItemInputValues } from "../utils.js?v=10";
+import { syncInvoiceMeta } from "../utils.js?v=10";
+import { computeItemTotals } from "../utils.js?v=10";
+import { normalizeItem } from "../utils.js?v=10";
+import { validateItem } from "../utils.js?v=10";
+import { formatAmount } from "../utils.js?v=10";
 import { getProvinceTextById } from "../provinces.js";
-import { buyerTaxState } from "../utils.js?v=9";
-import { applyAutoFurtherTax } from "../utils.js?v=9";
+import { buyerTaxState } from "../utils.js?v=10";
+import { applyAutoFurtherTax } from "../utils.js?v=10";
 import { BuyerService } from "../services/buyer_service.js";
 
 let currentItems = [];
@@ -527,6 +527,60 @@ function formatAvailableStock(quantity) {
     return Number(quantity).toFixed(2);
 }
 
+function normalizeOptionText(value) {
+    return String(value ?? "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+}
+
+function selectOptionByText(selector, text) {
+    const $select = $(selector);
+    const label = String(text ?? "").trim();
+    if (!label) {
+        $select.val("").trigger("change.select2");
+        return false;
+    }
+    const normalizedLabel = normalizeOptionText(label);
+    let $option = $select.find("option").filter(function () {
+        return normalizeOptionText(this.textContent) === normalizedLabel;
+    }).first();
+    if ($option.length) {
+        $select.val($option.val()).trigger("change.select2");
+        return $option[0].dataset.savedInvoiceFallback !== "true";
+    }
+    const fallbackOption = new Option(label, label, true, true);
+    fallbackOption.dataset.savedInvoiceFallback = "true";
+    if (selector === "#rate") {
+        const parsedRate = Number.parseFloat(label);
+        fallbackOption.dataset.rateValue = String(
+            Number.isFinite(parsedRate) ? parsedRate : 0
+        );
+    }
+    $select.append(fallbackOption).val(label).trigger("change.select2");
+    return false;
+}
+
+function selectOptionByValue(selector, value) {
+    const $select = $(selector);
+    const optionValue = String(value ?? "").trim();
+    let $option = $select.find("option").filter(function () {
+        return String(this.value).trim() === optionValue;
+    }).first();
+    if (!$option.length && optionValue) {
+        const fallbackOption = new Option(
+            optionValue,
+            optionValue,
+            true,
+            true
+        );
+        fallbackOption.dataset.savedInvoiceFallback = "true";
+        $select.append(fallbackOption);
+        $option = $(fallbackOption);
+    }
+    $select.val(optionValue).trigger("change.select2");
+}
+
 async function editItem(index) {
     const item = currentItems[index];
     if (!item) {
@@ -542,6 +596,39 @@ async function editItem(index) {
             ? `Available stock: ${formatAvailableStock(savedProduct.stock_quantity)}`
             : ""
     );
+    selectOptionByValue("#hsCode", item.hsCode);
+    await handleHSCodeChange.call($("#hsCode")[0]);
+    selectOptionByText("#uoM", item.uomText);
+
+    const hasSaleType = selectOptionByText(
+        "#saleType",
+        item.saleTypeLabel
+    );
+    if (hasSaleType) {
+        await handleSaleTypeChange.call($("#saleType")[0]);
+    } else {
+        resetSelect($("#rate"), "Select Rate");
+        resetSelect($("#sroSchedule"), "Select SRO");
+        resetSelect($("#sroItem"), "Select SRO Item");
+    }
+    const hasRate = selectOptionByText("#rate", item.rateLabel);
+    if (hasRate) {
+        await handleRateChange.call($("#rate")[0]);
+    } else {
+        resetSelect($("#sroSchedule"), "Select SRO");
+        resetSelect($("#sroItem"), "Select SRO Item");
+    }
+    const hasSro = selectOptionByText(
+        "#sroSchedule",
+        item.sroText
+    );
+    if (hasSro) {
+        await handleSROScheduleChange.call($("#sroSchedule")[0]);
+    } else {
+        resetSelect($("#sroItem"), "Select SRO Item");
+    }
+    selectOptionByText("#sroItem", item.sroItemText);
+
     $("#productDescription").val(item.productDescription);
     $("#quantity").val(item.quantity);
     $("#itemRate").val(
@@ -873,7 +960,7 @@ function loadDraftForEditing() {
     editingInvoiceId = invoice.id;
     // Header
     $("#internalInvoiceNo").val(invoice.internal_invoice_no);
-    $("#invoiceType").val(invoice.invoiceType).trigger("change");
+    selectOptionByText("#invoiceType", invoice.invoiceType);
     $("#invoiceDate").val(invoice.invoiceDate.substring(0, 10));
     $("#invoiceRefNo").val(invoice.invoiceRefNo || "");
     $("#scenarioId").val(invoice.scenarioId || "");

@@ -161,7 +161,9 @@ export function getItemInputValues() {
         rateLabel: selectedRate.text(), 
         itemRate: parseFloat($("#itemRate").val()),
         saleTypeId: $("#saleType").val(),
-        saleTypeLabel: ReferenceCache.saleTypes[$("#saleType").val()],
+        saleTypeLabel:
+            ReferenceCache.saleTypes[$("#saleType").val()] ||
+            saleTypeText,
         saleTypeText,
         discount: parseFloat($("#discount").val()),
         salesTaxWithheldAtSource: parseFloat($("#salesTaxWithheldAtSource").val()),
